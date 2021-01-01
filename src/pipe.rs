@@ -10,8 +10,8 @@ pub(crate) struct Pipe {
 }
 
 impl Pipe {
-    pub(crate) fn new() -> Self {
-        let (columns, rows) = terminal::size().unwrap();
+    pub(crate) fn new() -> crossterm::Result<Self> {
+        let (columns, rows) = terminal::size()?;
         let dir = rand::thread_rng().gen();
         let pos = match dir {
             Direction::Up => Position {
@@ -31,11 +31,11 @@ impl Pipe {
                 y: rand::thread_rng().gen_range(0..rows),
             },
         };
-        Self {
+        Ok(Self {
             dir,
             pos,
             color: gen_random_color(),
-        }
+        })
     }
 
     pub(crate) fn tick(&mut self) -> Option<()> {

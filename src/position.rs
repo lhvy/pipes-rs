@@ -14,15 +14,16 @@ impl Position {
             Direction::Left => self.x = self.x.checked_sub(1)?,
             Direction::Right => self.x = self.x.checked_add(1)?,
         }
-        if self.in_screen_bounds() {
+        // TODO: Error handling.
+        if self.in_screen_bounds().unwrap() {
             Some(())
         } else {
             None
         }
     }
 
-    fn in_screen_bounds(&self) -> bool {
-        let (columns, rows) = terminal::size().unwrap();
-        self.x < columns && self.y < rows
+    fn in_screen_bounds(&self) -> crossterm::Result<bool> {
+        let (columns, rows) = terminal::size()?;
+        Ok(self.x < columns && self.y < rows)
     }
 }

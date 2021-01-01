@@ -10,23 +10,22 @@ use std::{
     time::Duration,
 };
 
-fn main() {
+fn main() -> crossterm::Result<()> {
     let mut stdout = io::stdout();
-    let mut pipe = Pipe::new();
+    let mut pipe = Pipe::new()?;
     execute!(
         stdout,
         terminal::Clear(terminal::ClearType::All),
         cursor::Hide
-    )
-    .unwrap(); // TODO: Error handling properly.
+    )?;
     loop {
         if pipe.tick().is_none() {
-            pipe = Pipe::new();
+            pipe = Pipe::new()?;
         }
-        execute!(stdout, cursor::MoveTo(pipe.pos.x, pipe.pos.y)).unwrap();
-        execute!(stdout, style::SetForegroundColor(pipe.color)).unwrap();
+        execute!(stdout, cursor::MoveTo(pipe.pos.x, pipe.pos.y))?;
+        execute!(stdout, style::SetForegroundColor(pipe.color))?;
         print!("{}", pipe.dir.to_char());
-        stdout.flush().unwrap();
+        stdout.flush()?;
         thread::sleep(Duration::from_millis(20));
     }
 }
