@@ -25,7 +25,7 @@ impl Direction {
         rand::thread_rng().gen_bool(0.2)
     }
 
-    pub(crate) fn maybe_turn(&mut self) {
+    pub(crate) fn maybe_turn(&mut self) -> bool {
         if Self::will_turn() {
             let left = rand::thread_rng().gen_bool(0.5);
             *self = if left {
@@ -43,6 +43,9 @@ impl Direction {
                     Self::Right => Self::Up,
                 }
             };
+            true
+        } else {
+            false
         }
     }
 }

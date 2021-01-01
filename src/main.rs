@@ -24,7 +24,7 @@ fn main() -> crossterm::Result<()> {
         }
         execute!(stdout, cursor::MoveTo(pipe.pos.x, pipe.pos.y))?;
         execute!(stdout, style::SetForegroundColor(pipe.color))?;
-        print!("{}", pipe.dir.to_char());
+        print!("{}", pipe.to_char());
         stdout.flush()?;
         thread::sleep(Duration::from_millis(20));
     }

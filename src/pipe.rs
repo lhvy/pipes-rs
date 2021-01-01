@@ -7,6 +7,8 @@ pub(crate) struct Pipe {
     pub(crate) dir: Direction,
     pub(crate) pos: Position,
     pub(crate) color: style::Color,
+    prev_dir: Direction,
+    just_turned: bool,
 }
 
 impl Pipe {
@@ -35,12 +37,30 @@ impl Pipe {
             dir,
             pos,
             color: gen_random_color(),
+            prev_dir: dir,
+            just_turned: false,
         })
     }
 
     pub(crate) fn tick(&mut self) -> Option<()> {
-        self.dir.maybe_turn();
-        self.pos.move_in(self.dir)
+        self.pos.move_in(self.dir)?;
+        self.prev_dir = self.dir;
+        self.just_turned = self.dir.maybe_turn();
+        Some(())
+    }
+
+    pub(crate) fn to_char(&self) -> char {
+        if self.just_turned {
+            match (self.prev_dir, self.dir) {
+                (Direction::Up, Direction::Left) | (Direction::Right, Direction::Down) => '┓',
+                (Direction::Up, Direction::Right) | (Direction::Left, Direction::Down) => '┏',
+                (Direction::Down, Direction::Left) | (Direction::Right, Direction::Up) => '┛',
+                (Direction::Down, Direction::Right) | (Direction::Left, Direction::Up) => '┗',
+                _ => unreachable!(),
+            }
+        } else {
+            self.dir.to_char()
+        }
     }
 }
 
