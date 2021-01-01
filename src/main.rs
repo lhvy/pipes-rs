@@ -11,21 +11,30 @@ use std::{
 };
 
 fn main() -> crossterm::Result<()> {
-    let mut stdout = io::stdout();
-    let mut pipe = Pipe::new()?;
-    execute!(
-        stdout,
-        terminal::Clear(terminal::ClearType::All),
-        cursor::Hide
-    )?;
     loop {
-        if pipe.tick().is_none() {
-            pipe = Pipe::new()?;
+        let mut stdout = io::stdout();
+        let mut pipe = Pipe::new()?;
+        let mut ticks = 0;
+        execute!(
+            stdout,
+            terminal::Clear(terminal::ClearType::All),
+            cursor::Hide
+        )?;
+        while under_threshold(ticks)? {
+            if pipe.tick().is_none() {
+                pipe = Pipe::new()?;
+            }
+            execute!(stdout, cursor::MoveTo(pipe.pos.x, pipe.pos.y))?;
+            execute!(stdout, style::SetForegroundColor(pipe.color))?;
+            print!("{}", pipe.to_char());
+            stdout.flush()?;
+            ticks += 1;
+            thread::sleep(Duration::from_millis(20));
         }
-        execute!(stdout, cursor::MoveTo(pipe.pos.x, pipe.pos.y))?;
-        execute!(stdout, style::SetForegroundColor(pipe.color))?;
-        print!("{}", pipe.to_char());
-        stdout.flush()?;
-        thread::sleep(Duration::from_millis(20));
     }
+}
+
+fn under_threshold(ticks: u16) -> crossterm::Result<bool> {
+    let (columns, rows) = terminal::size()?;
+    Ok(ticks < columns * rows / 2)
 }
