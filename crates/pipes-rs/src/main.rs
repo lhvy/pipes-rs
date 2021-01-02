@@ -1,14 +1,11 @@
-mod config;
-mod direction;
-mod pipe;
-mod position;
-
 use anyhow::Context;
-use config::Config;
 use crossterm::{cursor, event, queue, style, terminal};
 use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use event::{Event, KeyCode, KeyModifiers};
-use pipe::{IsOffScreen, Pipe, PresetKind};
+use model::{
+    config::Config,
+    pipe::{IsOffScreen, Pipe, PresetKind},
+};
 use rand::Rng;
 use std::{
     collections::HashSet,

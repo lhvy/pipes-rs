@@ -4,7 +4,7 @@ use rand::{
 };
 
 #[derive(Clone, Copy)]
-pub(crate) enum Direction {
+pub enum Direction {
     Up,
     Down,
     Left,
@@ -16,7 +16,7 @@ impl Direction {
         rand::thread_rng().gen_bool(0.15)
     }
 
-    pub(crate) fn maybe_turn(&mut self) -> bool {
+    pub fn maybe_turn(&mut self) -> bool {
         if Self::will_turn() {
             let left = rand::thread_rng().gen_bool(0.5);
             *self = if left {

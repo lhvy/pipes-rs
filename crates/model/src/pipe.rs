@@ -4,17 +4,17 @@ use crate::position::Position;
 use crossterm::{style, terminal};
 use rand::Rng;
 
-pub(crate) struct Pipe {
-    pub(crate) dir: Direction,
-    pub(crate) pos: Position,
-    pub(crate) color: Option<style::Color>,
+pub struct Pipe {
+    pub dir: Direction,
+    pub pos: Position,
+    pub color: Option<style::Color>,
     kind: Kind,
     prev_dir: Direction,
     just_turned: bool,
 }
 
 impl Pipe {
-    pub(crate) fn new(color_mode: ColorMode, preset_kind: PresetKind) -> crossterm::Result<Self> {
+    pub fn new(color_mode: ColorMode, preset_kind: PresetKind) -> crossterm::Result<Self> {
         Self::new_raw(gen_random_color(color_mode), preset_kind.kind())
     }
 
@@ -54,11 +54,11 @@ impl Pipe {
         Ok((dir, pos))
     }
 
-    pub(crate) fn dup(&self) -> crossterm::Result<Self> {
+    pub fn dup(&self) -> crossterm::Result<Self> {
         Self::new_raw(self.color, self.kind)
     }
 
-    pub(crate) fn tick(&mut self) -> crossterm::Result<IsOffScreen> {
+    pub fn tick(&mut self) -> crossterm::Result<IsOffScreen> {
         if !self.pos.can_move_in(self.dir)? {
             return Ok(IsOffScreen(true));
         }
@@ -67,7 +67,7 @@ impl Pipe {
         Ok(IsOffScreen(false))
     }
 
-    pub(crate) fn to_char(&self) -> char {
+    pub fn to_char(&self) -> char {
         if self.just_turned {
             match (self.prev_dir, self.dir) {
                 (Direction::Up, Direction::Left) | (Direction::Right, Direction::Down) => {
@@ -97,7 +97,7 @@ impl Pipe {
 
 #[derive(serde::Serialize, serde::Deserialize, Eq, PartialEq, Hash, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
-pub(crate) enum PresetKind {
+pub enum PresetKind {
     Heavy,
     Light,
     Curved,
@@ -225,4 +225,4 @@ fn gen_random_color(color_mode: ColorMode) -> Option<style::Color> {
 }
 
 #[derive(PartialEq)]
-pub(crate) struct IsOffScreen(pub(crate) bool);
+pub struct IsOffScreen(pub bool);

@@ -1,13 +1,13 @@
 use crate::direction::Direction;
 use crossterm::terminal;
 
-pub(crate) struct Position {
-    pub(crate) x: u16,
-    pub(crate) y: u16,
+pub struct Position {
+    pub x: u16,
+    pub y: u16,
 }
 
 impl Position {
-    pub(crate) fn can_move_in(&mut self, dir: Direction) -> crossterm::Result<bool> {
+    pub fn can_move_in(&mut self, dir: Direction) -> crossterm::Result<bool> {
         match dir {
             Direction::Up => {
                 if self.y == 0 {

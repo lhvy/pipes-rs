@@ -172,6 +172,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "model"
+version = "0.1.0"
+dependencies = [
+ "color_space",
+ "crossterm",
+ "rand",
+ "serde",
+]
+
+[[package]]
 name = "ntapi"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -210,11 +220,10 @@ name = "pipes-rs"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "color_space",
  "crossterm",
  "etcetera",
+ "model",
  "rand",
- "serde",
  "toml",
 ]
 
