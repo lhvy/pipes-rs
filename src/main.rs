@@ -14,12 +14,9 @@ use std::{
 fn main() -> crossterm::Result<()> {
     let mut stdout = io::stdout();
     terminal::enable_raw_mode()?;
-    execute!(
-        stdout,
-        terminal::Clear(terminal::ClearType::All),
-        cursor::Hide
-    )?;
+    execute!(stdout, cursor::Hide)?;
     loop {
+        execute!(stdout, terminal::Clear(terminal::ClearType::All))?;
         let mut pipe = Pipe::new()?;
         let mut ticks = 0;
         while under_threshold(ticks)? {
