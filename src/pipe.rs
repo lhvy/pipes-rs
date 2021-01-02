@@ -7,7 +7,7 @@ use rand::Rng;
 pub(crate) struct Pipe {
     pub(crate) dir: Direction,
     pub(crate) pos: Position,
-    pub(crate) color: style::Color,
+    pub(crate) color: Option<style::Color>,
     prev_dir: Direction,
     just_turned: bool,
 }
@@ -67,11 +67,11 @@ impl Pipe {
     }
 }
 
-fn gen_random_color(color_mode: ColorMode) -> style::Color {
+fn gen_random_color(color_mode: ColorMode) -> Option<style::Color> {
     match color_mode {
         ColorMode::Ansi => {
             let num = rand::thread_rng().gen_range(0..=11);
-            match num {
+            Some(match num {
                 0 => style::Color::Red,
                 1 => style::Color::DarkRed,
                 2 => style::Color::Green,
@@ -85,7 +85,7 @@ fn gen_random_color(color_mode: ColorMode) -> style::Color {
                 10 => style::Color::Cyan,
                 11 => style::Color::DarkCyan,
                 _ => unreachable!(),
-            }
+            })
         }
         ColorMode::Rgb => {
             let hue = rand::thread_rng().gen_range(0.0..=360.0);
@@ -95,12 +95,13 @@ fn gen_random_color(color_mode: ColorMode) -> style::Color {
                 h: hue,
             };
             let color_space::Rgb { r, g, b } = color_space::Rgb::from(lch);
-            style::Color::Rgb {
+            Some(style::Color::Rgb {
                 r: r as u8,
                 g: g as u8,
                 b: b as u8,
-            }
+            })
         }
+        ColorMode::None => None,
     }
 }
 

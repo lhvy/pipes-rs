@@ -23,9 +23,9 @@ impl Config {
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub(crate) enum ColorMode {
-    #[serde(rename = "ANSI")]
     Ansi,
-    #[serde(rename = "RGB")]
     Rgb,
+    None,
 }

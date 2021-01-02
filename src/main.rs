@@ -41,7 +41,9 @@ fn main() -> anyhow::Result<()> {
                 return Ok(());
             }
             execute!(stdout, cursor::MoveTo(pipe.pos.x, pipe.pos.y))?;
-            execute!(stdout, style::SetForegroundColor(pipe.color))?;
+            if let Some(color) = pipe.color {
+                execute!(stdout, style::SetForegroundColor(color))?;
+            }
             print!("{}", pipe.to_char());
             stdout.flush()?;
             if pipe.tick()? == IsOffScreen(true) {
