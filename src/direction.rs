@@ -22,7 +22,7 @@ impl Direction {
     }
 
     fn will_turn() -> bool {
-        rand::thread_rng().gen_bool(0.2)
+        rand::thread_rng().gen_bool(0.15)
     }
 
     pub(crate) fn maybe_turn(&mut self) -> bool {
