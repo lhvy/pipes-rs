@@ -67,15 +67,17 @@ impl Pipe {
 }
 
 fn gen_random_color() -> style::Color {
-    let num = rand::thread_rng().gen_range(0..=5);
-    match num {
-        0 => style::Color::Red,
-        1 => style::Color::Green,
-        2 => style::Color::Yellow,
-        3 => style::Color::Blue,
-        4 => style::Color::Magenta,
-        5 => style::Color::Cyan,
-        _ => unreachable!(),
+    let hue = rand::thread_rng().gen_range(0.0..=360.0);
+    let lch = color_space::Lch {
+        l: 75.0,
+        c: 75.0,
+        h: hue,
+    };
+    let color_space::Rgb { r, g, b } = color_space::Rgb::from(lch);
+    style::Color::Rgb {
+        r: r as u8,
+        g: g as u8,
+        b: b as u8,
     }
 }
 
