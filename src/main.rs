@@ -63,9 +63,13 @@ fn main() -> anyhow::Result<()> {
     }
 }
 
-fn under_threshold(ticks: u16, reset_threshold: f32) -> crossterm::Result<bool> {
-    let (columns, rows) = terminal::size()?;
-    Ok(f32::from(ticks) < f32::from(columns) * f32::from(rows) * reset_threshold)
+fn under_threshold(ticks: u16, reset_threshold: Option<f32>) -> crossterm::Result<bool> {
+    if let Some(reset_threshold) = reset_threshold {
+        let (columns, rows) = terminal::size()?;
+        Ok(f32::from(ticks) < f32::from(columns) * f32::from(rows) * reset_threshold)
+    } else {
+        Ok(true)
+    }
 }
 
 fn random_kind(kinds: &HashSet<PresetKind>) -> PresetKind {

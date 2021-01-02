@@ -19,8 +19,12 @@ impl Config {
         Duration::from_millis(self.delay_ms.unwrap_or(20))
     }
 
-    pub(crate) fn reset_threshold(&self) -> f32 {
-        self.reset_threshold.unwrap_or(0.5)
+    pub(crate) fn reset_threshold(&self) -> Option<f32> {
+        if self.reset_threshold == Some(0.0) {
+            None
+        } else {
+            Some(self.reset_threshold.unwrap_or(0.5))
+        }
     }
 
     pub(crate) fn kinds(&self) -> HashSet<PresetKind> {
