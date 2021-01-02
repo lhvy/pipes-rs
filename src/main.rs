@@ -1,7 +1,9 @@
+mod config;
 mod direction;
 mod pipe;
 mod position;
 
+use config::Config;
 use crossterm::{cursor, event, execute, style, terminal};
 use event::{Event, KeyCode, KeyModifiers};
 use pipe::{IsOffScreen, Pipe};
@@ -12,14 +14,15 @@ use std::{
 };
 
 fn main() -> crossterm::Result<()> {
+    let config = Config::default();
     let mut stdout = io::stdout();
     terminal::enable_raw_mode()?;
     execute!(stdout, cursor::Hide)?;
     loop {
         execute!(stdout, terminal::Clear(terminal::ClearType::All))?;
-        let mut pipe = Pipe::new()?;
+        let mut pipe = Pipe::new(config.color_mode)?;
         let mut ticks = 0;
-        while under_threshold(ticks)? {
+        while under_threshold(ticks, config.reset_threshold)? {
             if let Some(Event::Key(event::KeyEvent {
                 code: KeyCode::Char('c'),
                 modifiers: KeyModifiers::CONTROL,
@@ -39,17 +42,17 @@ fn main() -> crossterm::Result<()> {
             print!("{}", pipe.to_char());
             stdout.flush()?;
             if pipe.tick()? == IsOffScreen(true) {
-                pipe = Pipe::new()?;
+                pipe = Pipe::new(config.color_mode)?;
             }
             ticks += 1;
-            thread::sleep(Duration::from_millis(20));
+            thread::sleep(config.delay);
         }
     }
 }
 
-fn under_threshold(ticks: u16) -> crossterm::Result<bool> {
+fn under_threshold(ticks: u16, reset_threshold: f32) -> crossterm::Result<bool> {
     let (columns, rows) = terminal::size()?;
-    Ok(ticks < columns * rows / 2)
+    Ok(f32::from(ticks) < f32::from(columns) * f32::from(rows) * reset_threshold)
 }
 
 fn get_event() -> crossterm::Result<Option<Event>> {

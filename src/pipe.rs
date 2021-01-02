@@ -1,3 +1,4 @@
+use crate::config::ColorMode;
 use crate::direction::Direction;
 use crate::position::Position;
 use crossterm::{style, terminal};
@@ -12,7 +13,7 @@ pub(crate) struct Pipe {
 }
 
 impl Pipe {
-    pub(crate) fn new() -> crossterm::Result<Self> {
+    pub(crate) fn new(color_mode: ColorMode) -> crossterm::Result<Self> {
         let (columns, rows) = terminal::size()?;
         let dir = rand::thread_rng().gen();
         let pos = match dir {
@@ -36,7 +37,7 @@ impl Pipe {
         Ok(Self {
             dir,
             pos,
-            color: gen_random_color(),
+            color: gen_random_color(color_mode),
             prev_dir: dir,
             just_turned: false,
         })
@@ -66,18 +67,40 @@ impl Pipe {
     }
 }
 
-fn gen_random_color() -> style::Color {
-    let hue = rand::thread_rng().gen_range(0.0..=360.0);
-    let lch = color_space::Lch {
-        l: 75.0,
-        c: 75.0,
-        h: hue,
-    };
-    let color_space::Rgb { r, g, b } = color_space::Rgb::from(lch);
-    style::Color::Rgb {
-        r: r as u8,
-        g: g as u8,
-        b: b as u8,
+fn gen_random_color(color_mode: ColorMode) -> style::Color {
+    match color_mode {
+        ColorMode::Ansi => {
+            let num = rand::thread_rng().gen_range(0..=11);
+            match num {
+                0 => style::Color::Red,
+                1 => style::Color::DarkRed,
+                2 => style::Color::Green,
+                3 => style::Color::DarkGreen,
+                4 => style::Color::Yellow,
+                5 => style::Color::DarkYellow,
+                6 => style::Color::Blue,
+                7 => style::Color::DarkBlue,
+                8 => style::Color::Magenta,
+                9 => style::Color::DarkMagenta,
+                10 => style::Color::Cyan,
+                11 => style::Color::DarkCyan,
+                _ => unreachable!(),
+            }
+        }
+        ColorMode::Rgb => {
+            let hue = rand::thread_rng().gen_range(0.0..=360.0);
+            let lch = color_space::Lch {
+                l: 75.0,
+                c: 75.0,
+                h: hue,
+            };
+            let color_space::Rgb { r, g, b } = color_space::Rgb::from(lch);
+            style::Color::Rgb {
+                r: r as u8,
+                g: g as u8,
+                b: b as u8,
+            }
+        }
     }
 }
 
