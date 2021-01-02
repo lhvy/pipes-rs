@@ -10,6 +10,7 @@ pub(crate) struct Config {
     kinds: Option<HashSet<PresetKind>>,
     bold: Option<bool>,
     inherit_style: Option<bool>,
+    num_pipes: Option<u32>,
 }
 
 impl Config {
@@ -43,6 +44,10 @@ impl Config {
 
     pub(crate) fn inherit_style(&self) -> bool {
         self.inherit_style.unwrap_or(false)
+    }
+
+    pub(crate) fn num_pipes(&self) -> u32 {
+        self.num_pipes.unwrap_or(1)
     }
 }
 

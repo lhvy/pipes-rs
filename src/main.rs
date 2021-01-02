@@ -5,7 +5,7 @@ mod position;
 
 use anyhow::Context;
 use config::Config;
-use crossterm::{cursor, event, execute, style, terminal};
+use crossterm::{cursor, event, queue, style, terminal};
 use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use event::{Event, KeyCode, KeyModifiers};
 use pipe::{IsOffScreen, Pipe, PresetKind};
@@ -23,14 +23,17 @@ fn main() -> anyhow::Result<()> {
     let kinds = config.kinds();
     let mut stdout = io::stdout();
     terminal::enable_raw_mode()?;
-    execute!(stdout, cursor::Hide)?;
+    queue!(stdout, cursor::Hide)?;
     if config.bold() {
-        execute!(stdout, style::SetAttribute(style::Attribute::Bold))?;
+        queue!(stdout, style::SetAttribute(style::Attribute::Bold))?;
     }
     loop {
-        execute!(stdout, terminal::Clear(terminal::ClearType::All))?;
+        queue!(stdout, terminal::Clear(terminal::ClearType::All))?;
         let create_pipe = || Pipe::new(config.color_mode(), random_kind(&kinds));
-        let mut pipe = create_pipe()?;
+        let mut pipes = Vec::new();
+        for _ in 0..config.num_pipes() {
+            pipes.push(create_pipe()?);
+        }
         let mut ticks = 0;
         while under_threshold(ticks, config.reset_threshold())? {
             if let Some(Event::Key(event::KeyEvent {
@@ -38,7 +41,7 @@ fn main() -> anyhow::Result<()> {
                 modifiers: KeyModifiers::CONTROL,
             })) = get_event()?
             {
-                execute!(
+                queue!(
                     stdout,
                     style::SetAttribute(style::Attribute::Reset),
                     terminal::Clear(terminal::ClearType::All),
@@ -48,20 +51,22 @@ fn main() -> anyhow::Result<()> {
                 terminal::disable_raw_mode()?;
                 return Ok(());
             }
-            execute!(stdout, cursor::MoveTo(pipe.pos.x, pipe.pos.y))?;
-            if let Some(color) = pipe.color {
-                execute!(stdout, style::SetForegroundColor(color))?;
-            }
-            print!("{}", pipe.to_char());
-            stdout.flush()?;
-            if pipe.tick()? == IsOffScreen(true) {
-                if config.inherit_style() {
-                    pipe = pipe.dup()?;
-                } else {
-                    pipe = create_pipe()?;
+            for pipe in &mut pipes {
+                queue!(stdout, cursor::MoveTo(pipe.pos.x, pipe.pos.y))?;
+                if let Some(color) = pipe.color {
+                    queue!(stdout, style::SetForegroundColor(color))?;
                 }
+                print!("{}", pipe.to_char());
+                if pipe.tick()? == IsOffScreen(true) {
+                    if config.inherit_style() {
+                        *pipe = pipe.dup()?;
+                    } else {
+                        *pipe = create_pipe()?;
+                    }
+                }
+                ticks += 1;
             }
-            ticks += 1;
+            stdout.flush()?;
             thread::sleep(config.delay());
         }
     }

@@ -54,7 +54,7 @@ impl Pipe {
         Ok((dir, pos))
     }
 
-    pub(crate) fn dup(self) -> crossterm::Result<Self> {
+    pub(crate) fn dup(&self) -> crossterm::Result<Self> {
         Self::new_raw(self.color, self.kind)
     }
 
@@ -105,6 +105,7 @@ pub(crate) enum PresetKind {
     Outline,
 }
 
+#[derive(Clone, Copy)]
 struct Kind {
     up: char,
     down: char,
