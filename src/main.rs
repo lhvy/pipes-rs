@@ -3,26 +3,29 @@ mod direction;
 mod pipe;
 mod position;
 
+use anyhow::Context;
 use config::Config;
 use crossterm::{cursor, event, execute, style, terminal};
+use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use event::{Event, KeyCode, KeyModifiers};
 use pipe::{IsOffScreen, Pipe};
 use std::{
+    fs,
     io::{self, Write},
     thread,
     time::Duration,
 };
 
-fn main() -> crossterm::Result<()> {
-    let config = Config::default();
+fn main() -> anyhow::Result<()> {
+    let config = read_config()?;
     let mut stdout = io::stdout();
     terminal::enable_raw_mode()?;
     execute!(stdout, cursor::Hide)?;
     loop {
         execute!(stdout, terminal::Clear(terminal::ClearType::All))?;
-        let mut pipe = Pipe::new(config.color_mode)?;
+        let mut pipe = Pipe::new(config.color_mode())?;
         let mut ticks = 0;
-        while under_threshold(ticks, config.reset_threshold)? {
+        while under_threshold(ticks, config.reset_threshold())? {
             if let Some(Event::Key(event::KeyEvent {
                 code: KeyCode::Char('c'),
                 modifiers: KeyModifiers::CONTROL,
@@ -42,10 +45,10 @@ fn main() -> crossterm::Result<()> {
             print!("{}", pipe.to_char());
             stdout.flush()?;
             if pipe.tick()? == IsOffScreen(true) {
-                pipe = Pipe::new(config.color_mode)?;
+                pipe = Pipe::new(config.color_mode())?;
             }
             ticks += 1;
-            thread::sleep(config.delay);
+            thread::sleep(config.delay());
         }
     }
 }
@@ -60,5 +63,20 @@ fn get_event() -> crossterm::Result<Option<Event>> {
         event::read().map(Some)
     } else {
         Ok(None)
+    }
+}
+
+fn read_config() -> anyhow::Result<Config> {
+    let path = Xdg::new(AppStrategyArgs {
+        top_level_domain: "io.github".to_string(),
+        author: "CookieCoder15".to_string(),
+        app_name: "pipes-rs".to_string(),
+    })?
+    .in_config_dir("config.toml");
+    if path.exists() {
+        let contents = fs::read_to_string(path)?;
+        Ok(toml::from_str(&contents).context("failed to read config")?)
+    } else {
+        Ok(Config::default())
     }
 }

@@ -1,23 +1,31 @@
+use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
+#[derive(Serialize, Deserialize, Default)]
 pub(crate) struct Config {
-    pub(crate) color_mode: ColorMode,
-    pub(crate) delay: Duration,
-    pub(crate) reset_threshold: f32,
+    color_mode: Option<ColorMode>,
+    delay_ms: Option<u64>,
+    reset_threshold: Option<f32>,
 }
 
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            color_mode: ColorMode::Ansi,
-            delay: Duration::from_millis(20),
-            reset_threshold: 0.5,
-        }
+impl Config {
+    pub(crate) fn color_mode(&self) -> ColorMode {
+        self.color_mode.unwrap_or(ColorMode::Ansi)
+    }
+
+    pub(crate) fn delay(&self) -> Duration {
+        Duration::from_millis(self.delay_ms.unwrap_or(20))
+    }
+
+    pub(crate) fn reset_threshold(&self) -> f32 {
+        self.reset_threshold.unwrap_or(0.5)
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize, Deserialize)]
 pub(crate) enum ColorMode {
+    #[serde(rename = "ANSI")]
     Ansi,
+    #[serde(rename = "RGB")]
     Rgb,
 }

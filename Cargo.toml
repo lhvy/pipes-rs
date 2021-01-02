@@ -7,6 +7,10 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.37"
 color_space = "0.5.3"
 crossterm = "0.19.0"
+etcetera = "0.3.2"
 rand = "0.8.0"
+serde = {version = "1.0.118", features = ["derive"]}
+toml = "0.5.8"
