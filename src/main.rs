@@ -8,8 +8,10 @@ use config::Config;
 use crossterm::{cursor, event, execute, style, terminal};
 use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use event::{Event, KeyCode, KeyModifiers};
-use pipe::{IsOffScreen, Pipe};
+use pipe::{IsOffScreen, Pipe, PresetKind};
+use rand::Rng;
 use std::{
+    collections::HashSet,
     fs,
     io::{self, Write},
     thread,
@@ -18,12 +20,17 @@ use std::{
 
 fn main() -> anyhow::Result<()> {
     let config = read_config()?;
+    let kinds = config.kinds();
     let mut stdout = io::stdout();
     terminal::enable_raw_mode()?;
     execute!(stdout, cursor::Hide)?;
+    if config.bold() {
+        execute!(stdout, style::SetAttribute(style::Attribute::Bold))?;
+    }
     loop {
         execute!(stdout, terminal::Clear(terminal::ClearType::All))?;
-        let mut pipe = Pipe::new(config.color_mode())?;
+        let create_pipe = || Pipe::new(config.color_mode(), random_kind(&kinds));
+        let mut pipe = create_pipe()?;
         let mut ticks = 0;
         while under_threshold(ticks, config.reset_threshold())? {
             if let Some(Event::Key(event::KeyEvent {
@@ -33,6 +40,7 @@ fn main() -> anyhow::Result<()> {
             {
                 execute!(
                     stdout,
+                    style::SetAttribute(style::Attribute::Reset),
                     terminal::Clear(terminal::ClearType::All),
                     cursor::MoveTo(0, 0),
                     cursor::Show,
@@ -47,7 +55,7 @@ fn main() -> anyhow::Result<()> {
             print!("{}", pipe.to_char());
             stdout.flush()?;
             if pipe.tick()? == IsOffScreen(true) {
-                pipe = Pipe::new(config.color_mode())?;
+                pipe = create_pipe()?;
             }
             ticks += 1;
             thread::sleep(config.delay());
@@ -58,6 +66,11 @@ fn main() -> anyhow::Result<()> {
 fn under_threshold(ticks: u16, reset_threshold: f32) -> crossterm::Result<bool> {
     let (columns, rows) = terminal::size()?;
     Ok(f32::from(ticks) < f32::from(columns) * f32::from(rows) * reset_threshold)
+}
+
+fn random_kind(kinds: &HashSet<PresetKind>) -> PresetKind {
+    let index = rand::thread_rng().gen_range(0..kinds.len());
+    kinds.iter().nth(index).copied().unwrap()
 }
 
 fn get_event() -> crossterm::Result<Option<Event>> {

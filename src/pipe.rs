@@ -8,12 +8,13 @@ pub(crate) struct Pipe {
     pub(crate) dir: Direction,
     pub(crate) pos: Position,
     pub(crate) color: Option<style::Color>,
+    kind: Kind,
     prev_dir: Direction,
     just_turned: bool,
 }
 
 impl Pipe {
-    pub(crate) fn new(color_mode: ColorMode) -> crossterm::Result<Self> {
+    pub(crate) fn new(color_mode: ColorMode, preset_kind: PresetKind) -> crossterm::Result<Self> {
         let (columns, rows) = terminal::size()?;
         let dir = rand::thread_rng().gen();
         let pos = match dir {
@@ -38,6 +39,7 @@ impl Pipe {
             dir,
             pos,
             color: gen_random_color(color_mode),
+            kind: preset_kind.kind(),
             prev_dir: dir,
             just_turned: false,
         })
@@ -55,14 +57,117 @@ impl Pipe {
     pub(crate) fn to_char(&self) -> char {
         if self.just_turned {
             match (self.prev_dir, self.dir) {
-                (Direction::Up, Direction::Left) | (Direction::Right, Direction::Down) => '┓',
-                (Direction::Up, Direction::Right) | (Direction::Left, Direction::Down) => '┏',
-                (Direction::Down, Direction::Left) | (Direction::Right, Direction::Up) => '┛',
-                (Direction::Down, Direction::Right) | (Direction::Left, Direction::Up) => '┗',
+                (Direction::Up, Direction::Left) | (Direction::Right, Direction::Down) => {
+                    self.kind.top_right
+                }
+                (Direction::Up, Direction::Right) | (Direction::Left, Direction::Down) => {
+                    self.kind.top_left
+                }
+                (Direction::Down, Direction::Left) | (Direction::Right, Direction::Up) => {
+                    self.kind.bottom_right
+                }
+                (Direction::Down, Direction::Right) | (Direction::Left, Direction::Up) => {
+                    self.kind.bottom_left
+                }
                 _ => unreachable!(),
             }
         } else {
-            self.dir.to_char()
+            match self.dir {
+                Direction::Up => self.kind.up,
+                Direction::Down => self.kind.down,
+                Direction::Left => self.kind.left,
+                Direction::Right => self.kind.right,
+            }
+        }
+    }
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Eq, PartialEq, Hash, Clone, Copy)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum PresetKind {
+    Heavy,
+    Light,
+    Curved,
+    // Emoji,
+    Outline,
+}
+
+struct Kind {
+    up: char,
+    down: char,
+    left: char,
+    right: char,
+    top_left: char,
+    top_right: char,
+    bottom_left: char,
+    bottom_right: char,
+}
+
+impl PresetKind {
+    const HEAVY: Kind = Kind {
+        up: '┃',
+        down: '┃',
+        left: '━',
+        right: '━',
+        top_left: '┏',
+        top_right: '┓',
+        bottom_left: '┗',
+        bottom_right: '┛',
+    };
+
+    const LIGHT: Kind = Kind {
+        up: '│',
+        down: '│',
+        left: '─',
+        right: '─',
+        top_left: '┌',
+        top_right: '┐',
+        bottom_left: '└',
+        bottom_right: '┘',
+    };
+
+    const CURVED: Kind = Kind {
+        up: '│',
+        down: '│',
+        left: '─',
+        right: '─',
+        top_left: '╭',
+        top_right: '╮',
+        bottom_left: '╰',
+        bottom_right: '╯',
+    };
+
+    /*
+    const EMOJI: Kind = Kind {
+        up: '👆',
+        down: '👇',
+        left: '👈',
+        right: '👉',
+        top_left: '👌',
+        top_right: '👌',
+        bottom_left: '👌',
+        bottom_right: '👌',
+    };
+    */
+
+    const OUTLINE: Kind = Kind {
+        up: '║',
+        down: '║',
+        left: '═',
+        right: '═',
+        top_left: '╔',
+        top_right: '╗',
+        bottom_left: '╚',
+        bottom_right: '╝',
+    };
+
+    fn kind(&self) -> Kind {
+        match self {
+            Self::Heavy => Self::HEAVY,
+            Self::Light => Self::LIGHT,
+            Self::Curved => Self::CURVED,
+            // Self::Emoji => Self::EMOJI,
+            Self::Outline => Self::OUTLINE,
         }
     }
 }

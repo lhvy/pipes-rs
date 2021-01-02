@@ -12,15 +12,6 @@ pub(crate) enum Direction {
 }
 
 impl Direction {
-    pub(crate) fn to_char(self) -> char {
-        match self {
-            Self::Up => '┃',
-            Self::Down => '┃',
-            Self::Left => '━',
-            Self::Right => '━',
-        }
-    }
-
     fn will_turn() -> bool {
         rand::thread_rng().gen_bool(0.15)
     }
