@@ -42,11 +42,13 @@ impl Pipe {
         })
     }
 
-    pub(crate) fn tick(&mut self) -> Option<()> {
-        self.pos.move_in(self.dir)?;
+    pub(crate) fn tick(&mut self) -> crossterm::Result<IsOffScreen> {
+        if !self.pos.can_move_in(self.dir)? {
+            return Ok(IsOffScreen(true));
+        }
         self.prev_dir = self.dir;
         self.just_turned = self.dir.maybe_turn();
-        Some(())
+        Ok(IsOffScreen(false))
     }
 
     pub(crate) fn to_char(&self) -> char {
@@ -76,3 +78,6 @@ fn gen_random_color() -> style::Color {
         _ => unreachable!(),
     }
 }
+
+#[derive(PartialEq)]
+pub(crate) struct IsOffScreen(pub(crate) bool);

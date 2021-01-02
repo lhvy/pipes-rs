@@ -4,7 +4,7 @@ mod position;
 
 use crossterm::{cursor, event, execute, style, terminal};
 use event::{Event, KeyCode, KeyModifiers};
-use pipe::Pipe;
+use pipe::{IsOffScreen, Pipe};
 use std::{
     io::{self, Write},
     thread,
@@ -37,7 +37,7 @@ fn main() -> crossterm::Result<()> {
                 terminal::disable_raw_mode()?;
                 return Ok(());
             }
-            if pipe.tick().is_none() {
+            if pipe.tick()? == IsOffScreen(true) {
                 pipe = Pipe::new()?;
             }
             execute!(stdout, cursor::MoveTo(pipe.pos.x, pipe.pos.y))?;
@@ -57,7 +57,7 @@ fn under_threshold(ticks: u16) -> crossterm::Result<bool> {
 
 fn get_event() -> crossterm::Result<Option<Event>> {
     if event::poll(Duration::from_millis(0))? {
-        dbg!(event::read()).map(Some)
+        event::read().map(Some)
     } else {
         Ok(None)
     }

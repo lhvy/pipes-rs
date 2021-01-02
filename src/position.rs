@@ -7,18 +7,27 @@ pub(crate) struct Position {
 }
 
 impl Position {
-    pub(crate) fn move_in(&mut self, dir: Direction) -> Option<()> {
+    pub(crate) fn can_move_in(&mut self, dir: Direction) -> crossterm::Result<bool> {
         match dir {
-            Direction::Up => self.y = self.y.checked_sub(1)?,
-            Direction::Down => self.y = self.y.checked_add(1)?,
-            Direction::Left => self.x = self.x.checked_sub(1)?,
-            Direction::Right => self.x = self.x.checked_add(1)?,
+            Direction::Up => {
+                if self.y == 0 {
+                    return Ok(false);
+                }
+                self.y -= 1;
+            }
+            Direction::Down => self.y += 1,
+            Direction::Left => {
+                if self.x == 0 {
+                    return Ok(false);
+                }
+                self.x -= 1;
+            }
+            Direction::Right => self.x += 1,
         }
-        // TODO: Error handling.
-        if self.in_screen_bounds().unwrap() {
-            Some(())
+        if self.in_screen_bounds()? {
+            Ok(true)
         } else {
-            None
+            Ok(false)
         }
     }
 
