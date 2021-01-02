@@ -37,13 +37,13 @@ fn main() -> crossterm::Result<()> {
                 terminal::disable_raw_mode()?;
                 return Ok(());
             }
-            if pipe.tick()? == IsOffScreen(true) {
-                pipe = Pipe::new()?;
-            }
             execute!(stdout, cursor::MoveTo(pipe.pos.x, pipe.pos.y))?;
             execute!(stdout, style::SetForegroundColor(pipe.color))?;
             print!("{}", pipe.to_char());
             stdout.flush()?;
+            if pipe.tick()? == IsOffScreen(true) {
+                pipe = Pipe::new()?;
+            }
             ticks += 1;
             thread::sleep(Duration::from_millis(20));
         }
