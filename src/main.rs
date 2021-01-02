@@ -55,7 +55,11 @@ fn main() -> anyhow::Result<()> {
             print!("{}", pipe.to_char());
             stdout.flush()?;
             if pipe.tick()? == IsOffScreen(true) {
-                pipe = create_pipe()?;
+                if config.inherit_style() {
+                    pipe = pipe.dup()?;
+                } else {
+                    pipe = create_pipe()?;
+                }
             }
             ticks += 1;
             thread::sleep(config.delay());

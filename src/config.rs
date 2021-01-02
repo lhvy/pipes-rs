@@ -1,6 +1,7 @@
 use crate::pipe::PresetKind;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, time::Duration};
+
 #[derive(Serialize, Deserialize, Default)]
 pub(crate) struct Config {
     color_mode: Option<ColorMode>,
@@ -8,6 +9,7 @@ pub(crate) struct Config {
     reset_threshold: Option<f32>,
     kinds: Option<HashSet<PresetKind>>,
     bold: Option<bool>,
+    inherit_style: Option<bool>,
 }
 
 impl Config {
@@ -37,6 +39,10 @@ impl Config {
 
     pub(crate) fn bold(&self) -> bool {
         self.bold.unwrap_or(true)
+    }
+
+    pub(crate) fn inherit_style(&self) -> bool {
+        self.inherit_style.unwrap_or(false)
     }
 }
 

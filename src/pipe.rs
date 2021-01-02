@@ -15,6 +15,22 @@ pub(crate) struct Pipe {
 
 impl Pipe {
     pub(crate) fn new(color_mode: ColorMode, preset_kind: PresetKind) -> crossterm::Result<Self> {
+        Self::new_raw(gen_random_color(color_mode), preset_kind.kind())
+    }
+
+    fn new_raw(color: Option<style::Color>, kind: Kind) -> crossterm::Result<Self> {
+        let (dir, pos) = Self::gen_rand_dir_and_pos()?;
+        Ok(Self {
+            dir,
+            pos,
+            color,
+            kind,
+            prev_dir: dir,
+            just_turned: false,
+        })
+    }
+
+    fn gen_rand_dir_and_pos() -> crossterm::Result<(Direction, Position)> {
         let (columns, rows) = terminal::size()?;
         let dir = rand::thread_rng().gen();
         let pos = match dir {
@@ -35,14 +51,11 @@ impl Pipe {
                 y: rand::thread_rng().gen_range(0..rows),
             },
         };
-        Ok(Self {
-            dir,
-            pos,
-            color: gen_random_color(color_mode),
-            kind: preset_kind.kind(),
-            prev_dir: dir,
-            just_turned: false,
-        })
+        Ok((dir, pos))
+    }
+
+    pub(crate) fn dup(self) -> crossterm::Result<Self> {
+        Self::new_raw(self.color, self.kind)
     }
 
     pub(crate) fn tick(&mut self) -> crossterm::Result<IsOffScreen> {
