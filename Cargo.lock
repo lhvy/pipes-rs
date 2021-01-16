@@ -175,10 +175,11 @@ dependencies = [
 name = "model"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "color_space",
- "crossterm",
  "rand",
  "serde",
+ "terminal",
 ]
 
 [[package]]
@@ -220,10 +221,10 @@ name = "pipes-rs"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "crossterm",
  "etcetera",
  "model",
  "rand",
+ "terminal",
  "toml",
 ]
 
@@ -379,6 +380,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-xid",
+]
+
+[[package]]
+name = "terminal"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "crossterm",
 ]
 
 [[package]]

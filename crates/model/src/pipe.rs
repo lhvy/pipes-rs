@@ -1,25 +1,33 @@
 use crate::config::ColorMode;
 use crate::direction::Direction;
 use crate::position::Position;
-use crossterm::{style, terminal};
 use rand::Rng;
+use terminal::Terminal;
 
 pub struct Pipe {
     pub dir: Direction,
     pub pos: Position,
-    pub color: Option<style::Color>,
+    pub color: Option<terminal::Color>,
     kind: Kind,
     prev_dir: Direction,
     just_turned: bool,
 }
 
 impl Pipe {
-    pub fn new(color_mode: ColorMode, preset_kind: PresetKind) -> crossterm::Result<Self> {
-        Self::new_raw(gen_random_color(color_mode), preset_kind.kind())
+    pub fn new(
+        terminal: &mut Terminal,
+        color_mode: ColorMode,
+        preset_kind: PresetKind,
+    ) -> anyhow::Result<Self> {
+        Self::new_raw(terminal, gen_random_color(color_mode), preset_kind.kind())
     }
 
-    fn new_raw(color: Option<style::Color>, kind: Kind) -> crossterm::Result<Self> {
-        let (dir, pos) = Self::gen_rand_dir_and_pos()?;
+    fn new_raw(
+        terminal: &mut Terminal,
+        color: Option<terminal::Color>,
+        kind: Kind,
+    ) -> anyhow::Result<Self> {
+        let (dir, pos) = Self::gen_rand_dir_and_pos(terminal)?;
         Ok(Self {
             dir,
             pos,
@@ -30,8 +38,8 @@ impl Pipe {
         })
     }
 
-    fn gen_rand_dir_and_pos() -> crossterm::Result<(Direction, Position)> {
-        let (columns, rows) = terminal::size()?;
+    fn gen_rand_dir_and_pos(terminal: &mut Terminal) -> anyhow::Result<(Direction, Position)> {
+        let (columns, rows) = terminal.size()?;
         let dir = rand::thread_rng().gen();
         let pos = match dir {
             Direction::Up => Position {
@@ -54,12 +62,12 @@ impl Pipe {
         Ok((dir, pos))
     }
 
-    pub fn dup(&self) -> crossterm::Result<Self> {
-        Self::new_raw(self.color, self.kind)
+    pub fn dup(&self, terminal: &mut Terminal) -> anyhow::Result<Self> {
+        Self::new_raw(terminal, self.color, self.kind)
     }
 
-    pub fn tick(&mut self) -> crossterm::Result<IsOffScreen> {
-        if !self.pos.can_move_in(self.dir)? {
+    pub fn tick(&mut self, terminal: &mut Terminal) -> anyhow::Result<IsOffScreen> {
+        if !self.pos.can_move_in(self.dir, terminal)? {
             return Ok(IsOffScreen(true));
         }
         self.prev_dir = self.dir;
@@ -186,23 +194,23 @@ impl PresetKind {
     }
 }
 
-fn gen_random_color(color_mode: ColorMode) -> Option<style::Color> {
+fn gen_random_color(color_mode: ColorMode) -> Option<terminal::Color> {
     match color_mode {
         ColorMode::Ansi => {
             let num = rand::thread_rng().gen_range(0..=11);
             Some(match num {
-                0 => style::Color::Red,
-                1 => style::Color::DarkRed,
-                2 => style::Color::Green,
-                3 => style::Color::DarkGreen,
-                4 => style::Color::Yellow,
-                5 => style::Color::DarkYellow,
-                6 => style::Color::Blue,
-                7 => style::Color::DarkBlue,
-                8 => style::Color::Magenta,
-                9 => style::Color::DarkMagenta,
-                10 => style::Color::Cyan,
-                11 => style::Color::DarkCyan,
+                0 => terminal::Color::Red,
+                1 => terminal::Color::DarkRed,
+                2 => terminal::Color::Green,
+                3 => terminal::Color::DarkGreen,
+                4 => terminal::Color::Yellow,
+                5 => terminal::Color::DarkYellow,
+                6 => terminal::Color::Blue,
+                7 => terminal::Color::DarkBlue,
+                8 => terminal::Color::Magenta,
+                9 => terminal::Color::DarkMagenta,
+                10 => terminal::Color::Cyan,
+                11 => terminal::Color::DarkCyan,
                 _ => unreachable!(),
             })
         }
@@ -214,7 +222,7 @@ fn gen_random_color(color_mode: ColorMode) -> Option<style::Color> {
                 h: hue,
             };
             let color_space::Rgb { r, g, b } = color_space::Rgb::from(lch);
-            Some(style::Color::Rgb {
+            Some(terminal::Color::Rgb {
                 r: r as u8,
                 g: g as u8,
                 b: b as u8,

@@ -1,15 +1,11 @@
 [package]
 authors = ["CookieCoder15 <40507205+CookieCoder15@users.noreply.github.com>"]
 edition = "2018"
-name = "pipes-rs"
+name = "terminal"
 version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1.0.37"
-etcetera = "0.3.2"
-model = {path = "../model"}
-rand = "0.8.0"
-terminal = {path = "../terminal"}
-toml = "0.5.8"
+crossterm = "0.19.0"

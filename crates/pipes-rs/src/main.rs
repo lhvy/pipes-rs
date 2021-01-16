@@ -1,77 +1,67 @@
 use anyhow::Context;
-use crossterm::{cursor, event, queue, style, terminal};
 use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
-use event::{Event, KeyCode, KeyModifiers};
 use model::{
     config::Config,
     pipe::{IsOffScreen, Pipe, PresetKind},
 };
 use rand::Rng;
-use std::{
-    collections::HashSet,
-    fs,
-    io::{self, Write},
-    thread,
-    time::Duration,
-};
+use std::{collections::HashSet, fs, thread};
+use terminal::Terminal;
 
 fn main() -> anyhow::Result<()> {
     let config = read_config()?;
     let kinds = config.kinds();
-    let mut stdout = io::stdout();
-    terminal::enable_raw_mode()?;
-    queue!(stdout, cursor::Hide)?;
+    let mut terminal = Terminal::default();
+    terminal.set_raw_mode(true)?;
+    terminal.set_cursor_visibility(false)?;
     if config.bold() {
-        queue!(stdout, style::SetAttribute(style::Attribute::Bold))?;
+        terminal.enable_bold()?;
     }
     loop {
-        queue!(stdout, terminal::Clear(terminal::ClearType::All))?;
-        let create_pipe = || Pipe::new(config.color_mode(), random_kind(&kinds));
+        terminal.clear()?;
         let mut pipes = Vec::new();
         for _ in 0..config.num_pipes() {
-            pipes.push(create_pipe()?);
+            let pipe = Pipe::new(&mut terminal, config.color_mode(), random_kind(&kinds))?;
+            pipes.push(pipe);
         }
         let mut ticks = 0;
-        while under_threshold(ticks, config.reset_threshold())? {
-            if let Some(Event::Key(event::KeyEvent {
-                code: KeyCode::Char('c'),
-                modifiers: KeyModifiers::CONTROL,
-            })) = get_event()?
-            {
-                queue!(
-                    stdout,
-                    style::SetAttribute(style::Attribute::Reset),
-                    terminal::Clear(terminal::ClearType::All),
-                    cursor::MoveTo(0, 0),
-                    cursor::Show,
-                )?;
-                terminal::disable_raw_mode()?;
+        while under_threshold(&mut terminal, ticks, config.reset_threshold())? {
+            if terminal.is_ctrl_c_pressed()? {
+                terminal.reset_style()?;
+                terminal.clear()?;
+                terminal.move_cursor_to(0, 0)?;
+                terminal.set_cursor_visibility(true)?;
+                terminal.set_raw_mode(false)?;
                 return Ok(());
             }
             for pipe in &mut pipes {
-                queue!(stdout, cursor::MoveTo(pipe.pos.x, pipe.pos.y))?;
+                terminal.move_cursor_to(pipe.pos.x, pipe.pos.y)?;
                 if let Some(color) = pipe.color {
-                    queue!(stdout, style::SetForegroundColor(color))?;
+                    terminal.set_text_color(color)?;
                 }
                 print!("{}", pipe.to_char());
-                if pipe.tick()? == IsOffScreen(true) {
+                if pipe.tick(&mut terminal)? == IsOffScreen(true) {
                     if config.inherit_style() {
-                        *pipe = pipe.dup()?;
+                        *pipe = pipe.dup(&mut terminal)?;
                     } else {
-                        *pipe = create_pipe()?;
+                        *pipe = Pipe::new(&mut terminal, config.color_mode(), random_kind(&kinds))?;
                     }
                 }
                 ticks += 1;
             }
-            stdout.flush()?;
+            terminal.flush()?;
             thread::sleep(config.delay());
         }
     }
 }
 
-fn under_threshold(ticks: u16, reset_threshold: Option<f32>) -> crossterm::Result<bool> {
+fn under_threshold(
+    terminal: &mut Terminal,
+    ticks: u16,
+    reset_threshold: Option<f32>,
+) -> anyhow::Result<bool> {
     if let Some(reset_threshold) = reset_threshold {
-        let (columns, rows) = terminal::size()?;
+        let (columns, rows) = terminal.size()?;
         Ok(f32::from(ticks) < f32::from(columns) * f32::from(rows) * reset_threshold)
     } else {
         Ok(true)
@@ -81,14 +71,6 @@ fn under_threshold(ticks: u16, reset_threshold: Option<f32>) -> crossterm::Resul
 fn random_kind(kinds: &HashSet<PresetKind>) -> PresetKind {
     let index = rand::thread_rng().gen_range(0..kinds.len());
     kinds.iter().nth(index).copied().unwrap()
-}
-
-fn get_event() -> crossterm::Result<Option<Event>> {
-    if event::poll(Duration::from_millis(0))? {
-        event::read().map(Some)
-    } else {
-        Ok(None)
-    }
 }
 
 fn read_config() -> anyhow::Result<Config> {
