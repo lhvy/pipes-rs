@@ -1,15 +1,36 @@
-use crate::pipe::PresetKind;
+use crate::pipe::{PresetKind, PresetKindSet};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, time::Duration};
+use std::{collections::HashSet, str::FromStr, time::Duration};
+use structopt::StructOpt;
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, StructOpt)]
 pub struct Config {
+    /// "ansi", "rgb" or "none"
+    #[structopt(short, long)]
     color_mode: Option<ColorMode>,
+
+    ///delay between frames in ms
+    #[structopt(short, long = "delay")]
     delay_ms: Option<u64>,
+
+    /// percentage of the screen before resetting (0.0-1.0)
+    #[structopt(short, long)]
     reset_threshold: Option<f32>,
-    kinds: Option<HashSet<PresetKind>>,
+
+    /// kinds of pipes separated by commas, e.g. heavy,curved
+    #[structopt(short, long)]
+    kinds: Option<PresetKindSet>,
+
+    /// whether to use bold (true/false)
+    #[structopt(short, long)]
     bold: Option<bool>,
+
+    /// whether pipes should retain style after hitting the edge (true/false)
+    #[structopt(short, long)]
     inherit_style: Option<bool>,
+
+    /// number of pipes
+    #[structopt(name = "pipe-num", short, long)]
     num_pipes: Option<u32>,
 }
 
@@ -30,11 +51,11 @@ impl Config {
         }
     }
 
-    pub fn kinds(&self) -> HashSet<PresetKind> {
+    pub fn kinds(&self) -> PresetKindSet {
         self.kinds.clone().unwrap_or_else(|| {
             let mut kinds = HashSet::with_capacity(1);
             kinds.insert(PresetKind::Heavy);
-            kinds
+            PresetKindSet(kinds)
         })
     }
 
@@ -49,6 +70,18 @@ impl Config {
     pub fn num_pipes(&self) -> u32 {
         self.num_pipes.unwrap_or(1)
     }
+
+    pub fn combine(self, other: Self) -> Self {
+        Self {
+            color_mode: other.color_mode.or(self.color_mode),
+            delay_ms: other.delay_ms.or(self.delay_ms),
+            reset_threshold: other.reset_threshold.or(self.reset_threshold),
+            kinds: other.kinds.or(self.kinds),
+            bold: other.bold.or(self.bold),
+            inherit_style: other.inherit_style.or(self.inherit_style),
+            num_pipes: other.num_pipes.or(self.num_pipes),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
@@ -57,4 +90,17 @@ pub enum ColorMode {
     Ansi,
     Rgb,
     None,
+}
+
+impl FromStr for ColorMode {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
+            "ansi" => Self::Ansi,
+            "rgb" => Self::Rgb,
+            "none" => Self::None,
+            _ => anyhow::bail!(r#"expected "ansi", "rgb" or "none""#),
+        })
+    }
 }

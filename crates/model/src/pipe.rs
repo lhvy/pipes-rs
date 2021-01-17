@@ -1,3 +1,5 @@
+use std::{collections::HashSet, str::FromStr};
+
 use crate::config::ColorMode;
 use crate::direction::Direction;
 use crate::position::Position;
@@ -232,5 +234,34 @@ fn gen_random_color(color_mode: ColorMode) -> Option<terminal::Color> {
     }
 }
 
+impl FromStr for PresetKind {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
+            "heavy" => Self::Heavy,
+            "light" => Self::Light,
+            "curved" => Self::Curved,
+            "outline" => Self::Outline,
+            _ => anyhow::bail!(r#"unknown pipe kind"#),
+        })
+    }
+}
+
 #[derive(PartialEq)]
 pub struct IsOffScreen(pub bool);
+
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
+pub struct PresetKindSet(pub HashSet<PresetKind>);
+
+impl FromStr for PresetKindSet {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut set = HashSet::new();
+        for preset_kind in s.split(',') {
+            set.insert(PresetKind::from_str(preset_kind)?);
+        }
+        Ok(Self(set))
+    }
+}

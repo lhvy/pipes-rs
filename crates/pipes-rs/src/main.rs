@@ -2,14 +2,15 @@ use anyhow::Context;
 use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use model::{
     config::Config,
-    pipe::{IsOffScreen, Pipe, PresetKind},
+    pipe::{IsOffScreen, Pipe, PresetKind, PresetKindSet},
 };
 use rand::Rng;
-use std::{collections::HashSet, fs, thread};
+use std::{fs, thread};
+use structopt::StructOpt;
 use terminal::Terminal;
 
 fn main() -> anyhow::Result<()> {
-    let config = read_config()?;
+    let config = read_config()?.combine(Config::from_args());
     let kinds = config.kinds();
     let mut terminal = Terminal::default();
     terminal.set_raw_mode(true)?;
@@ -68,7 +69,7 @@ fn under_threshold(
     }
 }
 
-fn random_kind(kinds: &HashSet<PresetKind>) -> PresetKind {
+fn random_kind(PresetKindSet(kinds): &PresetKindSet) -> PresetKind {
     let index = rand::thread_rng().gen_range(0..kinds.len());
     kinds.iter().nth(index).copied().unwrap()
 }
