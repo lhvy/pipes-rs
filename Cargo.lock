@@ -61,12 +61,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "color_space"
-version = "0.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3776b2bcc4e914db501bb9be9572dd706e344b9eb8f882894f3daa651d281381"
-
-[[package]]
 name = "crossterm"
 version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -230,11 +224,11 @@ name = "model"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "color_space",
  "rand",
  "serde",
  "structopt",
  "terminal",
+ "tincture",
 ]
 
 [[package]]
@@ -539,6 +533,12 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "tincture"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05f713c3bf4e2ef169710223e7185c8eaa27a5e3709f64a042d7f7650c32f692"
 
 [[package]]
 name = "toml"

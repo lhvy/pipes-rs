@@ -1,9 +1,8 @@
-use std::{collections::HashSet, str::FromStr};
-
 use crate::config::ColorMode;
 use crate::direction::Direction;
 use crate::position::Position;
 use rand::Rng;
+use std::{collections::HashSet, str::FromStr};
 use terminal::Terminal;
 
 pub struct Pipe {
@@ -218,16 +217,18 @@ fn gen_random_color(color_mode: ColorMode) -> Option<terminal::Color> {
         }
         ColorMode::Rgb => {
             let hue = rand::thread_rng().gen_range(0.0..=360.0);
-            let lch = color_space::Lch {
-                l: 75.0,
-                c: 75.0,
-                h: hue,
+            let oklch = tincture::Oklch {
+                l: 0.75,
+                c: 0.125,
+                h: tincture::Hue::from_degrees(hue).unwrap(),
             };
-            let color_space::Rgb { r, g, b } = color_space::Rgb::from(lch);
+            let oklab = tincture::Oklab::from(oklch);
+            let lrgb: tincture::LinearRgb = tincture::convert(oklab);
+            let tincture::Srgb { r, g, b } = tincture::Srgb::from(lrgb);
             Some(terminal::Color::Rgb {
-                r: r as u8,
-                g: g as u8,
-                b: b as u8,
+                r: (r * 255.0) as u8,
+                g: (g * 255.0) as u8,
+                b: (b * 255.0) as u8,
             })
         }
         ColorMode::None => None,
