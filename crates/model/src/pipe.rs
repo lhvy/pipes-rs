@@ -110,7 +110,7 @@ pub enum PresetKind {
     Heavy,
     Light,
     Curved,
-    // Emoji,
+    Emoji,
     Outline,
 }
 
@@ -124,6 +124,21 @@ struct Kind {
     top_right: char,
     bottom_left: char,
     bottom_right: char,
+}
+
+impl Kind {
+    fn chars(&self) -> Vec<char> {
+        vec![
+            self.up,
+            self.down,
+            self.left,
+            self.right,
+            self.top_left,
+            self.top_right,
+            self.bottom_left,
+            self.bottom_right,
+        ]
+    }
 }
 
 impl PresetKind {
@@ -160,7 +175,6 @@ impl PresetKind {
         bottom_right: '╯',
     };
 
-    /*
     const EMOJI: Kind = Kind {
         up: '👆',
         down: '👇',
@@ -171,7 +185,6 @@ impl PresetKind {
         bottom_left: '👌',
         bottom_right: '👌',
     };
-    */
 
     const OUTLINE: Kind = Kind {
         up: '║',
@@ -189,7 +202,7 @@ impl PresetKind {
             Self::Heavy => Self::HEAVY,
             Self::Light => Self::LIGHT,
             Self::Curved => Self::CURVED,
-            // Self::Emoji => Self::EMOJI,
+            Self::Emoji => Self::EMOJI,
             Self::Outline => Self::OUTLINE,
         }
     }
@@ -243,6 +256,7 @@ impl FromStr for PresetKind {
             "heavy" => Self::Heavy,
             "light" => Self::Light,
             "curved" => Self::Curved,
+            "emoji" => Self::Emoji,
             "outline" => Self::Outline,
             _ => anyhow::bail!(r#"unknown pipe kind"#),
         })
@@ -264,5 +278,15 @@ impl FromStr for PresetKindSet {
             set.insert(PresetKind::from_str(preset_kind)?);
         }
         Ok(Self(set))
+    }
+}
+
+impl PresetKindSet {
+    pub fn chars(&self) -> Vec<char> {
+        self.0
+            .iter()
+            .map(|preset_kind| preset_kind.kind())
+            .flat_map(|kind| kind.chars())
+            .collect()
     }
 }

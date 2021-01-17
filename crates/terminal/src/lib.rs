@@ -3,10 +3,15 @@ use crossterm::{
     event::{self, Event, KeyCode, KeyEvent, KeyModifiers},
     queue, style, terminal,
 };
-use std::{io::{self, Write}, time::Duration};
+use std::{
+    io::{self, Write},
+    time::Duration,
+};
+use unicode_width::UnicodeWidthChar;
 
 pub struct Terminal {
     stdout: io::Stdout,
+    max_char_width: u16,
 }
 
 macro_rules! gen_terminal_method {
@@ -31,15 +36,18 @@ macro_rules! gen_terminal_method_bool {
     };
 }
 
-impl Default for Terminal {
-    fn default() -> Self {
+impl Terminal {
+    pub fn new(chars: &[char]) -> Self {
         Self {
             stdout: io::stdout(),
+            max_char_width: chars
+                .iter()
+                .map(|c| c.width().unwrap() as u16)
+                .max()
+                .unwrap(),
         }
     }
-}
 
-impl Terminal {
     gen_terminal_method!(clear, terminal::Clear(terminal::ClearType::All));
     gen_terminal_method!(enable_bold, style::SetAttribute(style::Attribute::Bold));
     gen_terminal_method!(reset_style, style::SetAttribute(style::Attribute::Reset));
@@ -76,12 +84,14 @@ impl Terminal {
     }
 
     pub fn move_cursor_to(&mut self, x: u16, y: u16) -> anyhow::Result<()> {
-        queue!(self.stdout, cursor::MoveTo(x, y))?;
+        let max_char_width = self.max_char_width;
+        queue!(self.stdout, cursor::MoveTo(x * max_char_width, y))?;
         Ok(())
     }
 
     pub fn size(&self) -> anyhow::Result<(u16, u16)> {
-        Ok(terminal::size()?)
+        let (width, height) = terminal::size()?;
+        Ok((width / self.max_char_width, height))
     }
 
     pub fn flush(&mut self) -> anyhow::Result<()> {

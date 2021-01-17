@@ -12,7 +12,7 @@ use terminal::Terminal;
 fn main() -> anyhow::Result<()> {
     let config = read_config()?.combine(Config::from_args());
     let kinds = config.kinds();
-    let mut terminal = Terminal::default();
+    let mut terminal = Terminal::new(&kinds.chars());
     terminal.set_raw_mode(true)?;
     terminal.set_cursor_visibility(false)?;
     if config.bold() {
