@@ -4,6 +4,7 @@ use crossterm::{
     queue, style, terminal,
 };
 use std::{
+    fmt::Display,
     io::{self, Write},
     time::Duration,
 };
@@ -92,6 +93,11 @@ impl Terminal {
     pub fn size(&self) -> anyhow::Result<(u16, u16)> {
         let (width, height) = terminal::size()?;
         Ok((width / self.max_char_width, height))
+    }
+
+    pub fn print(&mut self, s: impl Display) -> anyhow::Result<()> {
+        self.stdout.write_all(format!("{}", s).as_bytes())?;
+        Ok(())
     }
 
     pub fn flush(&mut self) -> anyhow::Result<()> {

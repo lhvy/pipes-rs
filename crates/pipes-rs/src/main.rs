@@ -40,7 +40,7 @@ fn main() -> anyhow::Result<()> {
                 if let Some(color) = pipe.color {
                     terminal.set_text_color(color)?;
                 }
-                print!("{}", pipe.to_char());
+                terminal.print(pipe.to_char())?;
                 if pipe.tick(&mut terminal)? == IsOffScreen(true) {
                     if config.inherit_style() {
                         *pipe = pipe.dup(&mut terminal)?;
