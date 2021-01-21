@@ -56,3 +56,7 @@ There are also command line options that can be used to override parts of the co
 | `-k`   | sets the kinds of pipes, each kind separated by commas          | `-k heavy,curved` |
 | `-p`   | sets the number of pipes onscreen                               | `-p 5`            |
 | `-r`   | sets the percentage of the screen to be filled before resetting | `-r 0.75`         |
+
+## Acknowledgements
+
+This project is based off of [pipes.sh](https://github.com/pipeseroni/pipes.sh).
