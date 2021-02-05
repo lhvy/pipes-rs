@@ -6,7 +6,11 @@
 
 ## Installlation
 
-Brew formula soon.
+Install using Homebrew.
+
+```console
+$ brew install CookieCoder15/tap/pipes-rs
+```
 
 ## Configuration
 

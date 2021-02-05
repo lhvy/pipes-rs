@@ -1,0 +1,56 @@
+name: CD
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  update-homebrew-formula:
+    name: Update Homebrew Formula
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Get version
+        id: get-version
+        run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
+
+      - name: Compile
+        run: |
+          cargo build --release
+          strip target/release/pipes-rs
+          tar -czvf pipes-rs.tar.gz target/release/pipes-rs
+
+      - name: Create release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+
+      - name: Upload compiled binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: pipes-rs.tar.gz
+          asset_name: pipes-rs.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: mislav/bump-homebrew-formula-action@v1
+        with:
+          formula-name: pipes-rs
+          homebrew-tap: CookieCoder15/tap
+          download-url: https://github.com/CookieCoder15/pipes-rs/releases/download/${{ steps.get-version.outputs.version }}/pipes-rs.tar.gz
+        env:
+          COMMITTER_TOKEN: ${{ secrets.BREW_TOKEN }}
