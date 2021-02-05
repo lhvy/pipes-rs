@@ -4,7 +4,7 @@ use std::{collections::HashSet, str::FromStr, time::Duration};
 use structopt::StructOpt;
 
 #[derive(Serialize, Deserialize, Default, StructOpt)]
-#[structopt(name = "pipes.rs", no_version)]
+#[structopt(name = "pipes-rs", no_version)]
 pub struct Config {
     /// "ansi", "rgb" or "none"
     #[structopt(short, long)]

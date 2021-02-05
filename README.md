@@ -1,8 +1,8 @@
-# pipes.rs
+# pipes-rs
 
 > An overengineered rewrite of pipes.sh in Rust
 
-![pipes.rs preview](https://github.com/CookieCoder15/i/raw/master/pipes-rs-preview.gif)
+![pipes-rs preview](https://github.com/CookieCoder15/i/raw/master/pipes-rs-preview.gif)
 
 ## Installlation
 
@@ -14,7 +14,7 @@ $ brew install CookieCoder15/tap/pipes-rs
 
 ## Configuration
 
-pipes.rs can be configured using TOML located at `~/.config/pipes-rs/config.toml`.
+pipes-rs can be configured using TOML located at `~/.config/pipes-rs/config.toml`.
 The following is an example file with the default settings:
 
 ```toml
