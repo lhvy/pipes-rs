@@ -50,7 +50,7 @@ jobs:
       - uses: mislav/bump-homebrew-formula-action@v1
         with:
           formula-name: pipes-rs
-          homebrew-tap: CookieCoder15/tap
+          homebrew-tap: CookieCoder15/homebrew-tap
           download-url: https://github.com/CookieCoder15/pipes-rs/releases/download/${{ steps.get-version.outputs.version }}/pipes-rs.tar.gz
         env:
           COMMITTER_TOKEN: ${{ secrets.BREW_TOKEN }}
