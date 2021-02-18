@@ -1,17 +1,15 @@
-use crate::config::ColorMode;
 use crate::direction::Direction;
 use crate::position::Position;
+use crate::{config::ColorMode, position::InScreenBounds};
 use rand::Rng;
 use std::{collections::HashSet, str::FromStr};
 use terminal::Terminal;
 
 pub struct Pipe {
-    pub dir: Direction,
+    pub dirs: Vec<Direction>,
     pub pos: Position,
     pub color: Option<terminal::Color>,
     kind: Kind,
-    prev_dir: Direction,
-    just_turned: bool,
 }
 
 impl Pipe {
@@ -30,12 +28,10 @@ impl Pipe {
     ) -> anyhow::Result<Self> {
         let (dir, pos) = Self::gen_rand_dir_and_pos(terminal)?;
         Ok(Self {
-            dir,
+            dirs: vec![dir],
             pos,
             color,
             kind,
-            prev_dir: dir,
-            just_turned: false,
         })
     }
 
@@ -67,39 +63,46 @@ impl Pipe {
         Self::new_raw(terminal, self.color, self.kind)
     }
 
-    pub fn tick(&mut self, terminal: &mut Terminal) -> anyhow::Result<IsOffScreen> {
-        if !self.pos.can_move_in(self.dir, terminal)? {
-            return Ok(IsOffScreen(true));
+    pub fn tick(&mut self, terminal: &mut Terminal) -> anyhow::Result<InScreenBounds> {
+        let InScreenBounds(in_screen_bounds) =
+            self.pos.move_in(self.dirs[self.dirs.len() - 1], terminal)?;
+
+        if !in_screen_bounds {
+            return Ok(InScreenBounds(false));
         }
-        self.prev_dir = self.dir;
-        self.just_turned = self.dir.maybe_turn();
-        Ok(IsOffScreen(false))
+
+        self.dirs.push(*self.dirs.last().unwrap());
+        self.dirs.last_mut().unwrap().maybe_turn();
+
+        Ok(InScreenBounds(true))
     }
 
     pub fn to_char(&self) -> char {
-        if self.just_turned {
-            match (self.prev_dir, self.dir) {
-                (Direction::Up, Direction::Left) | (Direction::Right, Direction::Down) => {
-                    self.kind.top_right
-                }
-                (Direction::Up, Direction::Right) | (Direction::Left, Direction::Down) => {
-                    self.kind.top_left
-                }
-                (Direction::Down, Direction::Left) | (Direction::Right, Direction::Up) => {
-                    self.kind.bottom_right
-                }
-                (Direction::Down, Direction::Right) | (Direction::Left, Direction::Up) => {
-                    self.kind.bottom_left
-                }
-                _ => unreachable!(),
+        let dir = self.dirs[self.dirs.len() - 1];
+        let prev_dir = self
+            .dirs
+            .len()
+            .checked_sub(2)
+            .map_or(dir, |idx| self.dirs[idx]);
+
+        match (prev_dir, dir) {
+            (Direction::Up, Direction::Left) | (Direction::Right, Direction::Down) => {
+                self.kind.top_right
             }
-        } else {
-            match self.dir {
-                Direction::Up => self.kind.up,
-                Direction::Down => self.kind.down,
-                Direction::Left => self.kind.left,
-                Direction::Right => self.kind.right,
+            (Direction::Up, Direction::Right) | (Direction::Left, Direction::Down) => {
+                self.kind.top_left
             }
+            (Direction::Down, Direction::Left) | (Direction::Right, Direction::Up) => {
+                self.kind.bottom_right
+            }
+            (Direction::Down, Direction::Right) | (Direction::Left, Direction::Up) => {
+                self.kind.bottom_left
+            }
+            (Direction::Up, Direction::Up) => self.kind.up,
+            (Direction::Down, Direction::Down) => self.kind.down,
+            (Direction::Left, Direction::Left) => self.kind.left,
+            (Direction::Right, Direction::Right) => self.kind.right,
+            _ => unreachable!(),
         }
     }
 }
@@ -262,9 +265,6 @@ impl FromStr for PresetKind {
         })
     }
 }
-
-#[derive(PartialEq)]
-pub struct IsOffScreen(pub bool);
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct PresetKindSet(pub HashSet<PresetKind>);

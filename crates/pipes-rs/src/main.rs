@@ -2,7 +2,8 @@ use anyhow::Context;
 use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use model::{
     config::Config,
-    pipe::{IsOffScreen, Pipe, PresetKind, PresetKindSet},
+    pipe::{Pipe, PresetKind, PresetKindSet},
+    position::InScreenBounds,
 };
 use rand::Rng;
 use std::{fs, thread};
@@ -41,7 +42,7 @@ fn main() -> anyhow::Result<()> {
                     terminal.set_text_color(color)?;
                 }
                 terminal.print(pipe.to_char())?;
-                if pipe.tick(&mut terminal)? == IsOffScreen(true) {
+                if pipe.tick(&mut terminal)? == InScreenBounds(false) {
                     if config.inherit_style() {
                         *pipe = pipe.dup(&mut terminal)?;
                     } else {

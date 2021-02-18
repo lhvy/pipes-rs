@@ -3,7 +3,7 @@ use rand::{
     Rng,
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum Direction {
     Up,
     Down,
@@ -16,27 +16,41 @@ impl Direction {
         rand::thread_rng().gen_bool(0.15)
     }
 
-    pub fn maybe_turn(&mut self) -> bool {
+    pub fn maybe_turn(&mut self) {
         if Self::will_turn() {
-            let left = rand::thread_rng().gen_bool(0.5);
-            *self = if left {
-                match self {
-                    Self::Up => Self::Left,
-                    Self::Down => Self::Right,
-                    Self::Left => Self::Up,
-                    Self::Right => Self::Down,
-                }
-            } else {
-                match self {
-                    Self::Up => Self::Right,
-                    Self::Down => Self::Left,
-                    Self::Left => Self::Down,
-                    Self::Right => Self::Up,
-                }
-            };
-            true
+            *self = self.turn(TurnDirection::gen());
+        }
+    }
+
+    fn turn(&mut self, turn_dir: TurnDirection) -> Self {
+        match turn_dir {
+            TurnDirection::Left => match self {
+                Self::Up => Self::Left,
+                Self::Down => Self::Right,
+                Self::Left => Self::Up,
+                Self::Right => Self::Down,
+            },
+            TurnDirection::Right => match self {
+                Self::Up => Self::Right,
+                Self::Down => Self::Left,
+                Self::Left => Self::Down,
+                Self::Right => Self::Up,
+            },
+        }
+    }
+}
+
+enum TurnDirection {
+    Left,
+    Right,
+}
+
+impl TurnDirection {
+    fn gen() -> Self {
+        if rand::thread_rng().gen_bool(0.5) {
+            Self::Left
         } else {
-            false
+            Self::Right
         }
     }
 }
