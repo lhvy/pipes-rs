@@ -71,7 +71,7 @@ impl App {
 
     fn tick_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
         if self.terminal.is_ctrl_c_pressed()? {
-            self.exit()?;
+            self.reset_terminal()?;
             return Ok(ControlFlow::Break);
         }
 
@@ -108,7 +108,7 @@ impl App {
         Ok(())
     }
 
-    fn exit(&mut self) -> anyhow::Result<()> {
+    fn reset_terminal(&mut self) -> anyhow::Result<()> {
         self.terminal.reset_style()?;
         self.terminal.clear()?;
         self.terminal.move_cursor_to(0, 0)?;
