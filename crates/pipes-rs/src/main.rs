@@ -79,11 +79,8 @@ impl App {
         }
 
         for pipe in pipes {
-            self.terminal.move_cursor_to(pipe.pos.x, pipe.pos.y)?;
-            if let Some(color) = pipe.color {
-                self.terminal.set_text_color(color)?;
-            }
-            self.terminal.print(pipe.to_char())?;
+            self.render_pipe(pipe)?;
+
             if pipe.tick(&mut self.terminal)? == InScreenBounds(false) {
                 if self.config.inherit_style() {
                     *pipe = pipe.dup(&mut self.terminal)?;
@@ -95,12 +92,26 @@ impl App {
                     )?;
                 }
             }
+
             self.ticks += 1;
         }
+
         self.terminal.flush()?;
         thread::sleep(self.config.delay());
 
         Ok(ControlFlow::Continue)
+    }
+
+    fn render_pipe(&mut self, pipe: &mut Pipe) -> anyhow::Result<()> {
+        self.terminal.move_cursor_to(pipe.pos.x, pipe.pos.y)?;
+
+        if let Some(color) = pipe.color {
+            self.terminal.set_text_color(color)?;
+        }
+
+        self.terminal.print(pipe.to_char())?;
+
+        Ok(())
     }
 
     fn exit(&mut self) -> anyhow::Result<()> {
