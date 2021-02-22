@@ -11,93 +11,116 @@ use structopt::StructOpt;
 use terminal::Terminal;
 
 fn main() -> anyhow::Result<()> {
-    let config = read_config()?.combine(Config::from_args());
-    let kinds = config.kinds();
-    let mut terminal = Terminal::new(&kinds.chars());
-    terminal.set_raw_mode(true)?;
-    terminal.set_cursor_visibility(false)?;
-    if config.bold() {
-        terminal.enable_bold()?;
-    }
-    while let ControlFlow::Continue = reset_loop(&mut terminal, &config, &kinds)? {}
+    let app = App::new()?;
+    app.run()?;
+
     Ok(())
 }
 
-fn reset_loop(
-    terminal: &mut Terminal,
-    config: &Config,
-    kinds: &PresetKindSet,
-) -> anyhow::Result<ControlFlow> {
-    terminal.clear()?;
-    let mut pipes = Vec::new();
-    for _ in 0..config.num_pipes() {
-        let pipe = Pipe::new(terminal, config.color_mode(), random_kind(&kinds))?;
-        pipes.push(pipe);
-    }
-
-    let mut ticks = 0;
-    while under_threshold(terminal, ticks, config.reset_threshold())? {
-        if let ControlFlow::Break = tick_loop(terminal, &mut pipes, config, kinds, &mut ticks)? {
-            return Ok(ControlFlow::Break);
-        }
-    }
-
-    Ok(ControlFlow::Continue)
+struct App {
+    terminal: Terminal,
+    config: Config,
+    kinds: PresetKindSet,
 }
 
-fn tick_loop(
-    terminal: &mut Terminal,
-    pipes: &mut Vec<Pipe>,
-    config: &Config,
-    kinds: &PresetKindSet,
-    ticks: &mut u16,
-) -> anyhow::Result<ControlFlow> {
-    if terminal.is_ctrl_c_pressed()? {
-        exit(terminal)?;
-        return Ok(ControlFlow::Break);
+impl App {
+    fn new() -> anyhow::Result<Self> {
+        let config = read_config()?.combine(Config::from_args());
+        let kinds = config.kinds();
+        let terminal = Terminal::new(&kinds.chars());
+
+        Ok(Self {
+            terminal,
+            config,
+            kinds,
+        })
     }
 
-    for pipe in pipes {
-        terminal.move_cursor_to(pipe.pos.x, pipe.pos.y)?;
-        if let Some(color) = pipe.color {
-            terminal.set_text_color(color)?;
+    fn run(mut self) -> anyhow::Result<()> {
+        self.terminal.set_raw_mode(true)?;
+        self.terminal.set_cursor_visibility(false)?;
+        if self.config.bold() {
+            self.terminal.enable_bold()?;
         }
-        terminal.print(pipe.to_char())?;
-        if pipe.tick(terminal)? == InScreenBounds(false) {
-            if config.inherit_style() {
-                *pipe = pipe.dup(terminal)?;
-            } else {
-                *pipe = Pipe::new(terminal, config.color_mode(), random_kind(&kinds))?;
+        while let ControlFlow::Continue = self.reset_loop()? {}
+
+        Ok(())
+    }
+
+    fn reset_loop(&mut self) -> anyhow::Result<ControlFlow> {
+        self.terminal.clear()?;
+        let mut pipes = Vec::new();
+        for _ in 0..self.config.num_pipes() {
+            let pipe = Pipe::new(
+                &mut self.terminal,
+                self.config.color_mode(),
+                random_kind(&self.kinds),
+            )?;
+            pipes.push(pipe);
+        }
+
+        let mut ticks = 0;
+        while self.under_threshold(ticks, self.config.reset_threshold())? {
+            if let ControlFlow::Break = self.tick_loop(&mut pipes, &mut ticks)? {
+                return Ok(ControlFlow::Break);
             }
         }
-        *ticks += 1;
+
+        Ok(ControlFlow::Continue)
     }
-    terminal.flush()?;
-    thread::sleep(config.delay());
 
-    Ok(ControlFlow::Continue)
-}
+    fn tick_loop(&mut self, pipes: &mut Vec<Pipe>, ticks: &mut u16) -> anyhow::Result<ControlFlow> {
+        if self.terminal.is_ctrl_c_pressed()? {
+            self.exit()?;
+            return Ok(ControlFlow::Break);
+        }
 
-fn exit(terminal: &mut Terminal) -> anyhow::Result<()> {
-    terminal.reset_style()?;
-    terminal.clear()?;
-    terminal.move_cursor_to(0, 0)?;
-    terminal.set_cursor_visibility(true)?;
-    terminal.set_raw_mode(false)?;
+        for pipe in pipes {
+            self.terminal.move_cursor_to(pipe.pos.x, pipe.pos.y)?;
+            if let Some(color) = pipe.color {
+                self.terminal.set_text_color(color)?;
+            }
+            self.terminal.print(pipe.to_char())?;
+            if pipe.tick(&mut self.terminal)? == InScreenBounds(false) {
+                if self.config.inherit_style() {
+                    *pipe = pipe.dup(&mut self.terminal)?;
+                } else {
+                    *pipe = Pipe::new(
+                        &mut self.terminal,
+                        self.config.color_mode(),
+                        random_kind(&self.kinds),
+                    )?;
+                }
+            }
+            *ticks += 1;
+        }
+        self.terminal.flush()?;
+        thread::sleep(self.config.delay());
 
-    Ok(())
-}
+        Ok(ControlFlow::Continue)
+    }
 
-fn under_threshold(
-    terminal: &mut Terminal,
-    ticks: u16,
-    reset_threshold: Option<f32>,
-) -> anyhow::Result<bool> {
-    if let Some(reset_threshold) = reset_threshold {
-        let (columns, rows) = terminal.size()?;
-        Ok(f32::from(ticks) < f32::from(columns) * f32::from(rows) * reset_threshold)
-    } else {
-        Ok(true)
+    fn exit(&mut self) -> anyhow::Result<()> {
+        self.terminal.reset_style()?;
+        self.terminal.clear()?;
+        self.terminal.move_cursor_to(0, 0)?;
+        self.terminal.set_cursor_visibility(true)?;
+        self.terminal.set_raw_mode(false)?;
+
+        Ok(())
+    }
+
+    fn under_threshold(
+        &mut self,
+        ticks: u16,
+        reset_threshold: Option<f32>,
+    ) -> anyhow::Result<bool> {
+        if let Some(reset_threshold) = reset_threshold {
+            let (columns, rows) = self.terminal.size()?;
+            Ok(f32::from(ticks) < f32::from(columns) * f32::from(rows) * reset_threshold)
+        } else {
+            Ok(true)
+        }
     }
 }
 
