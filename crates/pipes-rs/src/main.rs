@@ -53,11 +53,8 @@ impl App {
         self.terminal.clear()?;
         let mut pipes = Vec::new();
         for _ in 0..self.config.num_pipes() {
-            let pipe = Pipe::new(
-                &mut self.terminal,
-                self.config.color_mode(),
-                random_kind(&self.kinds),
-            )?;
+            let kind = self.random_kind();
+            let pipe = Pipe::new(&mut self.terminal, self.config.color_mode(), kind)?;
             pipes.push(pipe);
         }
 
@@ -85,11 +82,8 @@ impl App {
                 if self.config.inherit_style() {
                     *pipe = pipe.dup(&mut self.terminal)?;
                 } else {
-                    *pipe = Pipe::new(
-                        &mut self.terminal,
-                        self.config.color_mode(),
-                        random_kind(&self.kinds),
-                    )?;
+                    let kind = self.random_kind();
+                    *pipe = Pipe::new(&mut self.terminal, self.config.color_mode(), kind)?;
                 }
             }
 
@@ -132,11 +126,13 @@ impl App {
             Ok(true)
         }
     }
-}
 
-fn random_kind(PresetKindSet(kinds): &PresetKindSet) -> PresetKind {
-    let index = rand::thread_rng().gen_range(0..kinds.len());
-    kinds.iter().nth(index).copied().unwrap()
+    fn random_kind(&self) -> PresetKind {
+        let PresetKindSet(ref kinds) = self.kinds;
+        let index = rand::thread_rng().gen_range(0..kinds.len());
+
+        kinds.iter().nth(index).copied().unwrap()
+    }
 }
 
 fn read_config() -> anyhow::Result<Config> {
