@@ -63,7 +63,7 @@ impl App {
 
         self.ticks = 0;
 
-        while self.under_threshold(self.config.reset_threshold())? {
+        while self.under_threshold()? {
             if let ControlFlow::Break = self.tick_loop(&mut pipes)? {
                 return Ok(ControlFlow::Break);
             }
@@ -113,8 +113,8 @@ impl App {
         Ok(())
     }
 
-    fn under_threshold(&mut self, reset_threshold: Option<f32>) -> anyhow::Result<bool> {
-        if let Some(reset_threshold) = reset_threshold {
+    fn under_threshold(&mut self) -> anyhow::Result<bool> {
+        if let Some(reset_threshold) = self.config.reset_threshold() {
             let (columns, rows) = self.terminal.size()?;
             Ok(f32::from(self.ticks) < f32::from(columns) * f32::from(rows) * reset_threshold)
         } else {
