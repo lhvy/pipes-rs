@@ -21,6 +21,7 @@ struct App {
     terminal: Terminal,
     config: Config,
     kinds: PresetKindSet,
+    ticks: u16,
 }
 
 impl App {
@@ -33,6 +34,7 @@ impl App {
             terminal,
             config,
             kinds,
+            ticks: 0,
         })
     }
 
@@ -59,9 +61,10 @@ impl App {
             pipes.push(pipe);
         }
 
-        let mut ticks = 0;
-        while self.under_threshold(ticks, self.config.reset_threshold())? {
-            if let ControlFlow::Break = self.tick_loop(&mut pipes, &mut ticks)? {
+        self.ticks = 0;
+
+        while self.under_threshold(self.config.reset_threshold())? {
+            if let ControlFlow::Break = self.tick_loop(&mut pipes)? {
                 return Ok(ControlFlow::Break);
             }
         }
@@ -69,7 +72,7 @@ impl App {
         Ok(ControlFlow::Continue)
     }
 
-    fn tick_loop(&mut self, pipes: &mut Vec<Pipe>, ticks: &mut u16) -> anyhow::Result<ControlFlow> {
+    fn tick_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
         if self.terminal.is_ctrl_c_pressed()? {
             self.exit()?;
             return Ok(ControlFlow::Break);
@@ -92,7 +95,7 @@ impl App {
                     )?;
                 }
             }
-            *ticks += 1;
+            self.ticks += 1;
         }
         self.terminal.flush()?;
         thread::sleep(self.config.delay());
@@ -110,14 +113,10 @@ impl App {
         Ok(())
     }
 
-    fn under_threshold(
-        &mut self,
-        ticks: u16,
-        reset_threshold: Option<f32>,
-    ) -> anyhow::Result<bool> {
+    fn under_threshold(&mut self, reset_threshold: Option<f32>) -> anyhow::Result<bool> {
         if let Some(reset_threshold) = reset_threshold {
             let (columns, rows) = self.terminal.size()?;
-            Ok(f32::from(ticks) < f32::from(columns) * f32::from(rows) * reset_threshold)
+            Ok(f32::from(self.ticks) < f32::from(columns) * f32::from(rows) * reset_threshold)
         } else {
             Ok(true)
         }
