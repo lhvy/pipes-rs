@@ -129,10 +129,13 @@ impl App {
 
     fn random_kind(&self) -> PresetKind {
         let PresetKindSet(ref kinds) = self.kinds;
-        let index = rand::thread_rng().gen_range(0..kinds.len());
-
-        kinds.iter().nth(index).copied().unwrap()
+        *choose_random(kinds.iter())
     }
+}
+
+fn choose_random<T>(mut iter: impl ExactSizeIterator<Item = T>) -> T {
+    let index = rand::thread_rng().gen_range(0..iter.len());
+    iter.nth(index).unwrap()
 }
 
 fn read_config() -> anyhow::Result<Config> {
