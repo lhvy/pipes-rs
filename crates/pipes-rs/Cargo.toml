@@ -12,6 +12,7 @@ anyhow = "1.0.37"
 etcetera = "0.3.2"
 model = {path = "../model"}
 rand = "0.8.0"
+serde = "1.0.118"
 structopt = "0.3.21"
 terminal = {path = "../terminal"}
 toml = "0.5.8"

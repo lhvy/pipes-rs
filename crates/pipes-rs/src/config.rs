@@ -1,10 +1,10 @@
-use crate::pipe::{PresetKind, PresetKindSet};
+use model::pipe::{ColorMode, PresetKind, PresetKindSet};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, str::FromStr, time::Duration};
+use std::{collections::HashSet, time::Duration};
 use structopt::StructOpt;
 
 #[derive(Serialize, Deserialize, Default, StructOpt)]
-#[structopt(name = "pipes-rs", no_version)]
+#[structopt(name = "pipes-rs")]
 pub struct Config {
     /// "ansi", "rgb" or "none"
     #[structopt(short, long)]
@@ -82,26 +82,5 @@ impl Config {
             inherit_style: other.inherit_style.or(self.inherit_style),
             num_pipes: other.num_pipes.or(self.num_pipes),
         }
-    }
-}
-
-#[derive(Clone, Copy, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ColorMode {
-    Ansi,
-    Rgb,
-    None,
-}
-
-impl FromStr for ColorMode {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(match s {
-            "ansi" => Self::Ansi,
-            "rgb" => Self::Rgb,
-            "none" => Self::None,
-            _ => anyhow::bail!(r#"expected "ansi", "rgb" or "none""#),
-        })
     }
 }
