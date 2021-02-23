@@ -130,6 +130,10 @@ impl Terminal {
         Ok(())
     }
 
+    pub fn portion_covered(&self) -> f32 {
+        self.screen.portion_covered()
+    }
+
     pub fn size(&self) -> (u16, u16) {
         *self.size.lock()
     }

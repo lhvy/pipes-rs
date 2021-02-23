@@ -120,10 +120,9 @@ impl App {
         Ok(())
     }
 
-    fn under_threshold(&mut self) -> bool {
+    fn under_threshold(&self) -> bool {
         if let Some(reset_threshold) = self.config.reset_threshold() {
-            let (columns, rows) = self.terminal.size();
-            f32::from(self.ticks) < f32::from(columns) * f32::from(rows) * reset_threshold
+            self.terminal.portion_covered() < reset_threshold
         } else {
             true
         }
