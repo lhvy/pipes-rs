@@ -3,16 +3,20 @@ use crossterm::{
     event::{self, Event, KeyCode, KeyEvent, KeyModifiers},
     queue, style, terminal,
 };
+use parking_lot::Mutex;
 use std::{
     fmt::Display,
     io::{self, Write},
-    time::Duration,
+    sync::Arc,
+    thread,
 };
 use unicode_width::UnicodeWidthChar;
 
 pub struct Terminal {
     stdout: io::Stdout,
     max_char_width: u16,
+    size: Arc<Mutex<(u16, u16)>>,
+    ctrl_c_rx: flume::Receiver<CtrlCPresed>,
 }
 
 macro_rules! gen_terminal_method {
@@ -38,15 +42,51 @@ macro_rules! gen_terminal_method_bool {
 }
 
 impl Terminal {
-    pub fn new(chars: &[char]) -> Self {
-        Self {
+    pub fn new(chars: &[char]) -> anyhow::Result<Self> {
+        let max_char_width = chars
+            .iter()
+            .map(|c| c.width().unwrap() as u16)
+            .max()
+            .unwrap();
+
+        let size = {
+            let (width, height) = terminal::size()?;
+            (width / max_char_width, height)
+        };
+
+        let size = Arc::new(Mutex::new(size));
+
+        let (ctrl_c_tx, ctrl_c_rx) = flume::unbounded();
+
+        thread::spawn({
+            let size = Arc::clone(&size);
+
+            move || {
+                loop {
+                    match event::read() {
+                        Ok(Event::Resize(x, y)) => *size.lock() = (x, y),
+
+                        Ok(Event::Key(KeyEvent {
+                            code: KeyCode::Char('c'),
+                            modifiers: KeyModifiers::CONTROL,
+                        })) => ctrl_c_tx.send(CtrlCPresed).unwrap(),
+
+                        Ok(_) => {} // ignore all other events
+
+                        // ignore errors because not updating the size
+                        // isn’t a fatal issue
+                        Err(_) => {}
+                    }
+                }
+            }
+        });
+
+        Ok(Self {
             stdout: io::stdout(),
-            max_char_width: chars
-                .iter()
-                .map(|c| c.width().unwrap() as u16)
-                .max()
-                .unwrap(),
-        }
+            max_char_width,
+            size,
+            ctrl_c_rx,
+        })
     }
 
     gen_terminal_method!(clear, terminal::Clear(terminal::ClearType::All));
@@ -90,9 +130,8 @@ impl Terminal {
         Ok(())
     }
 
-    pub fn size(&self) -> anyhow::Result<(u16, u16)> {
-        let (width, height) = terminal::size()?;
-        Ok((width / self.max_char_width, height))
+    pub fn size(&self) -> (u16, u16) {
+        *self.size.lock()
     }
 
     pub fn print(&mut self, s: impl Display) -> anyhow::Result<()> {
@@ -105,19 +144,8 @@ impl Terminal {
         Ok(())
     }
 
-    pub fn is_ctrl_c_pressed(&self) -> anyhow::Result<bool> {
-        Ok(Some(Event::Key(KeyEvent {
-            code: KeyCode::Char('c'),
-            modifiers: KeyModifiers::CONTROL,
-        })) == self.get_event()?)
-    }
-
-    fn get_event(&self) -> anyhow::Result<Option<Event>> {
-        if event::poll(Duration::from_millis(0))? {
-            Ok(event::read().map(Some)?)
-        } else {
-            Ok(None)
-        }
+    pub fn is_ctrl_c_pressed(&self) -> bool {
+        self.ctrl_c_rx.try_recv().is_ok()
     }
 }
 
@@ -137,3 +165,5 @@ pub enum Color {
     DarkCyan,
     Rgb { r: u8, g: u8, b: u8 },
 }
+
+struct CtrlCPresed;

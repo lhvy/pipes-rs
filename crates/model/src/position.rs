@@ -7,34 +7,30 @@ pub struct Position {
 }
 
 impl Position {
-    pub(crate) fn move_in(
-        &mut self,
-        dir: Direction,
-        terminal: &mut Terminal,
-    ) -> anyhow::Result<InScreenBounds> {
+    pub(crate) fn move_in(&mut self, dir: Direction, terminal: &mut Terminal) -> InScreenBounds {
         match dir {
             Direction::Up => {
                 if self.y == 0 {
-                    return Ok(InScreenBounds(false));
+                    return InScreenBounds(false);
                 }
                 self.y -= 1;
             }
             Direction::Down => self.y += 1,
             Direction::Left => {
                 if self.x == 0 {
-                    return Ok(InScreenBounds(false));
+                    return InScreenBounds(false);
                 }
                 self.x -= 1;
             }
             Direction::Right => self.x += 1,
         }
 
-        self.in_screen_bounds(terminal).map(InScreenBounds)
+        InScreenBounds(self.in_screen_bounds(terminal))
     }
 
-    fn in_screen_bounds(&self, terminal: &mut Terminal) -> anyhow::Result<bool> {
-        let (columns, rows) = terminal.size()?;
-        Ok(self.x < columns && self.y < rows)
+    fn in_screen_bounds(&self, terminal: &mut Terminal) -> bool {
+        let (columns, rows) = terminal.size();
+        self.x < columns && self.y < rows
     }
 }
 
