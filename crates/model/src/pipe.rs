@@ -13,30 +13,23 @@ pub struct Pipe {
 }
 
 impl Pipe {
-    pub fn new(
-        terminal: &mut Terminal,
-        color_mode: ColorMode,
-        preset_kind: PresetKind,
-    ) -> anyhow::Result<Self> {
+    pub fn new(terminal: &mut Terminal, color_mode: ColorMode, preset_kind: PresetKind) -> Self {
         Self::new_raw(terminal, gen_random_color(color_mode), preset_kind.kind())
     }
 
-    fn new_raw(
-        terminal: &mut Terminal,
-        color: Option<terminal::Color>,
-        kind: Kind,
-    ) -> anyhow::Result<Self> {
-        let (dir, pos) = Self::gen_rand_dir_and_pos(terminal)?;
-        Ok(Self {
+    fn new_raw(terminal: &mut Terminal, color: Option<terminal::Color>, kind: Kind) -> Self {
+        let (dir, pos) = Self::gen_rand_dir_and_pos(terminal);
+
+        Self {
             dirs: vec![dir],
             pos,
             color,
             kind,
-        })
+        }
     }
 
-    fn gen_rand_dir_and_pos(terminal: &mut Terminal) -> anyhow::Result<(Direction, Position)> {
-        let (columns, rows) = terminal.size()?;
+    fn gen_rand_dir_and_pos(terminal: &mut Terminal) -> (Direction, Position) {
+        let (columns, rows) = terminal.size();
         let dir = rand::thread_rng().gen();
         let pos = match dir {
             Direction::Up => Position {
@@ -56,25 +49,26 @@ impl Pipe {
                 y: rand::thread_rng().gen_range(0..rows),
             },
         };
-        Ok((dir, pos))
+
+        (dir, pos)
     }
 
-    pub fn dup(&self, terminal: &mut Terminal) -> anyhow::Result<Self> {
+    pub fn dup(&self, terminal: &mut Terminal) -> Self {
         Self::new_raw(terminal, self.color, self.kind)
     }
 
-    pub fn tick(&mut self, terminal: &mut Terminal) -> anyhow::Result<InScreenBounds> {
+    pub fn tick(&mut self, terminal: &mut Terminal) -> InScreenBounds {
         let InScreenBounds(in_screen_bounds) =
-            self.pos.move_in(self.dirs[self.dirs.len() - 1], terminal)?;
+            self.pos.move_in(self.dirs[self.dirs.len() - 1], terminal);
 
         if !in_screen_bounds {
-            return Ok(InScreenBounds(false));
+            return InScreenBounds(false);
         }
 
         self.dirs.push(*self.dirs.last().unwrap());
         self.dirs.last_mut().unwrap().maybe_turn();
 
-        Ok(InScreenBounds(true))
+        InScreenBounds(true)
     }
 
     pub fn to_char(&self) -> char {

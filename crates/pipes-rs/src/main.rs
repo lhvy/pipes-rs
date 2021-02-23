@@ -28,7 +28,7 @@ impl App {
     fn new() -> anyhow::Result<Self> {
         let config = read_config()?.combine(Config::from_args());
         let kinds = config.kinds();
-        let terminal = Terminal::new(&kinds.chars());
+        let terminal = Terminal::new(&kinds.chars())?;
 
         Ok(Self {
             terminal,
@@ -54,13 +54,13 @@ impl App {
         let mut pipes = Vec::new();
         for _ in 0..self.config.num_pipes() {
             let kind = self.random_kind();
-            let pipe = Pipe::new(&mut self.terminal, self.config.color_mode(), kind)?;
+            let pipe = Pipe::new(&mut self.terminal, self.config.color_mode(), kind);
             pipes.push(pipe);
         }
 
         self.ticks = 0;
 
-        while self.under_threshold()? {
+        while self.under_threshold() {
             if let ControlFlow::Break = self.tick_loop(&mut pipes)? {
                 return Ok(ControlFlow::Break);
             }
@@ -70,7 +70,7 @@ impl App {
     }
 
     fn tick_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
-        if self.terminal.is_ctrl_c_pressed()? {
+        if self.terminal.is_ctrl_c_pressed() {
             self.reset_terminal()?;
             return Ok(ControlFlow::Break);
         }
@@ -78,12 +78,12 @@ impl App {
         for pipe in pipes {
             self.render_pipe(pipe)?;
 
-            if pipe.tick(&mut self.terminal)? == InScreenBounds(false) {
+            if pipe.tick(&mut self.terminal) == InScreenBounds(false) {
                 if self.config.inherit_style() {
-                    *pipe = pipe.dup(&mut self.terminal)?;
+                    *pipe = pipe.dup(&mut self.terminal);
                 } else {
                     let kind = self.random_kind();
-                    *pipe = Pipe::new(&mut self.terminal, self.config.color_mode(), kind)?;
+                    *pipe = Pipe::new(&mut self.terminal, self.config.color_mode(), kind);
                 }
             }
 
@@ -118,12 +118,12 @@ impl App {
         Ok(())
     }
 
-    fn under_threshold(&mut self) -> anyhow::Result<bool> {
+    fn under_threshold(&mut self) -> bool {
         if let Some(reset_threshold) = self.config.reset_threshold() {
-            let (columns, rows) = self.terminal.size()?;
-            Ok(f32::from(self.ticks) < f32::from(columns) * f32::from(rows) * reset_threshold)
+            let (columns, rows) = self.terminal.size();
+            f32::from(self.ticks) < f32::from(columns) * f32::from(rows) * reset_threshold
         } else {
-            Ok(true)
+            true
         }
     }
 
