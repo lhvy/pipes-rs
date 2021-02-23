@@ -1,8 +1,6 @@
 name: CD
 on:
   push:
-    branches:
-      - master
     tags:
       - "v*"
 
