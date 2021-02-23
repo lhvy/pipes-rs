@@ -23,7 +23,6 @@ struct App {
     terminal: Terminal,
     config: Config,
     kinds: PresetKindSet,
-    ticks: u16,
 }
 
 impl App {
@@ -36,7 +35,6 @@ impl App {
             terminal,
             config,
             kinds,
-            ticks: 0,
         })
     }
 
@@ -59,8 +57,6 @@ impl App {
             let pipe = Pipe::new(&mut self.terminal, self.config.color_mode(), kind);
             pipes.push(pipe);
         }
-
-        self.ticks = 0;
 
         while self.under_threshold() {
             if let ControlFlow::Break = self.tick_loop(&mut pipes)? {
@@ -88,8 +84,6 @@ impl App {
                     *pipe = Pipe::new(&mut self.terminal, self.config.color_mode(), kind);
                 }
             }
-
-            self.ticks += 1;
         }
 
         self.terminal.flush()?;
