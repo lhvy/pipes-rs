@@ -1,6 +1,6 @@
 use crate::direction::Direction;
+use crate::position::InScreenBounds;
 use crate::position::Position;
-use crate::{config::ColorMode, position::InScreenBounds};
 use rand::Rng;
 use std::{collections::HashSet, str::FromStr};
 use terminal::Terminal;
@@ -288,5 +288,26 @@ impl PresetKindSet {
             .map(|preset_kind| preset_kind.kind())
             .flat_map(|kind| kind.chars())
             .collect()
+    }
+}
+
+#[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ColorMode {
+    Ansi,
+    Rgb,
+    None,
+}
+
+impl FromStr for ColorMode {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
+            "ansi" => Self::Ansi,
+            "rgb" => Self::Rgb,
+            "none" => Self::None,
+            _ => anyhow::bail!(r#"expected "ansi", "rgb" or "none""#),
+        })
     }
 }

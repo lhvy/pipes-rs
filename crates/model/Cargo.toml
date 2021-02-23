@@ -11,6 +11,5 @@ version = "0.1.0"
 anyhow = "1.0.37"
 rand = "0.8.0"
 serde = {version = "1.0.118", features = ["derive"]}
-structopt = {version = "0.3.21", features = ["wrap_help"]}
 terminal = {path = "../terminal"}
 tincture = "0.5.0"

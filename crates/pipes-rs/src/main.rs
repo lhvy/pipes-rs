@@ -1,7 +1,9 @@
+mod config;
+
 use anyhow::Context;
+use config::Config;
 use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use model::{
-    config::Config,
     pipe::{Pipe, PresetKind, PresetKindSet},
     position::InScreenBounds,
 };
