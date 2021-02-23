@@ -5,7 +5,6 @@ use crossterm::{
 };
 use parking_lot::Mutex;
 use std::{
-    fmt::Display,
     io::{self, Write},
     sync::Arc,
     thread,
@@ -120,8 +119,8 @@ impl Terminal {
         *self.size.lock()
     }
 
-    pub fn print(&mut self, s: impl Display) -> anyhow::Result<()> {
-        self.stdout.write_all(format!("{}", s).as_bytes())?;
+    pub fn print(&mut self, c: char) -> anyhow::Result<()> {
+        self.stdout.write_all(c.to_string().as_bytes())?;
         Ok(())
     }
 
