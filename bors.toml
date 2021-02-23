@@ -1,8 +1,17 @@
+# all jobs must pass on both the `staging` commit and the PR’s CI
+# before merging
 status = [
   "Rust (ubuntu-latest)",
   "Rust (windows-latest)",
   "Rust (macos-latest)",
   "Formatting",
 ] 
+pr_status = [
+  "Rust (ubuntu-latest)",
+  "Rust (windows-latest)",
+  "Rust (macos-latest)",
+  "Formatting",
+] 
+
 timeout_sec = 600 # CI must take at most ten minutes
 use_squash_merge = true
