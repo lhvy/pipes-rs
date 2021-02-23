@@ -105,21 +105,7 @@ impl Terminal {
     }
 
     pub fn set_text_color(&mut self, color: Color) -> anyhow::Result<()> {
-        let color = match color {
-            Color::Red => style::Color::Red,
-            Color::DarkRed => style::Color::DarkRed,
-            Color::Green => style::Color::Green,
-            Color::DarkGreen => style::Color::DarkGreen,
-            Color::Yellow => style::Color::Yellow,
-            Color::DarkYellow => style::Color::DarkYellow,
-            Color::Blue => style::Color::Blue,
-            Color::DarkBlue => style::Color::DarkBlue,
-            Color::Magenta => style::Color::Magenta,
-            Color::DarkMagenta => style::Color::DarkMagenta,
-            Color::Cyan => style::Color::Cyan,
-            Color::DarkCyan => style::Color::DarkCyan,
-            Color::Rgb { r, g, b } => style::Color::Rgb { r, g, b },
-        };
+        let color = style::Color::from(color);
         queue!(self.stdout, style::SetForegroundColor(color))?;
         Ok(())
     }
@@ -164,6 +150,26 @@ pub enum Color {
     Cyan,
     DarkCyan,
     Rgb { r: u8, g: u8, b: u8 },
+}
+
+impl From<Color> for style::Color {
+    fn from(color: Color) -> Self {
+        match color {
+            Color::Red => Self::Red,
+            Color::DarkRed => Self::DarkRed,
+            Color::Green => Self::Green,
+            Color::DarkGreen => Self::DarkGreen,
+            Color::Yellow => Self::Yellow,
+            Color::DarkYellow => Self::DarkYellow,
+            Color::Blue => Self::Blue,
+            Color::DarkBlue => Self::DarkBlue,
+            Color::Magenta => Self::Magenta,
+            Color::DarkMagenta => Self::DarkMagenta,
+            Color::Cyan => Self::Cyan,
+            Color::DarkCyan => Self::DarkCyan,
+            Color::Rgb { r, g, b } => Self::Rgb { r, g, b },
+        }
+    }
 }
 
 struct CtrlCPresed;
