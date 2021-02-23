@@ -1,9 +1,12 @@
+mod screen;
+
 use crossterm::{
     cursor,
     event::{self, Event, KeyCode, KeyEvent, KeyModifiers},
     queue, style, terminal,
 };
 use parking_lot::Mutex;
+use screen::Screen;
 use std::{
     io::{self, Write},
     sync::Arc,
@@ -12,6 +15,7 @@ use std::{
 use unicode_width::UnicodeWidthChar;
 
 pub struct Terminal {
+    screen: Screen,
     stdout: io::Stdout,
     max_char_width: u16,
     size: Arc<Mutex<(u16, u16)>>,
@@ -53,6 +57,8 @@ impl Terminal {
             (width / max_char_width, height)
         };
 
+        let screen = Screen::new(size.0 as usize, size.1 as usize);
+
         let size = Arc::new(Mutex::new(size));
 
         let (ctrl_c_tx, ctrl_c_rx) = flume::unbounded();
@@ -81,6 +87,7 @@ impl Terminal {
         });
 
         Ok(Self {
+            screen,
             stdout: io::stdout(),
             max_char_width,
             size,
@@ -88,11 +95,17 @@ impl Terminal {
         })
     }
 
-    gen_terminal_method!(clear, terminal::Clear(terminal::ClearType::All));
     gen_terminal_method!(enable_bold, style::SetAttribute(style::Attribute::Bold));
     gen_terminal_method!(reset_style, style::SetAttribute(style::Attribute::Reset));
 
     gen_terminal_method_bool!(set_cursor_visibility, visible, cursor::Show, cursor::Hide);
+
+    pub fn clear(&mut self) -> anyhow::Result<()> {
+        queue!(self.stdout, terminal::Clear(terminal::ClearType::All))?;
+        self.screen.clear();
+
+        Ok(())
+    }
 
     pub fn set_raw_mode(&mut self, enabled: bool) -> anyhow::Result<()> {
         if enabled {
@@ -112,6 +125,8 @@ impl Terminal {
     pub fn move_cursor_to(&mut self, x: u16, y: u16) -> anyhow::Result<()> {
         let max_char_width = self.max_char_width;
         queue!(self.stdout, cursor::MoveTo(x * max_char_width, y))?;
+        self.screen.move_cursor_to(x as usize, y as usize);
+
         Ok(())
     }
 
@@ -120,7 +135,9 @@ impl Terminal {
     }
 
     pub fn print(&mut self, c: char) -> anyhow::Result<()> {
+        self.screen.print(c);
         self.stdout.write_all(c.to_string().as_bytes())?;
+
         Ok(())
     }
 
