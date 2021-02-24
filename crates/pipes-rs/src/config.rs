@@ -33,6 +33,10 @@ pub struct Config {
     /// number of pipes
     #[structopt(name = "pipe-num", short, long)]
     num_pipes: Option<u32>,
+
+    /// chance of a pipe turning
+    #[structopt(short, long)]
+    turn_chance: Option<f64>,
 }
 
 impl Config {
@@ -72,6 +76,10 @@ impl Config {
         self.num_pipes.unwrap_or(1)
     }
 
+    pub fn turn_chance(&self) -> f64 {
+        self.turn_chance.unwrap_or(0.15)
+    }
+
     pub fn combine(self, other: Self) -> Self {
         Self {
             color_mode: other.color_mode.or(self.color_mode),
@@ -81,6 +89,7 @@ impl Config {
             bold: other.bold.or(self.bold),
             inherit_style: other.inherit_style.or(self.inherit_style),
             num_pipes: other.num_pipes.or(self.num_pipes),
+            turn_chance: other.turn_chance.or(self.turn_chance),
         }
     }
 }

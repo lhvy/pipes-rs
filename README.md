@@ -25,6 +25,7 @@ inherit_style = false
 kinds = ["heavy"] # heavy, light, curved, outline, emoji
 num_pipes = 1
 reset_threshold = 0.5 # 0.0-1.0
+turn_chance = 0.15 # 0.0-1.0
 ```
 
 ### Color Modes
@@ -60,6 +61,7 @@ There are also command line options that can be used to override parts of the co
 | `-k`   | sets the kinds of pipes, each kind separated by commas          | `-k heavy,curved` |
 | `-p`   | sets the number of pipes onscreen                               | `-p 5`            |
 | `-r`   | sets the percentage of the screen to be filled before resetting | `-r 0.75`         |
+| `-t`   | chance of a pipe turning each frame                             | `-t 0.15`         |
 
 ## Acknowledgements
 

@@ -80,7 +80,7 @@ impl App {
         for pipe in pipes {
             self.render_pipe(pipe)?;
 
-            if pipe.tick(&mut self.terminal) == InScreenBounds(false) {
+            if pipe.tick(&mut self.terminal, self.config.turn_chance()) == InScreenBounds(false) {
                 if self.config.inherit_style() {
                     *pipe = pipe.dup(&mut self.terminal);
                 } else {

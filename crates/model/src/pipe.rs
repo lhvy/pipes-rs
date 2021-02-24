@@ -57,7 +57,7 @@ impl Pipe {
         Self::new_raw(terminal, self.color, self.kind)
     }
 
-    pub fn tick(&mut self, terminal: &mut Terminal) -> InScreenBounds {
+    pub fn tick(&mut self, terminal: &mut Terminal, turn_chance: f64) -> InScreenBounds {
         let InScreenBounds(in_screen_bounds) =
             self.pos.move_in(self.dirs[self.dirs.len() - 1], terminal);
 
@@ -66,7 +66,7 @@ impl Pipe {
         }
 
         self.dirs.push(*self.dirs.last().unwrap());
-        self.dirs.last_mut().unwrap().maybe_turn();
+        self.dirs.last_mut().unwrap().maybe_turn(turn_chance);
 
         InScreenBounds(true)
     }

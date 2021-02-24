@@ -12,12 +12,8 @@ pub enum Direction {
 }
 
 impl Direction {
-    fn will_turn() -> bool {
-        rand::thread_rng().gen_bool(0.15)
-    }
-
-    pub fn maybe_turn(&mut self) {
-        if Self::will_turn() {
+    pub fn maybe_turn(&mut self, turn_chance: f64) {
+        if Self::will_turn(turn_chance) {
             *self = self.turn(TurnDirection::gen());
         }
     }
@@ -37,6 +33,10 @@ impl Direction {
                 Self::Right => Self::Up,
             },
         }
+    }
+
+    fn will_turn(turn_chance: f64) -> bool {
+        rand::thread_rng().gen_bool(turn_chance)
     }
 }
 
