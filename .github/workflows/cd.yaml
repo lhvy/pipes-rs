@@ -47,7 +47,7 @@ jobs:
           asset_name: pipes-rs.tar.gz
           asset_content_type: application/gzip
 
-      - uses: mislav/bump-homebrew-formula-action@v1.9
+      - uses: mislav/bump-homebrew-formula-action@v1.12
         with:
           formula-name: pipes-rs
           homebrew-tap: CookieCoder15/homebrew-tap
