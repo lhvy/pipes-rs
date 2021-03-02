@@ -677,7 +677,6 @@ dependencies = [
  "anyhow",
  "crossterm",
  "flume",
- "parking_lot",
  "unicode-width",
 ]
 
