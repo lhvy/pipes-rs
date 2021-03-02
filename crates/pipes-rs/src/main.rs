@@ -10,7 +10,7 @@ use model::{
 use rand::Rng;
 use std::{fs, thread};
 use structopt::StructOpt;
-use terminal::Terminal;
+use terminal::{Event, Terminal};
 
 fn main() -> anyhow::Result<()> {
     let app = App::new()?;
@@ -44,7 +44,12 @@ impl App {
         if self.config.bold() {
             self.terminal.enable_bold()?;
         }
-        while let ControlFlow::Continue = self.reset_loop()? {}
+
+        loop {
+            if let ControlFlow::Break = self.reset_loop()? {
+                break;
+            }
+        }
 
         Ok(())
     }
@@ -59,8 +64,10 @@ impl App {
         }
 
         while self.under_threshold() {
-            if let ControlFlow::Break = self.tick_loop(&mut pipes)? {
-                return Ok(ControlFlow::Break);
+            let control_flow = self.tick_loop(&mut pipes)?;
+            match control_flow {
+                ControlFlow::Break | ControlFlow::Reset => return Ok(control_flow),
+                _ => {}
             }
         }
 
@@ -68,9 +75,13 @@ impl App {
     }
 
     fn tick_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
-        if self.terminal.is_ctrl_c_pressed() {
-            self.reset_terminal()?;
-            return Ok(ControlFlow::Break);
+        match self.terminal.get_event() {
+            Some(Event::Resized) => return Ok(ControlFlow::Reset),
+            Some(Event::CtrlCPressed) => {
+                self.reset_terminal()?;
+                return Ok(ControlFlow::Break);
+            }
+            None => {}
         }
 
         for pipe in pipes {
@@ -152,4 +163,5 @@ fn read_config() -> anyhow::Result<Config> {
 enum ControlFlow {
     Continue,
     Break,
+    Reset,
 }

@@ -16,6 +16,9 @@ impl Screen {
     }
 
     pub(crate) fn move_cursor_to(&mut self, x: usize, y: usize) {
+        assert!(x < self.width);
+        assert!(y < self.height);
+
         self.cursor = (x, y);
     }
 

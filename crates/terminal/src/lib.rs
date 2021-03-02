@@ -2,14 +2,12 @@ mod screen;
 
 use crossterm::{
     cursor,
-    event::{self, Event, KeyCode, KeyEvent, KeyModifiers},
+    event::{self, Event as CrosstermEvent, KeyCode, KeyEvent, KeyModifiers},
     queue, style, terminal,
 };
-use parking_lot::Mutex;
 use screen::Screen;
 use std::{
     io::{self, Write},
-    sync::Arc,
     thread,
 };
 use unicode_width::UnicodeWidthChar;
@@ -18,8 +16,8 @@ pub struct Terminal {
     screen: Screen,
     stdout: io::Stdout,
     max_char_width: u16,
-    size: Arc<Mutex<(u16, u16)>>,
-    ctrl_c_rx: flume::Receiver<CtrlCPresed>,
+    size: (u16, u16),
+    events_rx: flume::Receiver<EventWithData>,
 }
 
 macro_rules! gen_terminal_method {
@@ -59,30 +57,24 @@ impl Terminal {
 
         let screen = Screen::new(size.0 as usize, size.1 as usize);
 
-        let size = Arc::new(Mutex::new(size));
+        let (events_tx, events_rx) = flume::unbounded();
 
-        let (ctrl_c_tx, ctrl_c_rx) = flume::unbounded();
+        thread::spawn(move || loop {
+            match event::read() {
+                Ok(CrosstermEvent::Resize(width, height)) => events_tx
+                    .send(EventWithData::Resized { width, height })
+                    .unwrap(),
 
-        thread::spawn({
-            let size = Arc::clone(&size);
+                Ok(CrosstermEvent::Key(KeyEvent {
+                    code: KeyCode::Char('c'),
+                    modifiers: KeyModifiers::CONTROL,
+                })) => events_tx.send(EventWithData::CtrlCPressed).unwrap(),
 
-            move || {
-                loop {
-                    match event::read() {
-                        Ok(Event::Resize(x, y)) => *size.lock() = (x, y),
+                Ok(_) => {} // ignore all other events
 
-                        Ok(Event::Key(KeyEvent {
-                            code: KeyCode::Char('c'),
-                            modifiers: KeyModifiers::CONTROL,
-                        })) => ctrl_c_tx.send(CtrlCPresed).unwrap(),
-
-                        Ok(_) => {} // ignore all other events
-
-                        // ignore errors because not updating the size
-                        // isn’t a fatal issue
-                        Err(_) => {}
-                    }
-                }
+                // ignore errors because not updating the size
+                // isn’t a fatal issue
+                Err(_) => {}
             }
         });
 
@@ -91,7 +83,7 @@ impl Terminal {
             stdout: io::stdout(),
             max_char_width,
             size,
-            ctrl_c_rx,
+            events_rx,
         })
     }
 
@@ -135,7 +127,7 @@ impl Terminal {
     }
 
     pub fn size(&self) -> (u16, u16) {
-        *self.size.lock()
+        self.size
     }
 
     pub fn print(&mut self, c: char) -> anyhow::Result<()> {
@@ -150,8 +142,20 @@ impl Terminal {
         Ok(())
     }
 
-    pub fn is_ctrl_c_pressed(&self) -> bool {
-        self.ctrl_c_rx.try_recv().is_ok()
+    pub fn get_event(&mut self) -> Option<Event> {
+        match self.events_rx.try_recv().ok() {
+            Some(EventWithData::CtrlCPressed) => Some(Event::CtrlCPressed),
+            Some(EventWithData::Resized { width, height }) => {
+                self.resize(width, height);
+                Some(Event::Resized)
+            }
+            None => None,
+        }
+    }
+
+    fn resize(&mut self, width: u16, height: u16) {
+        self.size = (width, height);
+        self.screen = Screen::new(width as usize, height as usize);
     }
 }
 
@@ -192,4 +196,12 @@ impl From<Color> for style::Color {
     }
 }
 
-struct CtrlCPresed;
+pub enum Event {
+    CtrlCPressed,
+    Resized,
+}
+
+enum EventWithData {
+    CtrlCPressed,
+    Resized { width: u16, height: u16 },
+}
