@@ -107,11 +107,11 @@ impl App {
                 pipe.tick(&mut self.terminal, &mut self.rng, self.config.turn_chance());
 
             if !stayed_onscreen {
-                if self.config.inherit_style() {
-                    *pipe = pipe.dup(&mut self.terminal, &mut self.rng);
+                *pipe = if self.config.inherit_style() {
+                    pipe.dup(&mut self.terminal, &mut self.rng)
                 } else {
-                    *pipe = self.create_pipe();
-                }
+                    self.create_pipe()
+                };
             }
         }
 
