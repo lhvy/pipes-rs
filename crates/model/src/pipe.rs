@@ -227,7 +227,9 @@ impl FromStr for PresetKind {
             "curved" => Self::Curved,
             "emoji" => Self::Emoji,
             "outline" => Self::Outline,
-            _ => anyhow::bail!(r#"unknown pipe kind"#),
+            _ => anyhow::bail!(
+                r#"unknown pipe kind (expected “heavy”, “light”, “curved”, “emoji” or “outline”)"#,
+            ),
         })
     }
 }
