@@ -4,7 +4,7 @@ pub use color::{ColorMode, Palette};
 use crate::direction::Direction;
 use crate::position::InScreenBounds;
 use crate::position::Position;
-use rand::Rng;
+use rng::Rng;
 use std::{collections::HashSet, str::FromStr};
 use terminal::Terminal;
 
@@ -18,19 +18,22 @@ pub struct Pipe {
 impl Pipe {
     pub fn new(
         terminal: &mut Terminal,
+        rng: &mut Rng,
         color_mode: ColorMode,
         palette: Palette,
         preset_kind: PresetKind,
     ) -> Self {
-        Self::new_raw(
-            terminal,
-            color::gen_random_color(color_mode, palette),
-            preset_kind.kind(),
-        )
+        let color = color::gen_random_color(rng, color_mode, palette);
+        Self::new_raw(terminal, rng, color, preset_kind.kind())
     }
 
-    fn new_raw(terminal: &mut Terminal, color: Option<terminal::Color>, kind: Kind) -> Self {
-        let (dir, pos) = Self::gen_rand_dir_and_pos(terminal);
+    fn new_raw(
+        terminal: &mut Terminal,
+        rng: &mut Rng,
+        color: Option<terminal::Color>,
+        kind: Kind,
+    ) -> Self {
+        let (dir, pos) = Self::gen_rand_dir_and_pos(terminal, rng);
 
         Self {
             dirs: vec![dir],
@@ -40,36 +43,41 @@ impl Pipe {
         }
     }
 
-    fn gen_rand_dir_and_pos(terminal: &mut Terminal) -> (Direction, Position) {
+    fn gen_rand_dir_and_pos(terminal: &mut Terminal, rng: &mut Rng) -> (Direction, Position) {
         let (columns, rows) = terminal.size();
-        let dir = rand::thread_rng().gen();
+        let dir = Direction::gen(rng);
         let pos = match dir {
             Direction::Up => Position {
-                x: rand::thread_rng().gen_range(0..columns),
+                x: rng.gen_range_16(0..columns),
                 y: rows - 1,
             },
             Direction::Down => Position {
-                x: rand::thread_rng().gen_range(0..columns),
+                x: rng.gen_range_16(0..columns),
                 y: 0,
             },
             Direction::Left => Position {
                 x: columns - 1,
-                y: rand::thread_rng().gen_range(0..rows),
+                y: rng.gen_range_16(0..rows),
             },
             Direction::Right => Position {
                 x: 0,
-                y: rand::thread_rng().gen_range(0..rows),
+                y: rng.gen_range_16(0..rows),
             },
         };
 
         (dir, pos)
     }
 
-    pub fn dup(&self, terminal: &mut Terminal) -> Self {
-        Self::new_raw(terminal, self.color, self.kind)
+    pub fn dup(&self, terminal: &mut Terminal, rng: &mut Rng) -> Self {
+        Self::new_raw(terminal, rng, self.color, self.kind)
     }
 
-    pub fn tick(&mut self, terminal: &mut Terminal, turn_chance: f64) -> InScreenBounds {
+    pub fn tick(
+        &mut self,
+        terminal: &mut Terminal,
+        rng: &mut Rng,
+        turn_chance: f32,
+    ) -> InScreenBounds {
         let InScreenBounds(in_screen_bounds) =
             self.pos.move_in(self.dirs[self.dirs.len() - 1], terminal);
 
@@ -78,7 +86,7 @@ impl Pipe {
         }
 
         self.dirs.push(*self.dirs.last().unwrap());
-        self.dirs.last_mut().unwrap().maybe_turn(turn_chance);
+        self.dirs.last_mut().unwrap().maybe_turn(rng, turn_chance);
 
         InScreenBounds(true)
     }
