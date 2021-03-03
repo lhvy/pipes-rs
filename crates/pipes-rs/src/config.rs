@@ -6,19 +6,19 @@ use structopt::StructOpt;
 #[derive(Serialize, Deserialize, Default, StructOpt)]
 #[structopt(name = "pipes-rs")]
 pub(crate) struct Config {
-    /// "ansi", "rgb" or "none"
+    /// “ansi”, “rgb” or “none”
     #[structopt(short, long)]
     color_mode: Option<ColorMode>,
 
-    /// "default", "darker" or "pastel"
+    /// “default”, “darker” or “pastel”
     #[structopt(long)]
     palette: Option<Palette>,
 
-    /// delay between frames in ms
+    /// delay between frames in milliseconds
     #[structopt(short, long = "delay")]
     delay_ms: Option<u64>,
 
-    /// percentage of the screen before resetting (0.0-1.0)
+    /// portion of screen covered before resetting (0.0–1.0)
     #[structopt(short, long)]
     reset_threshold: Option<f32>,
 
@@ -38,7 +38,7 @@ pub(crate) struct Config {
     #[structopt(name = "pipe-num", short, long)]
     num_pipes: Option<u32>,
 
-    /// chance of a pipe turning
+    /// chance of a pipe turning (0.0–1.0)
     #[structopt(short, long)]
     turn_chance: Option<f32>,
 }
