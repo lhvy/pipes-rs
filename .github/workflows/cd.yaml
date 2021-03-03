@@ -4,10 +4,33 @@ on:
     tags:
       - "v*"
 
+env:
+  RELEASE_BIN: pipes-rs
+
 jobs:
-  update-homebrew-formula:
-    name: Update Homebrew Formula
-    runs-on: macos-latest
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.step.outputs.upload_url }}
+
+    steps:
+      - uses: actions/create-release@v1
+        id: step
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+
+  build_release:
+    name: Build release
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    needs: create_release
 
     steps:
       - uses: actions/checkout@v2
@@ -17,40 +40,68 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Get version
-        id: get-version
-        run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
+      - name: Build
+        run: cargo build --release
 
-      - name: Compile
-        run: |
-          cargo build --release
-          strip target/release/pipes-rs
-          tar -czvf pipes-rs.tar.gz target/release/pipes-rs
+      - name: Create artifact directory
+        run: mkdir artifacts
 
-      - name: Create release
-        id: create-release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
+      - name: Create Linux archive
+        run: tar -czvf ./artifacts/${{ env.RELEASE_BIN }}-linux-x86_64.tar.gz ./target/release/${{ env.RELEASE_BIN }}
+        if: matrix.os == 'ubuntu-latest'
 
-      - name: Upload compiled binary
+      - name: Upload Linux archive
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: pipes-rs.tar.gz
-          asset_name: pipes-rs.tar.gz
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/${{ env.RELEASE_BIN }}-linux-x86_64.tar.gz
+          asset_name: ${{ env.RELEASE_BIN }}-linux-x86_64.tar.gz
           asset_content_type: application/gzip
+        if: matrix.os == 'ubuntu-latest'
 
-      - uses: mislav/bump-homebrew-formula-action@v1.12
+      - name: Create Windows archive
+        run: 7z a -tzip ./artifacts/${{ env.RELEASE_BIN }}-windows-x86_64.zip ./target/release/${{ env.RELEASE_BIN }}.exe
+        if: matrix.os == 'windows-latest'
+
+      - name: Upload Windows archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/${{ env.RELEASE_BIN }}-windows-x86_64.zip
+          asset_name: ${{ env.RELEASE_BIN }}-windows-x86_64.zip
+          asset_content_type: application/zip
+        if: matrix.os == 'windows-latest'
+
+      - name: Create macOS archive
+        run: tar -czvf ./artifacts/${{ env.RELEASE_BIN }}-mac-x86_64.tar.gz ./target/release/${{ env.RELEASE_BIN }}
+        if: matrix.os == 'macos-latest'
+
+      - name: Upload macOS archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/${{ env.RELEASE_BIN }}-mac-x86_64.tar.gz
+          asset_name: ${{ env.RELEASE_BIN }}-mac-x86_64.tar.gz
+          asset_content_type: application/gzip
+        if: matrix.os == 'macos-latest'
+
+      - name: Get version
+        id: get-version
+        run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
+        if: matrix.os == 'macos-latest'
+
+      - name: Bump Homebrew formula
+        uses: mislav/bump-homebrew-formula-action@v1.12
         with:
           formula-name: pipes-rs
           homebrew-tap: CookieCoder15/homebrew-tap
-          download-url: https://github.com/CookieCoder15/pipes-rs/releases/download/${{ steps.get-version.outputs.version }}/pipes-rs.tar.gz
+          download-url: https://github.com/CookieCoder15/pipes-rs/releases/download/${{ steps.get-version.outputs.version }}/pipes-rs-mac-x86_64.tar.gz
         env:
           COMMITTER_TOKEN: ${{ secrets.BREW_TOKEN }}
+        if: matrix.os == 'macos-latest'
