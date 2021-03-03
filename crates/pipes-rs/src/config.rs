@@ -1,4 +1,4 @@
-use model::pipe::{ColorMode, PresetKind, PresetKindSet};
+use model::pipe::{ColorMode, Palette, PresetKind, PresetKindSet};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, time::Duration};
 use structopt::StructOpt;
@@ -9,6 +9,10 @@ pub struct Config {
     /// "ansi", "rgb" or "none"
     #[structopt(short, long)]
     color_mode: Option<ColorMode>,
+
+    /// "default", "darker" or "pastel"
+    #[structopt(long)]
+    palette: Option<Palette>,
 
     ///delay between frames in ms
     #[structopt(short, long = "delay")]
@@ -42,6 +46,10 @@ pub struct Config {
 impl Config {
     pub fn color_mode(&self) -> ColorMode {
         self.color_mode.unwrap_or(ColorMode::Ansi)
+    }
+
+    pub fn palette(&self) -> Palette {
+        self.palette.unwrap_or(Palette::Default)
     }
 
     pub fn delay(&self) -> Duration {
@@ -83,6 +91,7 @@ impl Config {
     pub fn combine(self, other: Self) -> Self {
         Self {
             color_mode: other.color_mode.or(self.color_mode),
+            palette: other.palette.or(self.palette),
             delay_ms: other.delay_ms.or(self.delay_ms),
             reset_threshold: other.reset_threshold.or(self.reset_threshold),
             kinds: other.kinds.or(self.kinds),

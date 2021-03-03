@@ -59,7 +59,12 @@ impl App {
         let mut pipes = Vec::new();
         for _ in 0..self.config.num_pipes() {
             let kind = self.random_kind();
-            let pipe = Pipe::new(&mut self.terminal, self.config.color_mode(), kind);
+            let pipe = Pipe::new(
+                &mut self.terminal,
+                self.config.color_mode(),
+                self.config.palette(),
+                kind,
+            );
             pipes.push(pipe);
         }
 
@@ -92,7 +97,12 @@ impl App {
                     *pipe = pipe.dup(&mut self.terminal);
                 } else {
                     let kind = self.random_kind();
-                    *pipe = Pipe::new(&mut self.terminal, self.config.color_mode(), kind);
+                    *pipe = Pipe::new(
+                        &mut self.terminal,
+                        self.config.color_mode(),
+                        self.config.palette(),
+                        kind,
+                    );
                 }
             }
         }
