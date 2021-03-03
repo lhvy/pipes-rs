@@ -5,7 +5,7 @@ use structopt::StructOpt;
 
 #[derive(Serialize, Deserialize, Default, StructOpt)]
 #[structopt(name = "pipes-rs")]
-pub struct Config {
+pub(crate) struct Config {
     /// "ansi", "rgb" or "none"
     #[structopt(short, long)]
     color_mode: Option<ColorMode>,
@@ -44,19 +44,19 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn color_mode(&self) -> ColorMode {
+    pub(crate) fn color_mode(&self) -> ColorMode {
         self.color_mode.unwrap_or(ColorMode::Ansi)
     }
 
-    pub fn palette(&self) -> Palette {
+    pub(crate) fn palette(&self) -> Palette {
         self.palette.unwrap_or(Palette::Default)
     }
 
-    pub fn delay(&self) -> Duration {
+    pub(crate) fn delay(&self) -> Duration {
         Duration::from_millis(self.delay_ms.unwrap_or(20))
     }
 
-    pub fn reset_threshold(&self) -> Option<f32> {
+    pub(crate) fn reset_threshold(&self) -> Option<f32> {
         if self.reset_threshold == Some(0.0) {
             None
         } else {
@@ -64,7 +64,7 @@ impl Config {
         }
     }
 
-    pub fn kinds(&self) -> PresetKindSet {
+    pub(crate) fn kinds(&self) -> PresetKindSet {
         self.kinds.clone().unwrap_or_else(|| {
             let mut kinds = HashSet::with_capacity(1);
             kinds.insert(PresetKind::Heavy);
@@ -72,23 +72,23 @@ impl Config {
         })
     }
 
-    pub fn bold(&self) -> bool {
+    pub(crate) fn bold(&self) -> bool {
         self.bold.unwrap_or(true)
     }
 
-    pub fn inherit_style(&self) -> bool {
+    pub(crate) fn inherit_style(&self) -> bool {
         self.inherit_style.unwrap_or(false)
     }
 
-    pub fn num_pipes(&self) -> u32 {
+    pub(crate) fn num_pipes(&self) -> u32 {
         self.num_pipes.unwrap_or(1)
     }
 
-    pub fn turn_chance(&self) -> f64 {
+    pub(crate) fn turn_chance(&self) -> f64 {
         self.turn_chance.unwrap_or(0.15)
     }
 
-    pub fn combine(self, other: Self) -> Self {
+    pub(crate) fn combine(self, other: Self) -> Self {
         Self {
             color_mode: other.color_mode.or(self.color_mode),
             palette: other.palette.or(self.palette),
