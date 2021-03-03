@@ -59,18 +59,7 @@ impl App {
 
     fn reset_loop(&mut self) -> anyhow::Result<ControlFlow> {
         self.terminal.clear()?;
-        let mut pipes = Vec::new();
-        for _ in 0..self.config.num_pipes() {
-            let kind = self.random_kind();
-            let pipe = Pipe::new(
-                &mut self.terminal,
-                &mut self.rng,
-                self.config.color_mode(),
-                self.config.palette(),
-                kind,
-            );
-            pipes.push(pipe);
-        }
+        let mut pipes = self.create_pipes();
 
         while self.under_threshold() {
             let control_flow = self.tick_loop(&mut pipes)?;
@@ -81,6 +70,24 @@ impl App {
         }
 
         Ok(ControlFlow::Continue)
+    }
+
+    fn create_pipes(&mut self) -> Vec<Pipe> {
+        (0..self.config.num_pipes())
+            .map(|_| self.create_pipe())
+            .collect()
+    }
+
+    fn create_pipe(&mut self) -> Pipe {
+        let kind = self.random_kind();
+
+        Pipe::new(
+            &mut self.terminal,
+            &mut self.rng,
+            self.config.color_mode(),
+            self.config.palette(),
+            kind,
+        )
     }
 
     fn tick_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
@@ -96,20 +103,14 @@ impl App {
         for pipe in pipes {
             self.render_pipe(pipe)?;
 
-            if pipe.tick(&mut self.terminal, &mut self.rng, self.config.turn_chance())
-                == InScreenBounds(false)
-            {
+            let InScreenBounds(stayed_onscreen) =
+                pipe.tick(&mut self.terminal, &mut self.rng, self.config.turn_chance());
+
+            if !stayed_onscreen {
                 if self.config.inherit_style() {
                     *pipe = pipe.dup(&mut self.terminal, &mut self.rng);
                 } else {
-                    let kind = self.random_kind();
-                    *pipe = Pipe::new(
-                        &mut self.terminal,
-                        &mut self.rng,
-                        self.config.color_mode(),
-                        self.config.palette(),
-                        kind,
-                    );
+                    *pipe = self.create_pipe();
                 }
             }
         }
