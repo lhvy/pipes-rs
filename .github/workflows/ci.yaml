@@ -6,7 +6,7 @@ on:
     branches: [master, staging, trying]
 
 env:
-  RUSTFLAGS: "--deny warnings"
+  RUSTFLAGS: "--deny warnings --warn unreachable-pub"
 
 jobs:
   rust:
