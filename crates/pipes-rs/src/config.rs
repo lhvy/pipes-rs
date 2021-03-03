@@ -14,7 +14,7 @@ pub(crate) struct Config {
     #[structopt(long)]
     palette: Option<Palette>,
 
-    ///delay between frames in ms
+    /// delay between frames in ms
     #[structopt(short, long = "delay")]
     delay_ms: Option<u64>,
 

@@ -31,8 +31,8 @@ delay_ms = 20
 inherit_style = false
 kinds = ["heavy"] # heavy, light, curved, outline, emoji
 num_pipes = 1
-reset_threshold = 0.5 # 0.0-1.0
-turn_chance = 0.15 # 0.0-1.0
+reset_threshold = 0.5 # 0.0–1.0
+turn_chance = 0.15 # 0.0–1.0
 ```
 
 ### Color Modes
