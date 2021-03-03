@@ -40,7 +40,7 @@ pub(crate) struct Config {
 
     /// chance of a pipe turning
     #[structopt(short, long)]
-    turn_chance: Option<f64>,
+    turn_chance: Option<f32>,
 }
 
 impl Config {
@@ -84,7 +84,7 @@ impl Config {
         self.num_pipes.unwrap_or(1)
     }
 
-    pub(crate) fn turn_chance(&self) -> f64 {
+    pub(crate) fn turn_chance(&self) -> f32 {
         self.turn_chance.unwrap_or(0.15)
     }
 

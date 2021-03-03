@@ -11,7 +11,7 @@ version = "1.2.0"
 anyhow = "1.0.37"
 etcetera = "0.3.2"
 model = {path = "../model"}
-rand = "0.8.0"
+rng = {path = "../rng"}
 serde = "1.0.118"
 structopt = "0.3.21"
 terminal = {path = "../terminal"}

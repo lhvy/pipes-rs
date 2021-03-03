@@ -7,7 +7,7 @@ use model::{
     pipe::{Pipe, PresetKind, PresetKindSet},
     position::InScreenBounds,
 };
-use rand::Rng;
+use rng::Rng;
 use std::{fs, thread};
 use structopt::StructOpt;
 use terminal::{Event, Terminal};
@@ -21,6 +21,7 @@ fn main() -> anyhow::Result<()> {
 
 struct App {
     terminal: Terminal,
+    rng: Rng,
     config: Config,
     kinds: PresetKindSet,
 }
@@ -30,9 +31,11 @@ impl App {
         let config = read_config()?.combine(Config::from_args());
         let kinds = config.kinds();
         let terminal = Terminal::new(&kinds.chars())?;
+        let rng = Rng::new()?;
 
         Ok(Self {
             terminal,
+            rng,
             config,
             kinds,
         })
@@ -61,6 +64,7 @@ impl App {
             let kind = self.random_kind();
             let pipe = Pipe::new(
                 &mut self.terminal,
+                &mut self.rng,
                 self.config.color_mode(),
                 self.config.palette(),
                 kind,
@@ -92,13 +96,16 @@ impl App {
         for pipe in pipes {
             self.render_pipe(pipe)?;
 
-            if pipe.tick(&mut self.terminal, self.config.turn_chance()) == InScreenBounds(false) {
+            if pipe.tick(&mut self.terminal, &mut self.rng, self.config.turn_chance())
+                == InScreenBounds(false)
+            {
                 if self.config.inherit_style() {
-                    *pipe = pipe.dup(&mut self.terminal);
+                    *pipe = pipe.dup(&mut self.terminal, &mut self.rng);
                 } else {
                     let kind = self.random_kind();
                     *pipe = Pipe::new(
                         &mut self.terminal,
+                        &mut self.rng,
                         self.config.color_mode(),
                         self.config.palette(),
                         kind,
@@ -143,14 +150,14 @@ impl App {
         }
     }
 
-    fn random_kind(&self) -> PresetKind {
+    fn random_kind(&mut self) -> PresetKind {
         let PresetKindSet(ref kinds) = self.kinds;
-        *choose_random(kinds.iter())
+        *choose_random(kinds.iter(), &mut self.rng)
     }
 }
 
-fn choose_random<T>(mut iter: impl ExactSizeIterator<Item = T>) -> T {
-    let index = rand::thread_rng().gen_range(0..iter.len());
+fn choose_random<T>(mut iter: impl ExactSizeIterator<Item = T>, rng: &mut Rng) -> T {
+    let index = rng.gen_range_size(0..iter.len());
     iter.nth(index).unwrap()
 }
 

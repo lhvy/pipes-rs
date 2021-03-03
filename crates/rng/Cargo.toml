@@ -2,14 +2,11 @@
 authors = ["CookieCoder15 <40507205+CookieCoder15@users.noreply.github.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
-name = "model"
+name = "rng"
 version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.37"
-rng = {path = "../rng"}
-serde = {version = "1.0.118", features = ["derive"]}
-terminal = {path = "../terminal"}
-tincture = "0.5.0"
+getrandom = "0.2.2"
+oorandom = "11.1.3"

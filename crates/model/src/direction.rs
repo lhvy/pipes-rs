@@ -1,7 +1,4 @@
-use rand::{
-    distributions::{Distribution, Standard},
-    Rng,
-};
+use rng::Rng;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Direction {
@@ -12,9 +9,11 @@ pub enum Direction {
 }
 
 impl Direction {
-    pub fn maybe_turn(&mut self, turn_chance: f64) {
-        if Self::will_turn(turn_chance) {
-            *self = self.turn(TurnDirection::gen());
+    pub fn maybe_turn(&mut self, rng: &mut Rng, turn_chance: f32) {
+        let will_turn = rng.gen_bool(turn_chance);
+
+        if will_turn {
+            *self = self.turn(TurnDirection::gen(rng));
         }
     }
 
@@ -34,10 +33,6 @@ impl Direction {
             },
         }
     }
-
-    fn will_turn(turn_chance: f64) -> bool {
-        rand::thread_rng().gen_bool(turn_chance)
-    }
 }
 
 enum TurnDirection {
@@ -46,8 +41,8 @@ enum TurnDirection {
 }
 
 impl TurnDirection {
-    fn gen() -> Self {
-        if rand::thread_rng().gen_bool(0.5) {
+    fn gen(rng: &mut Rng) -> Self {
+        if rng.gen_bool(0.5) {
             Self::Left
         } else {
             Self::Right
@@ -55,9 +50,9 @@ impl TurnDirection {
     }
 }
 
-impl Distribution<Direction> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Direction {
-        match rng.gen_range(0..=3) {
+impl Direction {
+    pub(crate) fn gen(rng: &mut Rng) -> Self {
+        match rng.gen_range(0..4) {
             0 => Direction::Up,
             1 => Direction::Down,
             2 => Direction::Left,
