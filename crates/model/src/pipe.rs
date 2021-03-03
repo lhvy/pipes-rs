@@ -4,6 +4,7 @@ use crate::position::Position;
 use rand::Rng;
 use std::{collections::HashSet, str::FromStr};
 use terminal::Terminal;
+use tincture::ColorSpace;
 
 pub struct Pipe {
     pub dirs: Vec<Direction>,
@@ -13,8 +14,17 @@ pub struct Pipe {
 }
 
 impl Pipe {
-    pub fn new(terminal: &mut Terminal, color_mode: ColorMode, preset_kind: PresetKind) -> Self {
-        Self::new_raw(terminal, gen_random_color(color_mode), preset_kind.kind())
+    pub fn new(
+        terminal: &mut Terminal,
+        color_mode: ColorMode,
+        palette: Palette,
+        preset_kind: PresetKind,
+    ) -> Self {
+        Self::new_raw(
+            terminal,
+            gen_random_color(color_mode, palette),
+            preset_kind.kind(),
+        )
     }
 
     fn new_raw(terminal: &mut Terminal, color: Option<terminal::Color>, kind: Kind) -> Self {
@@ -205,7 +215,7 @@ impl PresetKind {
     }
 }
 
-fn gen_random_color(color_mode: ColorMode) -> Option<terminal::Color> {
+fn gen_random_color(color_mode: ColorMode, palette: Palette) -> Option<terminal::Color> {
     match color_mode {
         ColorMode::Ansi => {
             let num = rand::thread_rng().gen_range(0..=11);
@@ -228,17 +238,19 @@ fn gen_random_color(color_mode: ColorMode) -> Option<terminal::Color> {
         ColorMode::Rgb => {
             let hue = rand::thread_rng().gen_range(0.0..=360.0);
             let oklch = tincture::Oklch {
-                l: 0.75,
-                c: 0.125,
+                l: palette.get_lightness(),
+                c: palette.get_chroma(),
                 h: tincture::Hue::from_degrees(hue).unwrap(),
             };
             let oklab = tincture::Oklab::from(oklch);
             let lrgb: tincture::LinearRgb = tincture::convert(oklab);
-            let tincture::Srgb { r, g, b } = tincture::Srgb::from(lrgb);
+            let srgb = tincture::Srgb::from(lrgb);
+            debug_assert!(srgb.in_bounds());
+
             Some(terminal::Color::Rgb {
-                r: (r * 255.0) as u8,
-                g: (g * 255.0) as u8,
-                b: (b * 255.0) as u8,
+                r: (srgb.r * 255.0) as u8,
+                g: (srgb.g * 255.0) as u8,
+                b: (srgb.b * 255.0) as u8,
             })
         }
         ColorMode::None => None,
@@ -303,5 +315,44 @@ impl FromStr for ColorMode {
             "none" => Self::None,
             _ => anyhow::bail!(r#"expected "ansi", "rgb" or "none""#),
         })
+    }
+}
+
+#[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Palette {
+    Default,
+    Darker,
+    Pastel,
+}
+
+impl FromStr for Palette {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
+            "default" => Self::Default,
+            "darker" => Self::Darker,
+            "pastel" => Self::Pastel,
+            _ => anyhow::bail!(r#"expected "default", "darker" or "pastel""#),
+        })
+    }
+}
+
+impl Palette {
+    fn get_lightness(self) -> f32 {
+        match self {
+            Self::Default => 0.75,
+            Self::Darker => 0.65,
+            Self::Pastel => 0.8,
+        }
+    }
+
+    fn get_chroma(self) -> f32 {
+        match self {
+            Self::Default => 0.125,
+            Self::Darker => 0.11,
+            Self::Pastel => 0.085,
+        }
     }
 }
