@@ -7,7 +7,7 @@ pub struct Position {
 }
 
 impl Position {
-    pub(crate) fn move_in(&mut self, dir: Direction, terminal: &mut Terminal) -> InScreenBounds {
+    pub(crate) fn move_in(&mut self, dir: Direction, terminal: &Terminal) -> InScreenBounds {
         match dir {
             Direction::Up => {
                 if self.y == 0 {
@@ -28,7 +28,7 @@ impl Position {
         InScreenBounds(self.in_screen_bounds(terminal))
     }
 
-    fn in_screen_bounds(&self, terminal: &mut Terminal) -> bool {
+    fn in_screen_bounds(&self, terminal: &Terminal) -> bool {
         let (columns, rows) = terminal.size();
         self.x < columns && self.y < rows
     }

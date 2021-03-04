@@ -9,7 +9,7 @@ use std::{collections::HashSet, str::FromStr};
 use terminal::Terminal;
 
 pub struct Pipe {
-    pub dirs: Vec<Direction>,
+    dirs: Vec<Direction>,
     pub pos: Position,
     pub color: Option<terminal::Color>,
     kind: Kind,
@@ -17,7 +17,7 @@ pub struct Pipe {
 
 impl Pipe {
     pub fn new(
-        terminal: &mut Terminal,
+        terminal: &Terminal,
         rng: &mut Rng,
         color_mode: ColorMode,
         palette: Palette,
@@ -28,7 +28,7 @@ impl Pipe {
     }
 
     fn new_raw(
-        terminal: &mut Terminal,
+        terminal: &Terminal,
         rng: &mut Rng,
         color: Option<terminal::Color>,
         kind: Kind,
@@ -43,7 +43,7 @@ impl Pipe {
         }
     }
 
-    fn gen_rand_dir_and_pos(terminal: &mut Terminal, rng: &mut Rng) -> (Direction, Position) {
+    fn gen_rand_dir_and_pos(terminal: &Terminal, rng: &mut Rng) -> (Direction, Position) {
         let (columns, rows) = terminal.size();
         let dir = Direction::gen(rng);
         let pos = match dir {
@@ -68,16 +68,11 @@ impl Pipe {
         (dir, pos)
     }
 
-    pub fn dup(&self, terminal: &mut Terminal, rng: &mut Rng) -> Self {
+    pub fn dup(&self, terminal: &Terminal, rng: &mut Rng) -> Self {
         Self::new_raw(terminal, rng, self.color, self.kind)
     }
 
-    pub fn tick(
-        &mut self,
-        terminal: &mut Terminal,
-        rng: &mut Rng,
-        turn_chance: f32,
-    ) -> InScreenBounds {
+    pub fn tick(&mut self, terminal: &Terminal, rng: &mut Rng, turn_chance: f32) -> InScreenBounds {
         let InScreenBounds(in_screen_bounds) =
             self.pos.move_in(self.dirs[self.dirs.len() - 1], terminal);
 
