@@ -122,8 +122,10 @@ pub enum PresetKind {
     Heavy,
     Light,
     Curved,
+    Knobby,
     Emoji,
     Outline,
+    Dots,
 }
 
 #[derive(Clone, Copy)]
@@ -187,6 +189,17 @@ impl PresetKind {
         bottom_right: '╯',
     };
 
+    const KNOBBY: Kind = Kind {
+        up: '╽',
+        down: '╿',
+        left: '╼',
+        right: '╾',
+        top_left: '┎',
+        top_right: '┒',
+        bottom_left: '┖',
+        bottom_right: '┚',
+    };
+
     const EMOJI: Kind = Kind {
         up: '👆',
         down: '👇',
@@ -209,13 +222,26 @@ impl PresetKind {
         bottom_right: '╝',
     };
 
+    const DOTS: Kind = Kind {
+        up: '•',
+        down: '•',
+        left: '•',
+        right: '•',
+        top_left: '•',
+        top_right: '•',
+        bottom_left: '•',
+        bottom_right: '•',
+    };
+
     fn kind(&self) -> Kind {
         match self {
             Self::Heavy => Self::HEAVY,
             Self::Light => Self::LIGHT,
             Self::Curved => Self::CURVED,
+            Self::Knobby => Self::KNOBBY,
             Self::Emoji => Self::EMOJI,
             Self::Outline => Self::OUTLINE,
+            Self::Dots => Self::DOTS,
         }
     }
 }
@@ -228,10 +254,12 @@ impl FromStr for PresetKind {
             "heavy" => Self::Heavy,
             "light" => Self::Light,
             "curved" => Self::Curved,
+            "knobby" => Self::Knobby,
             "emoji" => Self::Emoji,
             "outline" => Self::Outline,
+            "dots" => Self::Dots,
             _ => anyhow::bail!(
-                r#"unknown pipe kind (expected “heavy”, “light”, “curved”, “emoji” or “outline”)"#,
+                r#"unknown pipe kind (expected “heavy”, “light”, “curved”, “knobby”, “emoji”, “outline” or “dots”)"#,
             ),
         })
     }
