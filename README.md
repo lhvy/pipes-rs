@@ -1,6 +1,6 @@
 # pipes-rs
 
-> An overengineered rewrite of pipes.sh in Rust
+> An over-engineered rewrite of pipes.sh in Rust
 
 ![pipes-rs preview](https://github.com/CookieCoder15/i/raw/master/pipes-rs-preview.gif)
 
