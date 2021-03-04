@@ -29,7 +29,7 @@ color_mode = "ansi" # ansi, rgb or none
 palette = "default" # default, darker or pastel
 delay_ms = 20
 inherit_style = false
-kinds = ["heavy"] # heavy, light, curved, outline, emoji
+kinds = ["heavy"] # heavy, light, curved, knobby, emoji, outline, dots
 num_pipes = 1
 reset_threshold = 0.5 # 0.0–1.0
 turn_chance = 0.15 # 0.0–1.0
@@ -53,13 +53,15 @@ turn_chance = 0.15 # 0.0–1.0
 
 ### Pipe Kinds
 
-| Kind      | Preview                    |
-| :-------- | :------------------------- |
-| `heavy`   | `┃┏ ┓┛━ ┓┗┃┛┗┏ ━`          |
-| `light`   | `│┌ ┐┘─ ┐└│┘└┌ ─`          |
-| `curved`  | `│╭ ╮╯─ ╮╰│╯╰╭ ─`          |
-| `outline` | `║╔ ╗╝═ ╗╚║╝╚╔ ═`          |
-| `emoji`   | `👆👌👌👌👈👌👌👇👌👌👌👉` |
+| Kind      | Preview                   |
+| :-------- | :------------------------ |
+| `heavy`   | `┃ ┃ ━ ━ ┏ ┓ ┗ ┛`         |
+| `light`   | `│ │ ─ ─ ┌ ┐ └ ┘`         |
+| `curved`  | `│ │ ─ ─ ╭ ╮ ╰ ╯`         |
+| `knobby`  | `╽ ╿ ╼ ╾ ┎ ┒ ┖ ┚`         |
+| `emoji`   | `👆 👇 👈 👉 👌 👌 👌 👌` |
+| `outline` | `║ ║ ═ ═ ╔ ╗ ╚ ╝`         |
+| `dots`    | `• • • • • • • •`         |
 
 _Due to emojis having a different character width, using the emoji pipe kind along side another pipe kind can cause spacing issues._
 
