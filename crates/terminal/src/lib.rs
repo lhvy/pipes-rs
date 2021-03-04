@@ -20,28 +20,6 @@ pub struct Terminal {
     events_rx: flume::Receiver<EventWithData>,
 }
 
-macro_rules! gen_terminal_method {
-    ($name: ident, $command: expr) => {
-        pub fn $name(&mut self) -> anyhow::Result<()> {
-            queue!(self.stdout, $command)?;
-            Ok(())
-        }
-    };
-}
-
-macro_rules! gen_terminal_method_bool {
-    ($name: ident, $param: ident, $true_command: expr, $false_command: expr) => {
-        pub fn $name(&mut self, $param: bool) -> anyhow::Result<()> {
-            if $param {
-                queue!(self.stdout, $true_command)?;
-            } else {
-                queue!(self.stdout, $false_command)?;
-            }
-            Ok(())
-        }
-    };
-}
-
 impl Terminal {
     pub fn new(chars: &[char]) -> anyhow::Result<Self> {
         let max_char_width = chars
@@ -87,10 +65,25 @@ impl Terminal {
         })
     }
 
-    gen_terminal_method!(enable_bold, style::SetAttribute(style::Attribute::Bold));
-    gen_terminal_method!(reset_style, style::SetAttribute(style::Attribute::Reset));
+    pub fn enable_bold(&mut self) -> anyhow::Result<()> {
+        queue!(self.stdout, style::SetAttribute(style::Attribute::Bold))?;
+        Ok(())
+    }
 
-    gen_terminal_method_bool!(set_cursor_visibility, visible, cursor::Show, cursor::Hide);
+    pub fn reset_style(&mut self) -> anyhow::Result<()> {
+        queue!(self.stdout, style::SetAttribute(style::Attribute::Reset))?;
+        Ok(())
+    }
+
+    pub fn set_cursor_visibility(&mut self, visible: bool) -> anyhow::Result<()> {
+        if visible {
+            queue!(self.stdout, cursor::Show)?;
+        } else {
+            queue!(self.stdout, cursor::Hide)?;
+        }
+
+        Ok(())
+    }
 
     pub fn clear(&mut self) -> anyhow::Result<()> {
         queue!(self.stdout, terminal::Clear(terminal::ClearType::All))?;
