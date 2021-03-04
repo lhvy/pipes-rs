@@ -48,6 +48,11 @@ impl Terminal {
                     ..
                 })) => events_tx.send(EventWithData::Exit).unwrap(),
 
+                Ok(CrosstermEvent::Key(KeyEvent {
+                    code: KeyCode::Char('r'),
+                    ..
+                })) => events_tx.send(EventWithData::Reset).unwrap(),
+
                 Ok(_) => {} // ignore all other events
 
                 // ignore errors because not updating the size
@@ -140,9 +145,10 @@ impl Terminal {
     pub fn get_event(&mut self) -> Option<Event> {
         match self.events_rx.try_recv().ok() {
             Some(EventWithData::Exit) => Some(Event::Exit),
+            Some(EventWithData::Reset) => Some(Event::Reset),
             Some(EventWithData::Resized { width, height }) => {
                 self.resize(width, height);
-                Some(Event::Resized)
+                Some(Event::Reset)
             }
             None => None,
         }
@@ -193,10 +199,11 @@ impl From<Color> for style::Color {
 
 pub enum Event {
     Exit,
-    Resized,
+    Reset,
 }
 
 enum EventWithData {
     Exit,
+    Reset,
     Resized { width: u16, height: u16 },
 }
