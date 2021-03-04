@@ -1,6 +1,8 @@
+use anyhow::Context;
+use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use model::pipe::{ColorMode, Palette, PresetKind, PresetKindSet};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, time::Duration};
+use std::{collections::HashSet, fs, path::PathBuf, time::Duration};
 use structopt::StructOpt;
 
 #[derive(Serialize, Deserialize, Default, StructOpt)]
@@ -44,6 +46,32 @@ pub(crate) struct Config {
 }
 
 impl Config {
+    pub(crate) fn read() -> anyhow::Result<Self> {
+        let path = Self::path()?;
+
+        if path.exists() {
+            Self::read_from_disk(path)
+        } else {
+            Ok(Config::default())
+        }
+    }
+
+    fn path() -> anyhow::Result<PathBuf> {
+        let path = Xdg::new(AppStrategyArgs {
+            top_level_domain: "io.github".to_string(),
+            author: "CookieCoder15".to_string(),
+            app_name: "pipes-rs".to_string(),
+        })?
+        .in_config_dir("config.toml");
+
+        Ok(path)
+    }
+
+    fn read_from_disk(path: PathBuf) -> anyhow::Result<Self> {
+        let contents = fs::read_to_string(path)?;
+        Ok(toml::from_str(&contents).context("failed to read config")?)
+    }
+
     pub(crate) fn color_mode(&self) -> ColorMode {
         self.color_mode.unwrap_or(ColorMode::Ansi)
     }
