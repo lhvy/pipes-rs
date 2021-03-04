@@ -65,7 +65,7 @@ impl App {
             let control_flow = self.tick_loop(&mut pipes)?;
             match control_flow {
                 ControlFlow::Break | ControlFlow::Reset => return Ok(control_flow),
-                _ => {}
+                ControlFlow::Continue => {}
             }
         }
 
