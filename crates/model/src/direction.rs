@@ -13,25 +13,34 @@ impl Direction {
         let will_turn = rng.gen_bool(turn_chance);
 
         if will_turn {
-            *self = self.turn(TurnDirection::gen(rng));
+            let random_turn_dir = TurnDirection::gen(rng);
+            self.turn(random_turn_dir);
         }
     }
 
-    fn turn(&self, turn_dir: TurnDirection) -> Self {
+    fn turn(&mut self, turn_dir: TurnDirection) {
         match turn_dir {
-            TurnDirection::Left => match self {
-                Self::Up => Self::Left,
-                Self::Down => Self::Right,
-                Self::Left => Self::Up,
-                Self::Right => Self::Down,
-            },
-            TurnDirection::Right => match self {
-                Self::Up => Self::Right,
-                Self::Down => Self::Left,
-                Self::Left => Self::Down,
-                Self::Right => Self::Up,
-            },
+            TurnDirection::Left => self.turn_left(),
+            TurnDirection::Right => self.turn_right(),
         }
+    }
+
+    fn turn_left(&mut self) {
+        *self = match self {
+            Self::Up => Self::Left,
+            Self::Down => Self::Right,
+            Self::Left => Self::Up,
+            Self::Right => Self::Down,
+        };
+    }
+
+    fn turn_right(&mut self) {
+        *self = match self {
+            Self::Up => Self::Right,
+            Self::Down => Self::Left,
+            Self::Left => Self::Down,
+            Self::Right => Self::Up,
+        };
     }
 }
 
