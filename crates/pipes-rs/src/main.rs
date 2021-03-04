@@ -30,7 +30,7 @@ impl App {
     fn new() -> anyhow::Result<Self> {
         let config = read_config()?.combine(Config::from_args());
         let kinds = config.kinds();
-        let terminal = Terminal::new(&kinds.chars())?;
+        let terminal = Terminal::new(kinds.chars())?;
         let rng = Rng::new()?;
 
         Ok(Self {

@@ -258,11 +258,10 @@ impl FromStr for PresetKindSet {
 }
 
 impl PresetKindSet {
-    pub fn chars(&self) -> Vec<char> {
+    pub fn chars(&self) -> impl Iterator<Item = char> + '_ {
         self.0
             .iter()
             .map(|preset_kind| preset_kind.kind())
             .flat_map(|kind| kind.chars())
-            .collect()
     }
 }
