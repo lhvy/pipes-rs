@@ -1,5 +1,4 @@
 use crate::direction::Direction;
-use terminal::Terminal;
 
 pub struct Position {
     pub x: u16,
@@ -7,7 +6,7 @@ pub struct Position {
 }
 
 impl Position {
-    pub(crate) fn move_in(&mut self, dir: Direction, terminal: &Terminal) -> InScreenBounds {
+    pub(crate) fn move_in(&mut self, dir: Direction, size: (u16, u16)) -> InScreenBounds {
         match dir {
             Direction::Up => {
                 if self.y == 0 {
@@ -25,11 +24,10 @@ impl Position {
             Direction::Right => self.x += 1,
         }
 
-        InScreenBounds(self.in_screen_bounds(terminal))
+        InScreenBounds(self.in_screen_bounds(size))
     }
 
-    fn in_screen_bounds(&self, terminal: &Terminal) -> bool {
-        let (columns, rows) = terminal.size();
+    fn in_screen_bounds(&self, (columns, rows): (u16, u16)) -> bool {
         self.x < columns && self.y < rows
     }
 }

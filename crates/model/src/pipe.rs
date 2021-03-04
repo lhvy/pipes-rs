@@ -6,7 +6,6 @@ use crate::position::InScreenBounds;
 use crate::position::Position;
 use rng::Rng;
 use std::{collections::HashSet, str::FromStr};
-use terminal::Terminal;
 
 pub struct Pipe {
     dirs: Vec<Direction>,
@@ -17,23 +16,23 @@ pub struct Pipe {
 
 impl Pipe {
     pub fn new(
-        terminal: &Terminal,
+        size: (u16, u16),
         rng: &mut Rng,
         color_mode: ColorMode,
         palette: Palette,
         preset_kind: PresetKind,
     ) -> Self {
         let color = color::gen_random_color(rng, color_mode, palette);
-        Self::new_raw(terminal, rng, color, preset_kind.kind())
+        Self::new_raw(size, rng, color, preset_kind.kind())
     }
 
     fn new_raw(
-        terminal: &Terminal,
+        size: (u16, u16),
         rng: &mut Rng,
         color: Option<terminal::Color>,
         kind: Kind,
     ) -> Self {
-        let (dir, pos) = Self::gen_rand_dir_and_pos(terminal, rng);
+        let (dir, pos) = Self::gen_rand_dir_and_pos(size, rng);
 
         Self {
             dirs: vec![dir],
@@ -43,8 +42,7 @@ impl Pipe {
         }
     }
 
-    fn gen_rand_dir_and_pos(terminal: &Terminal, rng: &mut Rng) -> (Direction, Position) {
-        let (columns, rows) = terminal.size();
+    fn gen_rand_dir_and_pos((columns, rows): (u16, u16), rng: &mut Rng) -> (Direction, Position) {
         let dir = Direction::gen(rng);
         let pos = match dir {
             Direction::Up => Position {
@@ -68,13 +66,13 @@ impl Pipe {
         (dir, pos)
     }
 
-    pub fn dup(&self, terminal: &Terminal, rng: &mut Rng) -> Self {
-        Self::new_raw(terminal, rng, self.color, self.kind)
+    pub fn dup(&self, size: (u16, u16), rng: &mut Rng) -> Self {
+        Self::new_raw(size, rng, self.color, self.kind)
     }
 
-    pub fn tick(&mut self, terminal: &Terminal, rng: &mut Rng, turn_chance: f32) -> InScreenBounds {
+    pub fn tick(&mut self, size: (u16, u16), rng: &mut Rng, turn_chance: f32) -> InScreenBounds {
         let InScreenBounds(in_screen_bounds) =
-            self.pos.move_in(self.dirs[self.dirs.len() - 1], terminal);
+            self.pos.move_in(self.dirs[self.dirs.len() - 1], size);
 
         if !in_screen_bounds {
             return InScreenBounds(false);

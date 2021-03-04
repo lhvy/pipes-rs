@@ -82,7 +82,7 @@ impl App {
         let kind = self.random_kind();
 
         Pipe::new(
-            &self.terminal,
+            self.terminal.size(),
             &mut self.rng,
             self.config.color_mode(),
             self.config.palette(),
@@ -103,12 +103,15 @@ impl App {
         for pipe in pipes {
             self.render_pipe(pipe)?;
 
-            let InScreenBounds(stayed_onscreen) =
-                pipe.tick(&self.terminal, &mut self.rng, self.config.turn_chance());
+            let InScreenBounds(stayed_onscreen) = pipe.tick(
+                self.terminal.size(),
+                &mut self.rng,
+                self.config.turn_chance(),
+            );
 
             if !stayed_onscreen {
                 *pipe = if self.config.inherit_style() {
-                    pipe.dup(&self.terminal, &mut self.rng)
+                    pipe.dup(self.terminal.size(), &mut self.rng)
                 } else {
                     self.create_pipe()
                 };
