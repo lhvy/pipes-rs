@@ -43,12 +43,8 @@ macro_rules! gen_terminal_method_bool {
 }
 
 impl Terminal {
-    pub fn new(chars: &[char]) -> anyhow::Result<Self> {
-        let max_char_width = chars
-            .iter()
-            .map(|c| c.width().unwrap() as u16)
-            .max()
-            .unwrap();
+    pub fn new(chars: impl Iterator<Item = char>) -> anyhow::Result<Self> {
+        let max_char_width = chars.map(|c| c.width().unwrap() as u16).max().unwrap();
 
         let size = {
             let (width, height) = terminal::size()?;
