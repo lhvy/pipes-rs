@@ -88,7 +88,7 @@ impl Terminal {
         Ok(())
     }
 
-    pub fn set_raw_mode(&mut self, enabled: bool) -> anyhow::Result<()> {
+    pub fn set_raw_mode(&self, enabled: bool) -> anyhow::Result<()> {
         if enabled {
             terminal::enable_raw_mode()?;
         } else {

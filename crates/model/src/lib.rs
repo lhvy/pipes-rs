@@ -1,3 +1,3 @@
-pub mod direction;
+mod direction;
 pub mod pipe;
 pub mod position;

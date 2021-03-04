@@ -1,7 +1,7 @@
 use rng::Rng;
 
 #[derive(Clone, Copy, PartialEq)]
-pub enum Direction {
+pub(crate) enum Direction {
     Up,
     Down,
     Left,
@@ -9,7 +9,7 @@ pub enum Direction {
 }
 
 impl Direction {
-    pub fn maybe_turn(&mut self, rng: &mut Rng, turn_chance: f32) {
+    pub(crate) fn maybe_turn(&mut self, rng: &mut Rng, turn_chance: f32) {
         let will_turn = rng.gen_bool(turn_chance);
 
         if will_turn {
@@ -17,7 +17,7 @@ impl Direction {
         }
     }
 
-    fn turn(&mut self, turn_dir: TurnDirection) -> Self {
+    fn turn(&self, turn_dir: TurnDirection) -> Self {
         match turn_dir {
             TurnDirection::Left => match self {
                 Self::Up => Self::Left,
