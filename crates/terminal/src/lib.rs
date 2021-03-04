@@ -42,7 +42,11 @@ impl Terminal {
                 Ok(CrosstermEvent::Key(KeyEvent {
                     code: KeyCode::Char('c'),
                     modifiers: KeyModifiers::CONTROL,
-                })) => events_tx.send(EventWithData::CtrlCPressed).unwrap(),
+                }))
+                | Ok(CrosstermEvent::Key(KeyEvent {
+                    code: KeyCode::Char('q'),
+                    ..
+                })) => events_tx.send(EventWithData::Exit).unwrap(),
 
                 Ok(_) => {} // ignore all other events
 
@@ -133,7 +137,7 @@ impl Terminal {
 
     pub fn get_event(&mut self) -> Option<Event> {
         match self.events_rx.try_recv().ok() {
-            Some(EventWithData::CtrlCPressed) => Some(Event::CtrlCPressed),
+            Some(EventWithData::Exit) => Some(Event::Exit),
             Some(EventWithData::Resized { width, height }) => {
                 self.resize(width, height);
                 Some(Event::Resized)
@@ -186,11 +190,11 @@ impl From<Color> for style::Color {
 }
 
 pub enum Event {
-    CtrlCPressed,
+    Exit,
     Resized,
 }
 
 enum EventWithData {
-    CtrlCPressed,
+    Exit,
     Resized { width: u16, height: u16 },
 }
