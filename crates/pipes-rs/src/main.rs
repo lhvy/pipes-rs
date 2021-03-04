@@ -1,14 +1,12 @@
 mod config;
 
-use anyhow::Context;
 use config::Config;
-use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use model::{
     pipe::{Pipe, PresetKind, PresetKindSet},
     position::InScreenBounds,
 };
 use rng::Rng;
-use std::{fs, thread};
+use std::thread;
 use structopt::StructOpt;
 use terminal::{Event, Terminal};
 
@@ -28,7 +26,7 @@ struct App {
 
 impl App {
     fn new() -> anyhow::Result<Self> {
-        let config = read_config()?.combine(Config::from_args());
+        let config = Config::read()?.combine(Config::from_args());
         let kinds = config.kinds();
         let terminal = Terminal::new(kinds.chars())?;
         let rng = Rng::new()?;
@@ -163,21 +161,6 @@ impl App {
 fn choose_random<T>(mut iter: impl ExactSizeIterator<Item = T>, rng: &mut Rng) -> T {
     let index = rng.gen_range_size(0..iter.len());
     iter.nth(index).unwrap()
-}
-
-fn read_config() -> anyhow::Result<Config> {
-    let path = Xdg::new(AppStrategyArgs {
-        top_level_domain: "io.github".to_string(),
-        author: "CookieCoder15".to_string(),
-        app_name: "pipes-rs".to_string(),
-    })?
-    .in_config_dir("config.toml");
-    if path.exists() {
-        let contents = fs::read_to_string(path)?;
-        Ok(toml::from_str(&contents).context("failed to read config")?)
-    } else {
-        Ok(Config::default())
-    }
 }
 
 #[must_use]
