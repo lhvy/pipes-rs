@@ -90,7 +90,7 @@ impl App {
 
     fn tick_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
         match self.terminal.get_event() {
-            Some(Event::Resized) => return Ok(ControlFlow::Reset),
+            Some(Event::Reset) => return Ok(ControlFlow::Reset),
             Some(Event::Exit) => {
                 self.reset_terminal()?;
                 return Ok(ControlFlow::Break);
