@@ -82,7 +82,7 @@ pub enum Palette {
     Default,
     Darker,
     Pastel,
-    TheMatrix,
+    Matrix,
 }
 
 impl FromStr for Palette {
@@ -93,9 +93,9 @@ impl FromStr for Palette {
             "default" => Self::Default,
             "darker" => Self::Darker,
             "pastel" => Self::Pastel,
-            "the-matrix" => Self::TheMatrix,
+            "matrix" => Self::Matrix,
             _ => anyhow::bail!(
-                r#"unknown palette (expected “default”, “darker”, “pastel” or “the-matrix”)"#,
+                r#"unknown palette (expected “default”, “darker”, “pastel” or “matrix”)"#,
             ),
         })
     }
@@ -104,7 +104,7 @@ impl FromStr for Palette {
 impl Palette {
     pub(super) fn get_hue_range(self) -> Range<f32> {
         match self {
-            Self::TheMatrix => 145.0..145.0,
+            Self::Matrix => 145.0..145.0,
             _ => 0.0..360.0,
         }
     }
@@ -114,7 +114,7 @@ impl Palette {
             Self::Default => 0.75..0.75,
             Self::Darker => 0.65..0.65,
             Self::Pastel => 0.8..0.8,
-            Self::TheMatrix => 0.5..0.9,
+            Self::Matrix => 0.5..0.9,
         }
     }
 
@@ -123,7 +123,7 @@ impl Palette {
             Self::Default => 0.125,
             Self::Darker => 0.11,
             Self::Pastel => 0.085,
-            Self::TheMatrix => 0.11,
+            Self::Matrix => 0.11,
         }
     }
 }
