@@ -12,7 +12,7 @@ pub(crate) struct Config {
     #[structopt(short, long)]
     color_mode: Option<ColorMode>,
 
-    /// “default”, “darker” or “pastel”
+    /// “default”, “darker”, “pastel” or “matrix”
     #[structopt(long)]
     palette: Option<Palette>,
 
