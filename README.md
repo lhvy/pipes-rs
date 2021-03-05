@@ -81,6 +81,12 @@ There are also command line options that can be used to override parts of the co
 | `-t`        | chance of a pipe turning each frame                             | `-t 0.15`          |
 | `--palette` | sets the color palette, RGB mode only                           | `--palette pastel` |
 
-## Acknowledgements
+## Credits
+
+### Contributors
+
+pipes-rs is maintained by myself and [arzg](https://github.com/arzg); any other contributions via PRs are welcome! Forks and modifications are implicitly dual-licensed under Apache 2.0 OR MIT. Please credit the above contributers and pipes.sh when making modifications.
+
+### Inspiration
 
 This project is based off of [pipes.sh](https://github.com/pipeseroni/pipes.sh).
