@@ -85,7 +85,7 @@ There are also command line options that can be used to override parts of the co
 
 ### Contributors
 
-pipes-rs is maintained by myself and [arzg](https://github.com/arzg); any other contributions via PRs are welcome! Forks and modifications are implicitly dual-licensed under Apache 2.0 OR MIT. Please credit the above contributers and pipes.sh when making modifications.
+pipes-rs is maintained by [CookieCoder15](https://github.com/CookieCoder15) and [arzg](https://github.com/arzg); any other contributions via PRs are welcome! Forks and modifications are implicitly dual-licensed under Apache 2.0 OR MIT. Please credit the above contributers and pipes.sh when making modifications.
 
 ### Inspiration
 
