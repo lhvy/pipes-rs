@@ -1,5 +1,5 @@
 use rng::Rng;
-use std::str::FromStr;
+use std::{ops::Range, str::FromStr};
 use tincture::ColorSpace;
 
 pub(super) fn gen_random_color(
@@ -35,9 +35,11 @@ fn gen_random_ansi_color(rng: &mut Rng) -> terminal::Color {
 }
 
 fn gen_random_rgb_color(rng: &mut Rng, palette: Palette) -> terminal::Color {
-    let hue = rng.gen_range_float(0.0..360.0);
+    let hue = rng.gen_range_float(palette.get_hue_range());
+    let lightness = rng.gen_range_float(palette.get_lightness_range());
+
     let oklch = tincture::Oklch {
-        l: palette.get_lightness(),
+        l: lightness,
         c: palette.get_chroma(),
         h: tincture::Hue::from_degrees(hue).unwrap(),
     };
@@ -80,6 +82,7 @@ pub enum Palette {
     Default,
     Darker,
     Pastel,
+    TheMatrix,
 }
 
 impl FromStr for Palette {
@@ -90,17 +93,28 @@ impl FromStr for Palette {
             "default" => Self::Default,
             "darker" => Self::Darker,
             "pastel" => Self::Pastel,
-            _ => anyhow::bail!(r#"unknown palette (expected “default”, “darker” or “pastel”)"#),
+            "the-matrix" => Self::TheMatrix,
+            _ => anyhow::bail!(
+                r#"unknown palette (expected “default”, “darker”, “pastel” or “the-matrix”)"#,
+            ),
         })
     }
 }
 
 impl Palette {
-    pub(super) fn get_lightness(self) -> f32 {
+    pub(super) fn get_hue_range(self) -> Range<f32> {
         match self {
-            Self::Default => 0.75,
-            Self::Darker => 0.65,
-            Self::Pastel => 0.8,
+            Self::TheMatrix => 145.0..145.0,
+            _ => 0.0..360.0,
+        }
+    }
+
+    pub(super) fn get_lightness_range(self) -> Range<f32> {
+        match self {
+            Self::Default => 0.75..0.75,
+            Self::Darker => 0.65..0.65,
+            Self::Pastel => 0.8..0.8,
+            Self::TheMatrix => 0.5..0.9,
         }
     }
 
@@ -109,6 +123,7 @@ impl Palette {
             Self::Default => 0.125,
             Self::Darker => 0.11,
             Self::Pastel => 0.085,
+            Self::TheMatrix => 0.11,
         }
     }
 }

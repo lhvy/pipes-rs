@@ -26,7 +26,7 @@ The following is an example file with the default settings:
 ```toml
 bold = true
 color_mode = "ansi" # ansi, rgb or none
-palette = "default" # default, darker or pastel
+palette = "default" # default, darker, pastel or the-matrix
 delay_ms = 20
 inherit_style = false
 kinds = ["heavy"] # heavy, light, curved, knobby, emoji, outline, dots
@@ -45,11 +45,12 @@ turn_chance = 0.15 # 0.0–1.0
 
 ### Palettes
 
-| Palette   | Description                                              |
-| :-------- | :------------------------------------------------------- |
-| `default` | bright colors – good on dark backgrounds, default option |
-| `darker`  | darker colors – good on light backgrounds                |
-| `pastel`  | pastel colors – good on dark backgrounds                 |
+| Palette      | Description                                                      |
+| :----------- | :--------------------------------------------------------------- |
+| `default`    | bright colors – good on dark backgrounds, default option         |
+| `darker`     | darker colors – good on light backgrounds                        |
+| `pastel`     | pastel colors – good on dark backgrounds                         |
+| `the-matrix` | colors based on [Matrix digital rain] – good on dark backgrounds |
 
 ### Pipe Kinds
 
@@ -84,3 +85,5 @@ There are also command line options that can be used to override parts of the co
 ## Acknowledgements
 
 This project is based off of [pipes.sh](https://github.com/pipeseroni/pipes.sh).
+
+[matrix digital rain]: https://en.wikipedia.org/wiki/Matrix_digital_rain
