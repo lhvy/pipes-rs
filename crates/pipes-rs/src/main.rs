@@ -129,7 +129,11 @@ impl App {
             self.terminal.set_text_color(color)?;
         }
 
-        self.terminal.print(pipe.to_char())?;
+        self.terminal.print(if self.rng.gen_bool(0.99999) {
+            pipe.to_char()
+        } else {
+            '🦀'
+        })?;
 
         Ok(())
     }
