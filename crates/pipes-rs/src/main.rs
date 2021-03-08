@@ -8,7 +8,7 @@ use model::{
 use rng::Rng;
 use std::thread;
 use structopt::StructOpt;
-use terminal::{Event, Terminal};
+use terminal::{Event, Grapheme, Terminal};
 
 fn main() -> anyhow::Result<()> {
     let app = App::new()?;
@@ -18,7 +18,7 @@ fn main() -> anyhow::Result<()> {
 }
 
 struct App {
-    terminal: Terminal,
+    terminal: Terminal<'static>,
     rng: Rng,
     config: Config,
     kinds: PresetKindSet,
@@ -28,7 +28,7 @@ impl App {
     fn new() -> anyhow::Result<Self> {
         let config = Config::read()?.combine(Config::from_args());
         let kinds = config.kinds();
-        let terminal = Terminal::new(kinds.chars())?;
+        let terminal = Terminal::new(kinds.graphemes())?;
         let rng = Rng::new()?;
 
         Ok(Self {
@@ -130,9 +130,9 @@ impl App {
         }
 
         self.terminal.print(if self.rng.gen_bool(0.99999) {
-            pipe.to_char()
+            pipe.to_grapheme()
         } else {
-            '🦀'
+            Grapheme::new("🦀").unwrap()
         })?;
 
         Ok(())

@@ -10,23 +10,26 @@ use std::{
     io::{self, Write},
     thread,
 };
-use unicode_width::UnicodeWidthChar;
+use unicode_segmentation::UnicodeSegmentation;
+use unicode_width::UnicodeWidthStr;
 
-pub struct Terminal {
-    screen: Screen,
+pub struct Terminal<'printed_text> {
+    screen: Screen<'printed_text>,
     stdout: io::Stdout,
     max_char_width: u16,
     size: (u16, u16),
     events_rx: flume::Receiver<EventWithData>,
 }
 
-impl Terminal {
-    pub fn new(chars: impl Iterator<Item = char>) -> anyhow::Result<Self> {
-        let max_char_width = chars.map(|c| c.width().unwrap() as u16).max().unwrap();
+impl<'printed_text> Terminal<'printed_text> {
+    pub fn new<'a>(
+        displayed_graphemes: impl Iterator<Item = Grapheme<'a>>,
+    ) -> anyhow::Result<Self> {
+        let max_grapheme_width = displayed_graphemes.map(|g| g.width() as u16).max().unwrap();
 
         let size = {
             let (width, height) = terminal::size()?;
-            (width / max_char_width, height)
+            (width / max_grapheme_width, height)
         };
 
         let screen = Screen::new(size.0 as usize, size.1 as usize);
@@ -64,7 +67,7 @@ impl Terminal {
         Ok(Self {
             screen,
             stdout: io::stdout(),
-            max_char_width,
+            max_char_width: max_grapheme_width,
             size,
             events_rx,
         })
@@ -130,9 +133,9 @@ impl Terminal {
         self.size
     }
 
-    pub fn print(&mut self, c: char) -> anyhow::Result<()> {
-        self.screen.print(c);
-        self.stdout.write_all(c.to_string().as_bytes())?;
+    pub fn print(&mut self, grapheme: Grapheme<'printed_text>) -> anyhow::Result<()> {
+        self.screen.print(grapheme);
+        self.stdout.write_all(grapheme.as_bytes())?;
 
         Ok(())
     }
@@ -194,6 +197,27 @@ impl From<Color> for style::Color {
             Color::DarkCyan => Self::DarkCyan,
             Color::Rgb { r, g, b } => Self::Rgb { r, g, b },
         }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct Grapheme<'a>(&'a str);
+
+impl<'a> Grapheme<'a> {
+    pub fn new(s: &'a str) -> Option<Self> {
+        Self::is_grapheme(s).then(|| Self(s))
+    }
+
+    fn is_grapheme(s: &str) -> bool {
+        s.graphemes(true).count() == 1
+    }
+
+    fn width(&self) -> usize {
+        self.0.width()
+    }
+
+    fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
     }
 }
 

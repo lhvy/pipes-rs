@@ -1,14 +1,16 @@
-pub(crate) struct Screen {
-    text: Vec<Cell>,
+use crate::Grapheme;
+
+pub(crate) struct Screen<'cell_text> {
+    text: Vec<Cell<'cell_text>>,
     cursor: (usize, usize),
     width: usize,
     height: usize,
 }
 
-impl Screen {
+impl<'cell_text> Screen<'cell_text> {
     pub(crate) fn new(width: usize, height: usize) -> Self {
         Self {
-            text: vec![Cell(None); width * height],
+            text: vec![Cell::empty(); width * height],
             cursor: (0, 0),
             width,
             height,
@@ -22,12 +24,14 @@ impl Screen {
         self.cursor = (x, y);
     }
 
-    pub(crate) fn print(&mut self, c: char) {
-        *self.current_cell() = Cell(Some(c));
+    pub(crate) fn print(&mut self, grapheme: Grapheme<'cell_text>) {
+        *self.current_cell() = Cell {
+            grapheme: Some(grapheme),
+        };
     }
 
     pub(crate) fn clear(&mut self) {
-        self.text = vec![Cell(None); self.width * self.height];
+        self.text = vec![Cell::empty(); self.width * self.height];
     }
 
     pub(crate) fn portion_covered(&self) -> f32 {
@@ -37,16 +41,22 @@ impl Screen {
         num_covered as f32 / total as f32
     }
 
-    fn current_cell(&mut self) -> &mut Cell {
+    fn current_cell(&mut self) -> &mut Cell<'cell_text> {
         &mut self.text[self.cursor.1 * self.width + self.cursor.0]
     }
 }
 
 #[derive(Clone, Copy)]
-struct Cell(Option<char>);
+struct Cell<'a> {
+    grapheme: Option<Grapheme<'a>>,
+}
 
-impl Cell {
+impl Cell<'_> {
+    fn empty() -> Self {
+        Self { grapheme: None }
+    }
+
     fn is_covered(self) -> bool {
-        self.0.is_some()
+        self.grapheme.is_some()
     }
 }

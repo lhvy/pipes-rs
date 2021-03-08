@@ -1,5 +1,6 @@
 mod color;
 pub use color::{ColorMode, Palette};
+use terminal::Grapheme;
 
 use crate::direction::Direction;
 use crate::position::InScreenBounds;
@@ -84,7 +85,7 @@ impl Pipe {
         InScreenBounds(true)
     }
 
-    pub fn to_char(&self) -> char {
+    pub fn to_grapheme(&self) -> Grapheme<'static> {
         let dir = self.dirs[self.dirs.len() - 1];
         let prev_dir = self
             .dirs
@@ -128,18 +129,18 @@ pub enum PresetKind {
 
 #[derive(Clone, Copy)]
 struct Kind {
-    up: char,
-    down: char,
-    left: char,
-    right: char,
-    top_left: char,
-    top_right: char,
-    bottom_left: char,
-    bottom_right: char,
+    up: Grapheme<'static>,
+    down: Grapheme<'static>,
+    left: Grapheme<'static>,
+    right: Grapheme<'static>,
+    top_left: Grapheme<'static>,
+    top_right: Grapheme<'static>,
+    bottom_left: Grapheme<'static>,
+    bottom_right: Grapheme<'static>,
 }
 
 impl Kind {
-    fn chars(&self) -> Vec<char> {
+    fn graphemes(&self) -> Vec<Grapheme<'static>> {
         vec![
             self.up,
             self.down,
@@ -153,95 +154,53 @@ impl Kind {
     }
 }
 
+macro_rules! define_preset {
+    (
+        $name:ident,
+        $up:literal,
+        $down: literal,
+        $left:literal,
+        $right:literal,
+        $top_left:literal,
+        $top_right:literal,
+        $bottom_left:literal,
+        $bottom_right:literal
+    ) => {
+        fn $name() -> Kind {
+            Kind {
+                up: Grapheme::new($up).unwrap(),
+                down: Grapheme::new($down).unwrap(),
+                left: Grapheme::new($left).unwrap(),
+                right: Grapheme::new($right).unwrap(),
+                top_left: Grapheme::new($top_left).unwrap(),
+                top_right: Grapheme::new($top_right).unwrap(),
+                bottom_left: Grapheme::new($bottom_left).unwrap(),
+                bottom_right: Grapheme::new($bottom_right).unwrap(),
+            }
+        }
+    };
+}
+
 impl PresetKind {
-    const HEAVY: Kind = Kind {
-        up: '┃',
-        down: '┃',
-        left: '━',
-        right: '━',
-        top_left: '┏',
-        top_right: '┓',
-        bottom_left: '┗',
-        bottom_right: '┛',
-    };
-
-    const LIGHT: Kind = Kind {
-        up: '│',
-        down: '│',
-        left: '─',
-        right: '─',
-        top_left: '┌',
-        top_right: '┐',
-        bottom_left: '└',
-        bottom_right: '┘',
-    };
-
-    const CURVED: Kind = Kind {
-        up: '│',
-        down: '│',
-        left: '─',
-        right: '─',
-        top_left: '╭',
-        top_right: '╮',
-        bottom_left: '╰',
-        bottom_right: '╯',
-    };
-
-    const KNOBBY: Kind = Kind {
-        up: '╽',
-        down: '╿',
-        left: '╼',
-        right: '╾',
-        top_left: '┎',
-        top_right: '┒',
-        bottom_left: '┖',
-        bottom_right: '┚',
-    };
-
-    const EMOJI: Kind = Kind {
-        up: '👆',
-        down: '👇',
-        left: '👈',
-        right: '👉',
-        top_left: '👌',
-        top_right: '👌',
-        bottom_left: '👌',
-        bottom_right: '👌',
-    };
-
-    const OUTLINE: Kind = Kind {
-        up: '║',
-        down: '║',
-        left: '═',
-        right: '═',
-        top_left: '╔',
-        top_right: '╗',
-        bottom_left: '╚',
-        bottom_right: '╝',
-    };
-
-    const DOTS: Kind = Kind {
-        up: '•',
-        down: '•',
-        left: '•',
-        right: '•',
-        top_left: '•',
-        top_right: '•',
-        bottom_left: '•',
-        bottom_right: '•',
-    };
-
     fn kind(&self) -> Kind {
         match self {
-            Self::Heavy => Self::HEAVY,
-            Self::Light => Self::LIGHT,
-            Self::Curved => Self::CURVED,
-            Self::Knobby => Self::KNOBBY,
-            Self::Emoji => Self::EMOJI,
-            Self::Outline => Self::OUTLINE,
-            Self::Dots => Self::DOTS,
+            Self::Heavy => Self::heavy(),
+            Self::Light => Self::light(),
+            Self::Curved => Self::curved(),
+            Self::Knobby => Self::knobby(),
+            Self::Emoji => Self::emoji(),
+            Self::Outline => Self::outline(),
+            Self::Dots => Self::dots(),
         }
     }
+
+    define_preset!(heavy, "┃", "┃", "━", "━", "┏", "┓", "┗", "┛");
+    define_preset!(light, "│", "│", "─", "─", "┌", "┐", "└", "┘");
+    define_preset!(curved, "│", "│", "─", "─", "╭", "╮", "╰", "╯");
+    define_preset!(knobby, "╽", "╿", "╼", "╾", "┎", "┒", "┖", "┚");
+    define_preset!(emoji, "👆", "👇", "👈", "👉", "👌", "👌", "👌", "👌");
+    define_preset!(outline, "║", "║", "═", "═", "╔", "╗", "╚", "╝");
+    define_preset!(dots, "•", "•", "•", "•", "•", "•", "•", "•");
 }
 
 impl FromStr for PresetKind {
@@ -279,10 +238,10 @@ impl FromStr for PresetKindSet {
 }
 
 impl PresetKindSet {
-    pub fn chars(&self) -> impl Iterator<Item = char> + '_ {
+    pub fn graphemes(&self) -> impl Iterator<Item = Grapheme<'static>> + '_ {
         self.0
             .iter()
             .map(|preset_kind| preset_kind.kind())
-            .flat_map(|kind| kind.chars())
+            .flat_map(|kind| kind.graphemes())
     }
 }

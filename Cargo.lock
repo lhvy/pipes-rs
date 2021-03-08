@@ -540,6 +540,7 @@ dependencies = [
  "anyhow",
  "crossterm",
  "flume",
+ "unicode-segmentation",
  "unicode-width",
 ]
 
