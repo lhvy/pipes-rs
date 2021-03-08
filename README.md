@@ -4,19 +4,29 @@
 
 ![pipes-rs preview](https://github.com/CookieCoder15/i/raw/master/pipes-rs-preview.gif)
 
-## Installlation
+## Installation
 
-### macOS
+### Cargo & Brew
 
-Install using Homebrew or download manually from [releases](https://github.com/CookieCoder15/pipes-rs/releases/latest).
+Install on any platform using Cargo:
+
+```console
+$ cargo install --git https://github.com/CookieCoder15/pipes-rs
+```
+
+Alternativley for macOS, install via Homebrew:
 
 ```console
 $ brew install CookieCoder15/tap/pipes-rs
 ```
 
-### Linux & Windows
+### Manual Download
 
-See [releases](https://github.com/CookieCoder15/pipes-rs/releases/latest).
+Download compiled binaries from [releases](https://github.com/CookieCoder15/pipes-rs/releases/latest).
+
+## Windows Font Issues
+
+Some characters may be missing on Windows and will fall back to [tofu](https://en.wikipedia.org/wiki/Noto_fonts#Etymology), use a font such as [Noto Mono](https://www.google.com/get/noto/) to fix this issue.
 
 ## Configuration
 
