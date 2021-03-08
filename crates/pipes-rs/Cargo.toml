@@ -10,6 +10,7 @@ version = "1.3.0"
 [dependencies]
 anyhow = "1.0.37"
 etcetera = "0.3.2"
+mimalloc = {version = "0.1.25", default-features = false}
 model = {path = "../model"}
 rng = {path = "../rng"}
 serde = "1.0.118"
