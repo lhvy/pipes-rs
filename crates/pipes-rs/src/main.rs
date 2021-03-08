@@ -33,7 +33,8 @@ impl App {
         let config = Config::read()?.combine(Config::from_args());
         config.validate()?;
         let kinds = config.kinds();
-        let terminal = Terminal::new(kinds.chars())?;
+        let largest_custom_width = kinds.custom_widths().max();
+        let terminal = Terminal::new(kinds.chars(), largest_custom_width)?;
         let rng = Rng::new()?;
 
         Ok(Self {
