@@ -21,8 +21,11 @@ pub struct Terminal {
 }
 
 impl Terminal {
-    pub fn new(chars: impl Iterator<Item = char>) -> anyhow::Result<Self> {
-        let max_char_width = chars.map(|c| c.width().unwrap() as u16).max().unwrap();
+    pub fn new(
+        chars: impl Iterator<Item = char>,
+        custom_width: Option<usize>,
+    ) -> anyhow::Result<Self> {
+        let max_char_width = Self::determine_max_char_width(chars, custom_width);
 
         let size = {
             let (width, height) = terminal::size()?;
@@ -68,6 +71,19 @@ impl Terminal {
             size,
             events_rx,
         })
+    }
+
+    fn determine_max_char_width(
+        chars: impl Iterator<Item = char>,
+        custom_width: Option<usize>,
+    ) -> u16 {
+        let max_char_width = chars.map(|c| c.width().unwrap() as u16).max().unwrap();
+
+        if let Some(custom_width) = custom_width {
+            max_char_width.max(custom_width as u16)
+        } else {
+            max_char_width
+        }
     }
 
     pub fn enable_bold(&mut self) -> anyhow::Result<()> {

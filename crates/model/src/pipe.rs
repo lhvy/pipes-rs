@@ -136,6 +136,7 @@ struct Kind {
     top_right: char,
     bottom_left: char,
     bottom_right: char,
+    width: KindWidth,
 }
 
 impl Kind {
@@ -153,6 +154,12 @@ impl Kind {
     }
 }
 
+#[derive(Clone, Copy)]
+enum KindWidth {
+    Auto,
+    Custom(usize),
+}
+
 impl PresetKind {
     const HEAVY: Kind = Kind {
         up: '┃',
@@ -163,6 +170,7 @@ impl PresetKind {
         top_right: '┓',
         bottom_left: '┗',
         bottom_right: '┛',
+        width: KindWidth::Auto,
     };
 
     const LIGHT: Kind = Kind {
@@ -174,6 +182,7 @@ impl PresetKind {
         top_right: '┐',
         bottom_left: '└',
         bottom_right: '┘',
+        width: KindWidth::Auto,
     };
 
     const CURVED: Kind = Kind {
@@ -185,6 +194,7 @@ impl PresetKind {
         top_right: '╮',
         bottom_left: '╰',
         bottom_right: '╯',
+        width: KindWidth::Auto,
     };
 
     const KNOBBY: Kind = Kind {
@@ -196,6 +206,7 @@ impl PresetKind {
         top_right: '┒',
         bottom_left: '┖',
         bottom_right: '┚',
+        width: KindWidth::Auto,
     };
 
     const EMOJI: Kind = Kind {
@@ -207,6 +218,7 @@ impl PresetKind {
         top_right: '👌',
         bottom_left: '👌',
         bottom_right: '👌',
+        width: KindWidth::Auto,
     };
 
     const OUTLINE: Kind = Kind {
@@ -218,6 +230,7 @@ impl PresetKind {
         top_right: '╗',
         bottom_left: '╚',
         bottom_right: '╝',
+        width: KindWidth::Auto,
     };
 
     const DOTS: Kind = Kind {
@@ -229,6 +242,7 @@ impl PresetKind {
         top_right: '•',
         bottom_left: '•',
         bottom_right: '•',
+        width: KindWidth::Custom(2),
     };
 
     fn kind(&self) -> Kind {
@@ -280,9 +294,17 @@ impl FromStr for PresetKindSet {
 
 impl PresetKindSet {
     pub fn chars(&self) -> impl Iterator<Item = char> + '_ {
-        self.0
-            .iter()
-            .map(|preset_kind| preset_kind.kind())
-            .flat_map(|kind| kind.chars())
+        self.kinds().flat_map(|kind| kind.chars())
+    }
+
+    pub fn custom_widths(&self) -> impl Iterator<Item = usize> + '_ {
+        self.kinds().filter_map(|kind| match kind.width {
+            KindWidth::Custom(n) => Some(n),
+            KindWidth::Auto => None,
+        })
+    }
+
+    fn kinds(&self) -> impl Iterator<Item = Kind> + '_ {
+        self.0.iter().map(|preset_kind| preset_kind.kind())
     }
 }
