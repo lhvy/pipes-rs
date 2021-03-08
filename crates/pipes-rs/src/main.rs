@@ -27,6 +27,7 @@ struct App {
 impl App {
     fn new() -> anyhow::Result<Self> {
         let config = Config::read()?.combine(Config::from_args());
+        config.validate()?;
         let kinds = config.kinds();
         let terminal = Terminal::new(kinds.chars())?;
         let rng = Rng::new()?;

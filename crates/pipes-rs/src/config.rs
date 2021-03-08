@@ -72,6 +72,19 @@ impl Config {
         Ok(toml::from_str(&contents).context("failed to read config")?)
     }
 
+    pub(crate) fn validate(&self) -> anyhow::Result<()> {
+        if let Some(reset_threshold) = self.reset_threshold() {
+            if !(0.0..=1.0).contains(&reset_threshold) {
+                anyhow::bail!("reset threshold should be within 0 and 1")
+            }
+        }
+        if !(0.0..=1.0).contains(&self.turn_chance()) {
+            anyhow::bail!("turn chance should be within 0 and 1")
+        }
+
+        Ok(())
+    }
+
     pub(crate) fn color_mode(&self) -> ColorMode {
         self.color_mode.unwrap_or(ColorMode::Ansi)
     }
