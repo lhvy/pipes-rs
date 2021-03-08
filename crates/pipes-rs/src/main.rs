@@ -1,6 +1,7 @@
 mod config;
 
 use config::Config;
+use mimalloc::MiMalloc;
 use model::{
     pipe::{Pipe, PresetKind, PresetKindSet},
     position::InScreenBounds,
@@ -9,6 +10,9 @@ use rng::Rng;
 use std::thread;
 use structopt::StructOpt;
 use terminal::{Event, Terminal};
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
 
 fn main() -> anyhow::Result<()> {
     let app = App::new()?;
