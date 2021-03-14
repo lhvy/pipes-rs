@@ -28,6 +28,11 @@ Download compiled binaries from [releases](https://github.com/CookieCoder15/pipe
 
 Some characters may be missing on Windows and will fall back to [tofu](https://en.wikipedia.org/wiki/Noto_fonts#Etymology), use a font such as [Noto Mono](https://www.google.com/get/noto/) to fix this issue.
 
+## Keybindings
+
+- `r`: reset the screen
+- `q` or `^C`: exit the program
+
 ## Configuration
 
 pipes-rs can be configured using TOML located at `~/.config/pipes-rs/config.toml`.
