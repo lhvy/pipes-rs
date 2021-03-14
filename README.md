@@ -1,5 +1,7 @@
 # pipes-rs
 
+[![Bors enabled](https://bors.tech/images/badge_small.svg)](https://app.bors.tech/repositories/32076) ![GitHub Actions CI status](https://github.com/CookieCoder15/pipes-rs/actions/workflows/ci.yaml/badge.svg)
+
 > An over-engineered rewrite of pipes.sh in Rust
 
 ![pipes-rs preview](https://github.com/CookieCoder15/i/raw/master/pipes-rs-preview.gif)
