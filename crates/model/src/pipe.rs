@@ -1,5 +1,8 @@
 mod color;
+mod history_keeper;
+
 pub use color::{ColorMode, Palette};
+use history_keeper::HistoryKeeper;
 
 use crate::direction::Direction;
 use crate::position::InScreenBounds;
@@ -8,7 +11,7 @@ use rng::Rng;
 use std::{collections::HashSet, str::FromStr};
 
 pub struct Pipe {
-    dirs: Vec<Direction>,
+    dir: HistoryKeeper<Direction>,
     pub pos: Position,
     pub color: Option<terminal::Color>,
     kind: Kind,
@@ -35,7 +38,7 @@ impl Pipe {
         let (dir, pos) = Self::gen_rand_dir_and_pos(size, rng);
 
         Self {
-            dirs: vec![dir],
+            dir: HistoryKeeper::new(dir),
             pos,
             color,
             kind,
@@ -71,26 +74,20 @@ impl Pipe {
     }
 
     pub fn tick(&mut self, size: (u16, u16), rng: &mut Rng, turn_chance: f32) -> InScreenBounds {
-        let InScreenBounds(in_screen_bounds) =
-            self.pos.move_in(self.dirs[self.dirs.len() - 1], size);
+        let InScreenBounds(in_screen_bounds) = self.pos.move_in(self.dir.current(), size);
 
         if !in_screen_bounds {
             return InScreenBounds(false);
         }
 
-        self.dirs.push(*self.dirs.last().unwrap());
-        self.dirs.last_mut().unwrap().maybe_turn(rng, turn_chance);
+        self.dir.update(|dir| dir.maybe_turn(rng, turn_chance));
 
         InScreenBounds(true)
     }
 
     pub fn to_char(&self) -> char {
-        let dir = self.dirs[self.dirs.len() - 1];
-        let prev_dir = self
-            .dirs
-            .len()
-            .checked_sub(2)
-            .map_or(dir, |idx| self.dirs[idx]);
+        let dir = self.dir.current();
+        let prev_dir = self.dir.previous().unwrap_or(dir);
 
         match (prev_dir, dir) {
             (Direction::Up, Direction::Left) | (Direction::Right, Direction::Down) => {
