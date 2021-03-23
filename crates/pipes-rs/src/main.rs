@@ -7,7 +7,7 @@ use model::{
     position::InScreenBounds,
 };
 use rng::Rng;
-use std::thread;
+use std::{io, thread};
 use structopt::StructOpt;
 use terminal::{Event, Terminal};
 
@@ -15,26 +15,30 @@ use terminal::{Event, Terminal};
 static GLOBAL: MiMalloc = MiMalloc;
 
 fn main() -> anyhow::Result<()> {
-    let app = App::new()?;
+    let stdout = io::stdout();
+    let app = App::new(stdout.lock())?;
     app.run()?;
 
     Ok(())
 }
 
-struct App {
-    terminal: Terminal,
+struct App<'a> {
+    terminal: Terminal<'a>,
     rng: Rng,
     config: Config,
     kinds: PresetKindSet,
 }
 
-impl App {
-    fn new() -> anyhow::Result<Self> {
+impl<'a> App<'a> {
+    fn new(stdout: io::StdoutLock<'a>) -> anyhow::Result<Self> {
         let config = Config::read()?.combine(Config::from_args());
         config.validate()?;
+
         let kinds = config.kinds();
+
         let largest_custom_width = kinds.custom_widths().max();
-        let terminal = Terminal::new(kinds.chars(), largest_custom_width)?;
+        let terminal = Terminal::new(stdout, kinds.chars(), largest_custom_width)?;
+
         let rng = Rng::new()?;
 
         Ok(Self {
