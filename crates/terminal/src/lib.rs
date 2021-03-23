@@ -13,16 +13,17 @@ use std::{
 };
 use unicode_width::UnicodeWidthChar;
 
-pub struct Terminal {
+pub struct Terminal<'a> {
     screen: Screen,
-    stdout: io::Stdout,
+    stdout: io::StdoutLock<'a>,
     max_char_width: u16,
     size: (u16, u16),
     events_rx: flume::Receiver<EventWithData>,
 }
 
-impl Terminal {
+impl<'a> Terminal<'a> {
     pub fn new(
+        stdout: io::StdoutLock<'a>,
         chars: impl Iterator<Item = char>,
         custom_width: Option<NonZeroUsize>,
     ) -> anyhow::Result<Self> {
@@ -67,7 +68,7 @@ impl Terminal {
 
         Ok(Self {
             screen,
-            stdout: io::stdout(),
+            stdout,
             max_char_width,
             size,
             events_rx,
