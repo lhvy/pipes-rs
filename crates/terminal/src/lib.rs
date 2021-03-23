@@ -8,6 +8,7 @@ use crossterm::{
 use screen::Screen;
 use std::{
     io::{self, Write},
+    num::NonZeroUsize,
     thread,
 };
 use unicode_width::UnicodeWidthChar;
@@ -23,7 +24,7 @@ pub struct Terminal {
 impl Terminal {
     pub fn new(
         chars: impl Iterator<Item = char>,
-        custom_width: Option<usize>,
+        custom_width: Option<NonZeroUsize>,
     ) -> anyhow::Result<Self> {
         let max_char_width = Self::determine_max_char_width(chars, custom_width);
 
@@ -75,12 +76,12 @@ impl Terminal {
 
     fn determine_max_char_width(
         chars: impl Iterator<Item = char>,
-        custom_width: Option<usize>,
+        custom_width: Option<NonZeroUsize>,
     ) -> u16 {
         let max_char_width = chars.map(|c| c.width().unwrap() as u16).max().unwrap();
 
         if let Some(custom_width) = custom_width {
-            max_char_width.max(custom_width as u16)
+            max_char_width.max(custom_width.get() as u16)
         } else {
             max_char_width
         }

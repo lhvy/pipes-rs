@@ -8,6 +8,7 @@ use crate::direction::Direction;
 use crate::position::InScreenBounds;
 use crate::position::Position;
 use rng::Rng;
+use std::num::NonZeroUsize;
 use std::{collections::HashSet, str::FromStr};
 
 pub struct Pipe {
@@ -154,7 +155,7 @@ impl Kind {
 #[derive(Clone, Copy)]
 enum KindWidth {
     Auto,
-    Custom(usize),
+    Custom(NonZeroUsize),
 }
 
 impl PresetKind {
@@ -239,7 +240,11 @@ impl PresetKind {
         top_right: '•',
         bottom_left: '•',
         bottom_right: '•',
-        width: KindWidth::Custom(2),
+
+        // ideally we would use NonZeroUsize::new(2).unwrap() here,
+        // but Option::unwrap in const contexts
+        // isn’t stable at the moment.
+        width: KindWidth::Custom(unsafe { NonZeroUsize::new_unchecked(2) }),
     };
 
     fn kind(&self) -> Kind {
@@ -294,7 +299,7 @@ impl PresetKindSet {
         self.kinds().flat_map(|kind| kind.chars())
     }
 
-    pub fn custom_widths(&self) -> impl Iterator<Item = usize> + '_ {
+    pub fn custom_widths(&self) -> impl Iterator<Item = NonZeroUsize> + '_ {
         self.kinds().filter_map(|kind| match kind.width {
             KindWidth::Custom(n) => Some(n),
             KindWidth::Auto => None,
