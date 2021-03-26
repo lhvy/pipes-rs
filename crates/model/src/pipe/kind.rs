@@ -1,3 +1,4 @@
+use std::array;
 use std::collections::HashSet;
 use std::num::NonZeroUsize;
 use std::str::FromStr;
@@ -28,8 +29,8 @@ pub(super) struct Kind {
 }
 
 impl Kind {
-    fn chars(&self) -> Vec<char> {
-        vec![
+    fn chars(&self) -> [char; 8] {
+        [
             self.up,
             self.down,
             self.left,
@@ -186,7 +187,8 @@ impl FromStr for PresetKindSet {
 
 impl PresetKindSet {
     pub fn chars(&self) -> impl Iterator<Item = char> + '_ {
-        self.kinds().flat_map(|kind| kind.chars())
+        self.kinds()
+            .flat_map(|kind| array::IntoIter::new(kind.chars()))
     }
 
     pub fn custom_widths(&self) -> impl Iterator<Item = NonZeroUsize> + '_ {
