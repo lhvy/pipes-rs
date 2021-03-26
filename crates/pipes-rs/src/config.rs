@@ -69,7 +69,7 @@ impl Config {
 
     fn read_from_disk(path: PathBuf) -> anyhow::Result<Self> {
         let contents = fs::read_to_string(path)?;
-        Ok(toml::from_str(&contents).context("failed to read config")?)
+        toml::from_str(&contents).context("failed to read config")
     }
 
     pub(crate) fn validate(&self) -> anyhow::Result<()> {
