@@ -32,8 +32,8 @@ Some characters may be missing on Windows and will fall back to [tofu](https://e
 
 ## Keybindings
 
-- `r`: reset the screen
-- `q` or `^C`: exit the program
+- <kbd>r</kbd>: reset the screen
+- <kbd>q</kbd> or <kbd>^C</kbd>: exit the program
 
 ## Configuration
 
