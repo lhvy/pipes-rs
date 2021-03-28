@@ -59,7 +59,7 @@ impl Config {
     fn path() -> anyhow::Result<PathBuf> {
         let path = Xdg::new(AppStrategyArgs {
             top_level_domain: "io.github".to_string(),
-            author: "CookieCoder15".to_string(),
+            author: "lhvy".to_string(),
             app_name: "pipes-rs".to_string(),
         })?
         .in_config_dir("config.toml");

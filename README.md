@@ -1,10 +1,10 @@
 # pipes-rs
 
-[![Bors enabled](https://bors.tech/images/badge_small.svg)](https://app.bors.tech/repositories/32076) ![GitHub Actions CI status](https://github.com/CookieCoder15/pipes-rs/actions/workflows/ci.yaml/badge.svg)
+[![Bors enabled](https://bors.tech/images/badge_small.svg)](https://app.bors.tech/repositories/32076) ![GitHub Actions CI status](https://github.com/lhvy/pipes-rs/actions/workflows/ci.yaml/badge.svg)
 
 > An over-engineered rewrite of pipes.sh in Rust
 
-![pipes-rs preview](https://github.com/CookieCoder15/i/raw/master/pipes-rs-preview.gif)
+![pipes-rs preview](https://github.com/lhvy/i/raw/master/pipes-rs-preview.gif)
 
 ## Installation
 
@@ -13,18 +13,18 @@
 Install on any platform using Cargo:
 
 ```console
-$ cargo install --git https://github.com/CookieCoder15/pipes-rs
+$ cargo install --git https://github.com/lhvy/pipes-rs
 ```
 
 Alternativley for macOS, install via Homebrew:
 
 ```console
-$ brew install CookieCoder15/tap/pipes-rs
+$ brew install lhvy/tap/pipes-rs
 ```
 
 ### Manual Download
 
-Download compiled binaries from [releases](https://github.com/CookieCoder15/pipes-rs/releases/latest).
+Download compiled binaries from [releases](https://github.com/lhvy/pipes-rs/releases/latest).
 
 ## Windows Font Issues
 
@@ -103,7 +103,7 @@ There are also command line options that can be used to override parts of the co
 
 ### Contributors
 
-pipes-rs is maintained by [CookieCoder15](https://github.com/CookieCoder15) and [arzg](https://github.com/arzg); any other contributions via PRs are welcome! Forks and modifications are implicitly dual-licensed under Apache 2.0 OR MIT. Please credit the above contributers and pipes.sh when making modifications.
+pipes-rs is maintained by [lhvy](https://github.com/lhvy) and [arzg](https://github.com/arzg); any other contributions via PRs are welcome! Forks and modifications are implicitly dual-licensed under Apache 2.0 OR MIT. Please credit the above contributers and pipes.sh when making modifications.
 
 ### Inspiration
 

@@ -1,5 +1,5 @@
 [package]
-authors = ["CookieCoder15 <40507205+CookieCoder15@users.noreply.github.com>"]
+authors = ["lhvy <cookiecoder15@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 name = "terminal"
