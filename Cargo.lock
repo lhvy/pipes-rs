@@ -366,7 +366,7 @@ dependencies = [
 
 [[package]]
 name = "pipes-rs"
-version = "1.4.1"
+version = "1.4.2"
 dependencies = [
  "anyhow",
  "etcetera",
