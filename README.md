@@ -16,7 +16,7 @@ Install on any platform using Cargo:
 $ cargo install --git https://github.com/lhvy/pipes-rs
 ```
 
-Alternativley for macOS, install via Homebrew:
+Alternatively for macOS, install via Homebrew:
 
 ```console
 $ brew install lhvy/tap/pipes-rs
