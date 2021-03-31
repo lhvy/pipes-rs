@@ -28,14 +28,13 @@ impl Pipe {
         preset_kind: PresetKind,
     ) -> Self {
         let color = color::gen_random_color(rng, color_mode, palette);
-        let kind = preset_kind.kind();
         let (dir, pos) = Self::gen_rand_dir_and_pos(size, rng);
 
         Self {
             dir: HistoryKeeper::new(dir),
             pos,
             color,
-            kind,
+            kind: preset_kind.kind(),
         }
     }
 
