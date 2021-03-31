@@ -62,6 +62,8 @@ impl<'a> App<'a> {
             }
         }
 
+        self.reset_terminal()?;
+
         Ok(())
     }
 
@@ -80,56 +82,38 @@ impl<'a> App<'a> {
         Ok(ControlFlow::Continue)
     }
 
-    fn create_pipes(&mut self) -> Vec<Pipe> {
-        (0..self.config.num_pipes())
-            .map(|_| self.create_pipe())
-            .collect()
-    }
-
-    fn create_pipe(&mut self) -> Pipe {
-        let kind = self.random_kind();
-
-        Pipe::new(
-            self.terminal.size(),
-            &mut self.rng,
-            self.config.color_mode(),
-            self.config.palette(),
-            kind,
-        )
-    }
-
     fn tick_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
         match self.terminal.get_event() {
             Some(Event::Reset) => return Ok(ControlFlow::Reset),
-            Some(Event::Exit) => {
-                self.reset_terminal()?;
-                return Ok(ControlFlow::Break);
-            }
+            Some(Event::Exit) => return Ok(ControlFlow::Break),
             None => {}
         }
 
         for pipe in pipes {
             self.render_pipe(pipe)?;
-
-            let InScreenBounds(stayed_onscreen) = pipe.tick(
-                self.terminal.size(),
-                &mut self.rng,
-                self.config.turn_chance(),
-            );
-
-            if !stayed_onscreen {
-                *pipe = if self.config.inherit_style() {
-                    pipe.dup(self.terminal.size(), &mut self.rng)
-                } else {
-                    self.create_pipe()
-                };
-            }
+            self.tick_pipe(pipe);
         }
 
         self.terminal.flush()?;
         thread::sleep(self.config.delay());
 
         Ok(ControlFlow::Continue)
+    }
+
+    fn tick_pipe(&mut self, pipe: &mut Pipe) {
+        let InScreenBounds(stayed_onscreen) = pipe.tick(
+            self.terminal.size(),
+            &mut self.rng,
+            self.config.turn_chance(),
+        );
+
+        if !stayed_onscreen {
+            *pipe = if self.config.inherit_style() {
+                pipe.dup(self.terminal.size(), &mut self.rng)
+            } else {
+                self.create_pipe()
+            };
+        }
     }
 
     fn render_pipe(&mut self, pipe: &Pipe) -> anyhow::Result<()> {
@@ -156,6 +140,24 @@ impl<'a> App<'a> {
         self.terminal.set_raw_mode(false)?;
 
         Ok(())
+    }
+
+    fn create_pipes(&mut self) -> Vec<Pipe> {
+        (0..self.config.num_pipes())
+            .map(|_| self.create_pipe())
+            .collect()
+    }
+
+    fn create_pipe(&mut self) -> Pipe {
+        let kind = self.random_kind();
+
+        Pipe::new(
+            self.terminal.size(),
+            &mut self.rng,
+            self.config.color_mode(),
+            self.config.palette(),
+            kind,
+        )
     }
 
     fn under_threshold(&self) -> bool {
