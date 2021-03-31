@@ -92,26 +92,29 @@ impl<'a> App<'a> {
 
         for pipe in pipes {
             self.render_pipe(pipe)?;
-
-            let InScreenBounds(stayed_onscreen) = pipe.tick(
-                self.terminal.size(),
-                &mut self.rng,
-                self.config.turn_chance(),
-            );
-
-            if !stayed_onscreen {
-                *pipe = if self.config.inherit_style() {
-                    pipe.dup(self.terminal.size(), &mut self.rng)
-                } else {
-                    self.create_pipe()
-                };
-            }
+            self.tick_pipe(pipe);
         }
 
         self.terminal.flush()?;
         thread::sleep(self.config.delay());
 
         Ok(ControlFlow::Continue)
+    }
+
+    fn tick_pipe(&mut self, pipe: &mut Pipe) {
+        let InScreenBounds(stayed_onscreen) = pipe.tick(
+            self.terminal.size(),
+            &mut self.rng,
+            self.config.turn_chance(),
+        );
+
+        if !stayed_onscreen {
+            *pipe = if self.config.inherit_style() {
+                pipe.dup(self.terminal.size(), &mut self.rng)
+            } else {
+                self.create_pipe()
+            };
+        }
     }
 
     fn render_pipe(&mut self, pipe: &Pipe) -> anyhow::Result<()> {
