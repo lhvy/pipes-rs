@@ -80,24 +80,6 @@ impl<'a> App<'a> {
         Ok(ControlFlow::Continue)
     }
 
-    fn create_pipes(&mut self) -> Vec<Pipe> {
-        (0..self.config.num_pipes())
-            .map(|_| self.create_pipe())
-            .collect()
-    }
-
-    fn create_pipe(&mut self) -> Pipe {
-        let kind = self.random_kind();
-
-        Pipe::new(
-            self.terminal.size(),
-            &mut self.rng,
-            self.config.color_mode(),
-            self.config.palette(),
-            kind,
-        )
-    }
-
     fn tick_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
         match self.terminal.get_event() {
             Some(Event::Reset) => return Ok(ControlFlow::Reset),
@@ -156,6 +138,24 @@ impl<'a> App<'a> {
         self.terminal.set_raw_mode(false)?;
 
         Ok(())
+    }
+
+    fn create_pipes(&mut self) -> Vec<Pipe> {
+        (0..self.config.num_pipes())
+            .map(|_| self.create_pipe())
+            .collect()
+    }
+
+    fn create_pipe(&mut self) -> Pipe {
+        let kind = self.random_kind();
+
+        Pipe::new(
+            self.terminal.size(),
+            &mut self.rng,
+            self.config.color_mode(),
+            self.config.palette(),
+            kind,
+        )
     }
 
     fn under_threshold(&self) -> bool {
