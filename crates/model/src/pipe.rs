@@ -28,15 +28,7 @@ impl Pipe {
         preset_kind: PresetKind,
     ) -> Self {
         let color = color::gen_random_color(rng, color_mode, palette);
-        Self::new_raw(size, rng, color, preset_kind.kind())
-    }
-
-    fn new_raw(
-        size: (u16, u16),
-        rng: &mut Rng,
-        color: Option<terminal::Color>,
-        kind: Kind,
-    ) -> Self {
+        let kind = preset_kind.kind();
         let (dir, pos) = Self::gen_rand_dir_and_pos(size, rng);
 
         Self {
@@ -47,32 +39,15 @@ impl Pipe {
         }
     }
 
-    fn gen_rand_dir_and_pos((columns, rows): (u16, u16), rng: &mut Rng) -> (Direction, Position) {
-        let dir = Direction::gen(rng);
-        let pos = match dir {
-            Direction::Up => Position {
-                x: rng.gen_range_16(0..columns),
-                y: rows - 1,
-            },
-            Direction::Down => Position {
-                x: rng.gen_range_16(0..columns),
-                y: 0,
-            },
-            Direction::Left => Position {
-                x: columns - 1,
-                y: rng.gen_range_16(0..rows),
-            },
-            Direction::Right => Position {
-                x: 0,
-                y: rng.gen_range_16(0..rows),
-            },
-        };
-
-        (dir, pos)
-    }
-
     pub fn dup(&self, size: (u16, u16), rng: &mut Rng) -> Self {
-        Self::new_raw(size, rng, self.color, self.kind)
+        let (dir, pos) = Self::gen_rand_dir_and_pos(size, rng);
+
+        Self {
+            dir: HistoryKeeper::new(dir),
+            pos,
+            color: self.color,
+            kind: self.kind,
+        }
     }
 
     pub fn tick(&mut self, size: (u16, u16), rng: &mut Rng, turn_chance: f32) -> InScreenBounds {
@@ -110,5 +85,29 @@ impl Pipe {
             (Direction::Right, Direction::Right) => self.kind.right,
             _ => unreachable!(),
         }
+    }
+
+    fn gen_rand_dir_and_pos((columns, rows): (u16, u16), rng: &mut Rng) -> (Direction, Position) {
+        let dir = Direction::gen(rng);
+        let pos = match dir {
+            Direction::Up => Position {
+                x: rng.gen_range_16(0..columns),
+                y: rows - 1,
+            },
+            Direction::Down => Position {
+                x: rng.gen_range_16(0..columns),
+                y: 0,
+            },
+            Direction::Left => Position {
+                x: columns - 1,
+                y: rng.gen_range_16(0..rows),
+            },
+            Direction::Right => Position {
+                x: 0,
+                y: rng.gen_range_16(0..rows),
+            },
+        };
+
+        (dir, pos)
     }
 }
