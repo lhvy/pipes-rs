@@ -50,6 +50,7 @@ impl<'a> App<'a> {
     }
 
     fn run(mut self) -> anyhow::Result<()> {
+        self.terminal.enter_alternate_screen()?;
         self.terminal.set_raw_mode(true)?;
         self.terminal.set_cursor_visibility(false)?;
         if self.config.bold() {
@@ -62,7 +63,9 @@ impl<'a> App<'a> {
             }
         }
 
-        self.reset_terminal()?;
+        self.terminal.set_raw_mode(false)?;
+        self.terminal.set_cursor_visibility(true)?;
+        self.terminal.leave_alternate_screen()?;
 
         Ok(())
     }
@@ -128,16 +131,6 @@ impl<'a> App<'a> {
         } else {
             '🦀'
         })?;
-
-        Ok(())
-    }
-
-    fn reset_terminal(&mut self) -> anyhow::Result<()> {
-        self.terminal.reset_style()?;
-        self.terminal.clear()?;
-        self.terminal.move_cursor_to(0, 0)?;
-        self.terminal.set_cursor_visibility(true)?;
-        self.terminal.set_raw_mode(false)?;
 
         Ok(())
     }
