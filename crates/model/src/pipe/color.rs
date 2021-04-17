@@ -71,7 +71,7 @@ impl FromStr for ColorMode {
             "ansi" => Self::Ansi,
             "rgb" => Self::Rgb,
             "none" => Self::None,
-            _ => anyhow::bail!(r#"unknown color mode (expected “ansi”, “rgb” or “none”)"#),
+            _ => anyhow::bail!("unknown color mode"),
         })
     }
 }
@@ -94,9 +94,7 @@ impl FromStr for Palette {
             "darker" => Self::Darker,
             "pastel" => Self::Pastel,
             "matrix" => Self::Matrix,
-            _ => anyhow::bail!(
-                r#"unknown palette (expected “default”, “darker”, “pastel” or “matrix”)"#,
-            ),
+            _ => anyhow::bail!("unknown palette"),
         })
     }
 }

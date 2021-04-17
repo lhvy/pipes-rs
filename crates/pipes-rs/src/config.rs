@@ -3,17 +3,18 @@ use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use model::pipe::{ColorMode, Palette, PresetKind, PresetKindSet};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, fs, path::PathBuf, time::Duration};
+use structopt::clap::AppSettings;
 use structopt::StructOpt;
 
 #[derive(Serialize, Deserialize, Default, StructOpt)]
-#[structopt(name = "pipes-rs")]
+#[structopt(name = "pipes-rs", setting = AppSettings::ColoredHelp)]
 pub(crate) struct Config {
-    /// “ansi”, “rgb” or “none”
-    #[structopt(short, long)]
+    /// what kind of terminal coloring to use
+    #[structopt(short, long, possible_values = &["ansi", "rgb", "none"])]
     color_mode: Option<ColorMode>,
 
-    /// “default”, “darker”, “pastel” or “matrix”
-    #[structopt(long)]
+    /// the color palette used assign colors to pipes
+    #[structopt(long, possible_values = &["default", "darker", "pastel", "matrix"])]
     palette: Option<Palette>,
 
     /// delay between frames in milliseconds
@@ -28,12 +29,12 @@ pub(crate) struct Config {
     #[structopt(short, long)]
     kinds: Option<PresetKindSet>,
 
-    /// whether to use bold (true/false)
-    #[structopt(short, long)]
+    /// whether to use bold
+    #[structopt(short, long, possible_values = &["true", "false"], value_name = "boolean")]
     bold: Option<bool>,
 
-    /// whether pipes should retain style after hitting the edge (true/false)
-    #[structopt(short, long)]
+    /// whether pipes should retain style after hitting the edge
+    #[structopt(short, long, possible_values = &["true", "false"], value_name = "boolean")]
     inherit_style: Option<bool>,
 
     /// number of pipes
