@@ -8,11 +8,11 @@ use structopt::StructOpt;
 #[derive(Serialize, Deserialize, Default, StructOpt)]
 #[structopt(name = "pipes-rs")]
 pub(crate) struct Config {
-    /// “ansi”, “rgb” or “none”
+    /// what kind of terminal coloring to use
     #[structopt(short, long, possible_values = &["ansi", "rgb", "none"])]
     color_mode: Option<ColorMode>,
 
-    /// “default”, “darker”, “pastel” or “matrix”
+    /// the color palette used assign colors to pipes
     #[structopt(long, possible_values = &["default", "darker", "pastel", "matrix"])]
     palette: Option<Palette>,
 
