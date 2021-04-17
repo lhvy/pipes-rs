@@ -28,12 +28,12 @@ pub(crate) struct Config {
     #[structopt(short, long)]
     kinds: Option<PresetKindSet>,
 
-    /// whether to use bold (true/false)
-    #[structopt(short, long)]
+    /// whether to use bold
+    #[structopt(short, long, possible_values = &["true", "false"])]
     bold: Option<bool>,
 
-    /// whether pipes should retain style after hitting the edge (true/false)
-    #[structopt(short, long)]
+    /// whether pipes should retain style after hitting the edge
+    #[structopt(short, long, possible_values = &["true", "false"])]
     inherit_style: Option<bool>,
 
     /// number of pipes
