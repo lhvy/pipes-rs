@@ -9,11 +9,11 @@ use structopt::StructOpt;
 #[structopt(name = "pipes-rs")]
 pub(crate) struct Config {
     /// “ansi”, “rgb” or “none”
-    #[structopt(short, long)]
+    #[structopt(short, long, possible_values = &["ansi", "rgb", "none"])]
     color_mode: Option<ColorMode>,
 
     /// “default”, “darker”, “pastel” or “matrix”
-    #[structopt(long)]
+    #[structopt(long, possible_values = &["default", "darker", "pastel", "matrix"])]
     palette: Option<Palette>,
 
     /// delay between frames in milliseconds
