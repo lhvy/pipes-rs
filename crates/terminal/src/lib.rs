@@ -125,6 +125,16 @@ impl<'a> Terminal<'a> {
         Ok(())
     }
 
+    pub fn enter_alternate_screen(&mut self) -> anyhow::Result<()> {
+        queue!(self.stdout, terminal::EnterAlternateScreen)?;
+        Ok(())
+    }
+
+    pub fn leave_alternate_screen(&mut self) -> anyhow::Result<()> {
+        queue!(self.stdout, terminal::LeaveAlternateScreen)?;
+        Ok(())
+    }
+
     pub fn set_text_color(&mut self, color: Color) -> anyhow::Result<()> {
         let color = style::Color::from(color);
         queue!(self.stdout, style::SetForegroundColor(color))?;
