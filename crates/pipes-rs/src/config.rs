@@ -3,10 +3,11 @@ use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use model::pipe::{ColorMode, Palette, PresetKind, PresetKindSet};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, fs, path::PathBuf, time::Duration};
+use structopt::clap::AppSettings;
 use structopt::StructOpt;
 
 #[derive(Serialize, Deserialize, Default, StructOpt)]
-#[structopt(name = "pipes-rs")]
+#[structopt(name = "pipes-rs", setting = AppSettings::ColoredHelp)]
 pub(crate) struct Config {
     /// what kind of terminal coloring to use
     #[structopt(short, long, possible_values = &["ansi", "rgb", "none"])]
