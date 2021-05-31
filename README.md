@@ -22,6 +22,13 @@ Alternatively for macOS, install via Homebrew:
 $ brew install lhvy/tap/pipes-rs
 ```
 
+You can also install `pipes-rs` on Windows via scoop:
+
+```
+scoop bucket add extras
+scoop install pipes-rs
+```
+
 ### Manual Download
 
 Download compiled binaries from [releases](https://github.com/lhvy/pipes-rs/releases/latest).
