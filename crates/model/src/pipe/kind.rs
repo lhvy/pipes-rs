@@ -1,4 +1,3 @@
-use std::array;
 use std::collections::HashSet;
 use std::num::NonZeroUsize;
 use std::str::FromStr;
@@ -187,8 +186,7 @@ impl FromStr for PresetKindSet {
 
 impl PresetKindSet {
     pub fn chars(&self) -> impl Iterator<Item = char> + '_ {
-        self.kinds()
-            .flat_map(|kind| array::IntoIter::new(kind.chars()))
+        self.kinds().flat_map(|kind| kind.chars())
     }
 
     pub fn custom_widths(&self) -> impl Iterator<Item = NonZeroUsize> + '_ {
