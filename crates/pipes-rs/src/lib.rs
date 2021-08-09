@@ -2,7 +2,7 @@ mod config;
 pub use config::Config;
 
 use model::{
-    pipe::{Pipe, PresetKind, PresetKindSet},
+    pipe::{Kind, KindSet, Pipe},
     position::InScreenBounds,
 };
 use rng::Rng;
@@ -13,7 +13,7 @@ pub struct App<B: Backend> {
     terminal: Terminal<B>,
     rng: Rng,
     config: Config,
-    kinds: PresetKindSet,
+    kinds: KindSet,
 }
 
 impl<B: Backend> App<B> {
@@ -145,9 +145,8 @@ impl<B: Backend> App<B> {
         }
     }
 
-    fn random_kind(&mut self) -> PresetKind {
-        let PresetKindSet(ref kinds) = self.kinds;
-        *choose_random(kinds.iter(), &mut self.rng)
+    fn random_kind(&mut self) -> Kind {
+        choose_random(self.kinds.iter(), &mut self.rng)
     }
 }
 

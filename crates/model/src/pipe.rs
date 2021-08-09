@@ -4,8 +4,7 @@ mod kind;
 
 pub use color::{ColorMode, Palette};
 use history_keeper::HistoryKeeper;
-use kind::Kind;
-pub use kind::{PresetKind, PresetKindSet};
+pub use kind::{Kind, KindSet};
 
 use crate::direction::Direction;
 use crate::position::InScreenBounds;
@@ -25,7 +24,7 @@ impl Pipe {
         rng: &mut Rng,
         color_mode: ColorMode,
         palette: Palette,
-        preset_kind: PresetKind,
+        kind: Kind,
     ) -> Self {
         let color = color::gen_random_color(rng, color_mode, palette);
         let (dir, pos) = Self::gen_rand_dir_and_pos(size, rng);
@@ -34,7 +33,7 @@ impl Pipe {
             dir: HistoryKeeper::new(dir),
             pos,
             color,
-            kind: preset_kind.kind(),
+            kind,
         }
     }
 
@@ -67,21 +66,21 @@ impl Pipe {
 
         match (prev_dir, dir) {
             (Direction::Up, Direction::Left) | (Direction::Right, Direction::Down) => {
-                self.kind.top_right
+                self.kind.top_right()
             }
             (Direction::Up, Direction::Right) | (Direction::Left, Direction::Down) => {
-                self.kind.top_left
+                self.kind.top_left()
             }
             (Direction::Down, Direction::Left) | (Direction::Right, Direction::Up) => {
-                self.kind.bottom_right
+                self.kind.bottom_right()
             }
             (Direction::Down, Direction::Right) | (Direction::Left, Direction::Up) => {
-                self.kind.bottom_left
+                self.kind.bottom_left()
             }
-            (Direction::Up, Direction::Up) => self.kind.up,
-            (Direction::Down, Direction::Down) => self.kind.down,
-            (Direction::Left, Direction::Left) => self.kind.left,
-            (Direction::Right, Direction::Right) => self.kind.right,
+            (Direction::Up, Direction::Up) => self.kind.up(),
+            (Direction::Down, Direction::Down) => self.kind.down(),
+            (Direction::Left, Direction::Left) => self.kind.left(),
+            (Direction::Right, Direction::Right) => self.kind.right(),
             _ => unreachable!(),
         }
     }

@@ -1,8 +1,8 @@
 use anyhow::Context;
 use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
-use model::pipe::{ColorMode, Palette, PresetKind, PresetKindSet};
+use model::pipe::{ColorMode, Kind, KindSet, Palette};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, fs, path::PathBuf, time::Duration};
+use std::{fs, path::PathBuf, time::Duration};
 use structopt::clap::AppSettings;
 use structopt::StructOpt;
 
@@ -27,7 +27,7 @@ pub struct Config {
 
     /// kinds of pipes separated by commas, e.g. heavy,curved
     #[structopt(short, long)]
-    pub kinds: Option<PresetKindSet>,
+    pub kinds: Option<KindSet>,
 
     /// whether to use bold
     #[structopt(short, long, possible_values = &["true", "false"], value_name = "boolean")]
@@ -113,12 +113,10 @@ impl Config {
         }
     }
 
-    pub fn kinds(&self) -> PresetKindSet {
-        self.kinds.clone().unwrap_or_else(|| {
-            let mut kinds = HashSet::with_capacity(1);
-            kinds.insert(PresetKind::Heavy);
-            PresetKindSet(kinds)
-        })
+    pub fn kinds(&self) -> KindSet {
+        self.kinds
+            .clone()
+            .unwrap_or_else(|| KindSet::from_one(Kind::Heavy))
     }
 
     pub fn bold(&self) -> bool {
