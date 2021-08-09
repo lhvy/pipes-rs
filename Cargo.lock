@@ -95,18 +95,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "config"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "etcetera",
- "model",
- "serde",
- "structopt",
- "toml",
-]
-
-[[package]]
 name = "criterion"
 version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -508,22 +496,15 @@ name = "pipes-rs"
 version = "1.4.4"
 dependencies = [
  "anyhow",
- "config",
  "criterion",
+ "etcetera",
  "mimalloc",
- "pipes-rs-core",
- "terminal",
-]
-
-[[package]]
-name = "pipes-rs-core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
  "model",
  "rng",
+ "serde",
+ "structopt",
  "terminal",
+ "toml",
 ]
 
 [[package]]

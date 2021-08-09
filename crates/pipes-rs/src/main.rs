@@ -1,6 +1,5 @@
-use config::Config;
 use mimalloc::MiMalloc;
-use pipes_rs_core::App;
+use pipes_rs::{App, Config};
 use std::io;
 use terminal::StdoutBackend;
 

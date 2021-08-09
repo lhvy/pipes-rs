@@ -9,10 +9,14 @@ version = "1.4.4"
 
 [dependencies]
 anyhow = "1.0.37"
-config = {path = "../config"}
+etcetera = "0.3.2"
 mimalloc = {version = "0.1.25", default-features = false}
-pipes-rs-core = {path = "../pipes-rs-core"}
+model = {path = "../model"}
+rng = {path = "../rng"}
+serde = "1.0.118"
+structopt = "0.3.21"
 terminal = {path = "../terminal"}
+toml = "0.5.8"
 
 [dev-dependencies]
 criterion = "0.3.5"

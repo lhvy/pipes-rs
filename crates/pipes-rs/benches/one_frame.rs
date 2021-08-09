@@ -1,6 +1,5 @@
-use config::Config;
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-use pipes_rs_core::App;
+use pipes_rs::{App, Config};
 use std::time::Duration;
 use terminal::VoidBackend;
 
