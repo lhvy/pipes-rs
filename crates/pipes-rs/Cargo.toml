@@ -13,3 +13,10 @@ config = {path = "../config"}
 mimalloc = {version = "0.1.25", default-features = false}
 pipes-rs-core = {path = "../pipes-rs-core"}
 terminal = {path = "../terminal"}
+
+[dev-dependencies]
+criterion = "0.3.5"
+
+[[bench]]
+harness = false
+name = "one_frame"

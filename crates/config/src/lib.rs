@@ -11,39 +11,39 @@ use structopt::StructOpt;
 pub struct Config {
     /// what kind of terminal coloring to use
     #[structopt(short, long, possible_values = &["ansi", "rgb", "none"])]
-    color_mode: Option<ColorMode>,
+    pub color_mode: Option<ColorMode>,
 
     /// the color palette used assign colors to pipes
     #[structopt(long, possible_values = &["default", "darker", "pastel", "matrix"])]
-    palette: Option<Palette>,
+    pub palette: Option<Palette>,
 
     /// delay between frames in milliseconds
     #[structopt(short, long = "delay")]
-    delay_ms: Option<u64>,
+    pub delay_ms: Option<u64>,
 
     /// portion of screen covered before resetting (0.0–1.0)
     #[structopt(short, long)]
-    reset_threshold: Option<f32>,
+    pub reset_threshold: Option<f32>,
 
     /// kinds of pipes separated by commas, e.g. heavy,curved
     #[structopt(short, long)]
-    kinds: Option<PresetKindSet>,
+    pub kinds: Option<PresetKindSet>,
 
     /// whether to use bold
     #[structopt(short, long, possible_values = &["true", "false"], value_name = "boolean")]
-    bold: Option<bool>,
+    pub bold: Option<bool>,
 
     /// whether pipes should retain style after hitting the edge
     #[structopt(short, long, possible_values = &["true", "false"], value_name = "boolean")]
-    inherit_style: Option<bool>,
+    pub inherit_style: Option<bool>,
 
     /// number of pipes
     #[structopt(name = "pipe-num", short, long)]
-    num_pipes: Option<u32>,
+    pub num_pipes: Option<u32>,
 
     /// chance of a pipe turning (0.0–1.0)
     #[structopt(short, long)]
-    turn_chance: Option<f32>,
+    pub turn_chance: Option<f32>,
 }
 
 impl Config {

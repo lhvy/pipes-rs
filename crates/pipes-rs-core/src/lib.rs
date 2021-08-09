@@ -67,7 +67,7 @@ impl<B: Backend> App<B> {
         Ok(ControlFlow::Continue)
     }
 
-    fn tick_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
+    pub fn tick_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
         match self.terminal.get_event() {
             Some(Event::Reset) => return Ok(ControlFlow::Reset),
             Some(Event::Exit) => return Ok(ControlFlow::Break),
@@ -117,7 +117,7 @@ impl<B: Backend> App<B> {
         Ok(())
     }
 
-    fn create_pipes(&mut self) -> Vec<Pipe> {
+    pub fn create_pipes(&mut self) -> Vec<Pipe> {
         (0..self.config.num_pipes())
             .map(|_| self.create_pipe())
             .collect()
