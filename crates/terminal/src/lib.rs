@@ -1,36 +1,37 @@
 mod screen;
+mod stdout_backend;
+mod void_backend;
+
+pub use stdout_backend::StdoutBackend;
+pub use void_backend::VoidBackend;
 
 use crossterm::{
     cursor,
-    event::{self, Event as CrosstermEvent, KeyCode, KeyEvent, KeyModifiers},
+    event::{Event as CrosstermEvent, KeyCode, KeyEvent, KeyModifiers},
     queue, style, terminal,
 };
 use screen::Screen;
-use std::{
-    io::{self, Write},
-    num::NonZeroUsize,
-    thread,
-};
+use std::{io::Write, num::NonZeroUsize, thread};
 use unicode_width::UnicodeWidthChar;
 
-pub struct Terminal<'a> {
+pub struct Terminal<B: Backend> {
     screen: Screen,
-    stdout: io::StdoutLock<'a>,
+    backend: B,
     max_char_width: u16,
     size: (u16, u16),
     events_rx: flume::Receiver<EventWithData>,
 }
 
-impl<'a> Terminal<'a> {
+impl<B: Backend> Terminal<B> {
     pub fn new(
-        stdout: io::StdoutLock<'a>,
+        backend: B,
         chars: impl Iterator<Item = char>,
         custom_width: Option<NonZeroUsize>,
     ) -> anyhow::Result<Self> {
         let max_char_width = Self::determine_max_char_width(chars, custom_width);
 
         let size = {
-            let (width, height) = terminal::size()?;
+            let (width, height) = backend.size()?;
             (width / max_char_width, height)
         };
 
@@ -38,37 +39,35 @@ impl<'a> Terminal<'a> {
 
         let (events_tx, events_rx) = flume::unbounded();
 
-        thread::spawn(move || loop {
-            match event::read() {
-                Ok(CrosstermEvent::Resize(width, height)) => events_tx
-                    .send(EventWithData::Resized { width, height })
-                    .unwrap(),
+        thread::spawn(move || {
+            B::for_each_event(|event| {
+                match event {
+                    CrosstermEvent::Resize(width, height) => events_tx
+                        .send(EventWithData::Resized { width, height })
+                        .unwrap(),
 
-                Ok(CrosstermEvent::Key(KeyEvent {
-                    code: KeyCode::Char('c'),
-                    modifiers: KeyModifiers::CONTROL,
-                }))
-                | Ok(CrosstermEvent::Key(KeyEvent {
-                    code: KeyCode::Char('q'),
-                    ..
-                })) => events_tx.send(EventWithData::Exit).unwrap(),
+                    CrosstermEvent::Key(KeyEvent {
+                        code: KeyCode::Char('c'),
+                        modifiers: KeyModifiers::CONTROL,
+                    })
+                    | CrosstermEvent::Key(KeyEvent {
+                        code: KeyCode::Char('q'),
+                        ..
+                    }) => events_tx.send(EventWithData::Exit).unwrap(),
 
-                Ok(CrosstermEvent::Key(KeyEvent {
-                    code: KeyCode::Char('r'),
-                    ..
-                })) => events_tx.send(EventWithData::Reset).unwrap(),
+                    CrosstermEvent::Key(KeyEvent {
+                        code: KeyCode::Char('r'),
+                        ..
+                    }) => events_tx.send(EventWithData::Reset).unwrap(),
 
-                Ok(_) => {} // ignore all other events
-
-                // ignore errors because not updating the size
-                // isn’t a fatal issue
-                Err(_) => {}
-            }
+                    _ => {} // ignore all other events
+                }
+            })
         });
 
         Ok(Self {
             screen,
-            stdout,
+            backend,
             max_char_width,
             size,
             events_rx,
@@ -89,27 +88,27 @@ impl<'a> Terminal<'a> {
     }
 
     pub fn enable_bold(&mut self) -> anyhow::Result<()> {
-        queue!(self.stdout, style::SetAttribute(style::Attribute::Bold))?;
+        queue!(self.backend, style::SetAttribute(style::Attribute::Bold))?;
         Ok(())
     }
 
     pub fn reset_style(&mut self) -> anyhow::Result<()> {
-        queue!(self.stdout, style::SetAttribute(style::Attribute::Reset))?;
+        queue!(self.backend, style::SetAttribute(style::Attribute::Reset))?;
         Ok(())
     }
 
     pub fn set_cursor_visibility(&mut self, visible: bool) -> anyhow::Result<()> {
         if visible {
-            queue!(self.stdout, cursor::Show)?;
+            queue!(self.backend, cursor::Show)?;
         } else {
-            queue!(self.stdout, cursor::Hide)?;
+            queue!(self.backend, cursor::Hide)?;
         }
 
         Ok(())
     }
 
     pub fn clear(&mut self) -> anyhow::Result<()> {
-        queue!(self.stdout, terminal::Clear(terminal::ClearType::All))?;
+        queue!(self.backend, terminal::Clear(terminal::ClearType::All))?;
         self.screen.clear();
 
         Ok(())
@@ -117,27 +116,27 @@ impl<'a> Terminal<'a> {
 
     pub fn set_raw_mode(&self, enabled: bool) -> anyhow::Result<()> {
         if enabled {
-            terminal::enable_raw_mode()?;
+            self.backend.enable_raw_mode()?;
         } else {
-            terminal::disable_raw_mode()?;
+            self.backend.disable_raw_mode()?;
         }
 
         Ok(())
     }
 
     pub fn enter_alternate_screen(&mut self) -> anyhow::Result<()> {
-        queue!(self.stdout, terminal::EnterAlternateScreen)?;
+        queue!(self.backend, terminal::EnterAlternateScreen)?;
         Ok(())
     }
 
     pub fn leave_alternate_screen(&mut self) -> anyhow::Result<()> {
-        queue!(self.stdout, terminal::LeaveAlternateScreen)?;
+        queue!(self.backend, terminal::LeaveAlternateScreen)?;
         Ok(())
     }
 
     pub fn set_text_color(&mut self, color: Color) -> anyhow::Result<()> {
         let color = style::Color::from(color);
-        queue!(self.stdout, style::SetForegroundColor(color))?;
+        queue!(self.backend, style::SetForegroundColor(color))?;
 
         Ok(())
     }
@@ -145,7 +144,7 @@ impl<'a> Terminal<'a> {
     #[inline(always)]
     pub fn move_cursor_to(&mut self, x: u16, y: u16) -> anyhow::Result<()> {
         let max_char_width = self.max_char_width;
-        queue!(self.stdout, cursor::MoveTo(x * max_char_width, y))?;
+        queue!(self.backend, cursor::MoveTo(x * max_char_width, y))?;
         self.screen.move_cursor_to(x as usize, y as usize);
 
         Ok(())
@@ -161,13 +160,13 @@ impl<'a> Terminal<'a> {
 
     pub fn print(&mut self, c: char) -> anyhow::Result<()> {
         self.screen.print(c);
-        self.stdout.write_all(c.to_string().as_bytes())?;
+        self.backend.write_all(c.to_string().as_bytes())?;
 
         Ok(())
     }
 
     pub fn flush(&mut self) -> anyhow::Result<()> {
-        self.stdout.flush()?;
+        self.backend.flush()?;
         Ok(())
     }
 
@@ -187,6 +186,13 @@ impl<'a> Terminal<'a> {
         self.size = (width, height);
         self.screen = Screen::new(width as usize, height as usize);
     }
+}
+
+pub trait Backend: Write {
+    fn size(&self) -> anyhow::Result<(u16, u16)>;
+    fn for_each_event(f: impl FnMut(CrosstermEvent));
+    fn enable_raw_mode(&self) -> anyhow::Result<()>;
+    fn disable_raw_mode(&self) -> anyhow::Result<()>;
 }
 
 #[derive(Clone, Copy)]
