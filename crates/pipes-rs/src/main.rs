@@ -9,7 +9,7 @@ use model::{
 use rng::Rng;
 use std::{io, thread};
 use structopt::StructOpt;
-use terminal::{Event, Terminal};
+use terminal::{Event, StdoutBackend, Terminal};
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
@@ -23,7 +23,7 @@ fn main() -> anyhow::Result<()> {
 }
 
 struct App<'a> {
-    terminal: Terminal<'a>,
+    terminal: Terminal<StdoutBackend<'a>>,
     rng: Rng,
     config: Config,
     kinds: PresetKindSet,
@@ -37,7 +37,11 @@ impl<'a> App<'a> {
         let kinds = config.kinds();
 
         let largest_custom_width = kinds.custom_widths().max();
-        let terminal = Terminal::new(stdout, kinds.chars(), largest_custom_width)?;
+        let terminal = Terminal::new(
+            StdoutBackend::new(stdout),
+            kinds.chars(),
+            largest_custom_width,
+        )?;
 
         let rng = Rng::new()?;
 
