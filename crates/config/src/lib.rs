@@ -8,7 +8,7 @@ use structopt::StructOpt;
 
 #[derive(Serialize, Deserialize, Default, StructOpt)]
 #[structopt(name = "pipes-rs", setting = AppSettings::ColoredHelp)]
-pub(crate) struct Config {
+pub struct Config {
     /// what kind of terminal coloring to use
     #[structopt(short, long, possible_values = &["ansi", "rgb", "none"])]
     color_mode: Option<ColorMode>,
@@ -47,7 +47,14 @@ pub(crate) struct Config {
 }
 
 impl Config {
-    pub(crate) fn read() -> anyhow::Result<Self> {
+    pub fn read() -> anyhow::Result<Self> {
+        let config = Self::read_from_disk_with_default()?.combine(Self::from_args());
+        config.validate()?;
+
+        Ok(config)
+    }
+
+    fn read_from_disk_with_default() -> anyhow::Result<Self> {
         let path = Self::path()?;
 
         if path.exists() {
@@ -73,7 +80,7 @@ impl Config {
         toml::from_str(&contents).context("failed to read config")
     }
 
-    pub(crate) fn validate(&self) -> anyhow::Result<()> {
+    fn validate(&self) -> anyhow::Result<()> {
         if let Some(reset_threshold) = self.reset_threshold() {
             if !(0.0..=1.0).contains(&reset_threshold) {
                 anyhow::bail!("reset threshold should be within 0 and 1")
@@ -86,19 +93,19 @@ impl Config {
         Ok(())
     }
 
-    pub(crate) fn color_mode(&self) -> ColorMode {
+    pub fn color_mode(&self) -> ColorMode {
         self.color_mode.unwrap_or(ColorMode::Ansi)
     }
 
-    pub(crate) fn palette(&self) -> Palette {
+    pub fn palette(&self) -> Palette {
         self.palette.unwrap_or(Palette::Default)
     }
 
-    pub(crate) fn delay(&self) -> Duration {
+    pub fn delay(&self) -> Duration {
         Duration::from_millis(self.delay_ms.unwrap_or(20))
     }
 
-    pub(crate) fn reset_threshold(&self) -> Option<f32> {
+    pub fn reset_threshold(&self) -> Option<f32> {
         if self.reset_threshold == Some(0.0) {
             None
         } else {
@@ -106,7 +113,7 @@ impl Config {
         }
     }
 
-    pub(crate) fn kinds(&self) -> PresetKindSet {
+    pub fn kinds(&self) -> PresetKindSet {
         self.kinds.clone().unwrap_or_else(|| {
             let mut kinds = HashSet::with_capacity(1);
             kinds.insert(PresetKind::Heavy);
@@ -114,23 +121,23 @@ impl Config {
         })
     }
 
-    pub(crate) fn bold(&self) -> bool {
+    pub fn bold(&self) -> bool {
         self.bold.unwrap_or(true)
     }
 
-    pub(crate) fn inherit_style(&self) -> bool {
+    pub fn inherit_style(&self) -> bool {
         self.inherit_style.unwrap_or(false)
     }
 
-    pub(crate) fn num_pipes(&self) -> u32 {
+    pub fn num_pipes(&self) -> u32 {
         self.num_pipes.unwrap_or(1)
     }
 
-    pub(crate) fn turn_chance(&self) -> f32 {
+    pub fn turn_chance(&self) -> f32 {
         self.turn_chance.unwrap_or(0.15)
     }
 
-    pub(crate) fn combine(self, other: Self) -> Self {
+    fn combine(self, other: Self) -> Self {
         Self {
             color_mode: other.color_mode.or(self.color_mode),
             palette: other.palette.or(self.palette),

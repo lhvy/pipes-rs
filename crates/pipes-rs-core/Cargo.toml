@@ -2,14 +2,14 @@
 authors = ["lhvy <me@lhvy.dev>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
-name = "pipes-rs"
-version = "1.4.4"
+name = "pipes-rs-core"
+version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.37"
+anyhow = "1.0.42"
 config = {path = "../config"}
-mimalloc = {version = "0.1.25", default-features = false}
-pipes-rs-core = {path = "../pipes-rs-core"}
+model = {path = "../model"}
+rng = {path = "../rng"}
 terminal = {path = "../terminal"}
