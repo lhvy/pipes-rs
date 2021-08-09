@@ -1,4 +1,6 @@
-use config::Config;
+mod config;
+pub use config::Config;
+
 use model::{
     pipe::{Pipe, PresetKind, PresetKindSet},
     position::InScreenBounds,
