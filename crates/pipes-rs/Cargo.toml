@@ -11,7 +11,8 @@ version = "1.4.4"
 anyhow = "1.0.37"
 config = {path = "../config"}
 mimalloc = {version = "0.1.25", default-features = false}
-pipes-rs-core = {path = "../pipes-rs-core"}
+model = {path = "../model"}
+rng = {path = "../rng"}
 terminal = {path = "../terminal"}
 
 [dev-dependencies]

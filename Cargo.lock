@@ -511,16 +511,6 @@ dependencies = [
  "config",
  "criterion",
  "mimalloc",
- "pipes-rs-core",
- "terminal",
-]
-
-[[package]]
-name = "pipes-rs-core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "config",
  "model",
  "rng",
  "terminal",
