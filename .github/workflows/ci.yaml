@@ -38,13 +38,13 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --all-features --locked
+          args: --all-targets --all-features --locked
 
       - name: Clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-features
+          args: --all-targets --all-features
 
       - name: Test
         uses: actions-rs/cargo@v1
