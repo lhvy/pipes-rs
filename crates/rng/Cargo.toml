@@ -1,5 +1,4 @@
 [package]
-authors = ["lhvy <me@lhvy.dev>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 name = "rng"
