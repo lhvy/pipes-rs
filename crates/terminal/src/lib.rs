@@ -160,7 +160,7 @@ impl<B: Backend> Terminal<B> {
     }
 
     pub fn print(&mut self, c: char) -> anyhow::Result<()> {
-        self.screen.print(c);
+        self.screen.print();
         self.backend.write_all(c.to_string().as_bytes())?;
 
         Ok(())

@@ -1,5 +1,5 @@
 pub(crate) struct Screen {
-    text: Vec<Cell>,
+    cells: Vec<Cell>,
     cursor: (usize, usize),
     width: usize,
     height: usize,
@@ -8,7 +8,7 @@ pub(crate) struct Screen {
 impl Screen {
     pub(crate) fn new(width: usize, height: usize) -> Self {
         Self {
-            text: vec![Cell(None); width * height],
+            cells: vec![Cell { is_covered: false }; width * height],
             cursor: (0, 0),
             width,
             height,
@@ -22,31 +22,29 @@ impl Screen {
         self.cursor = (x, y);
     }
 
-    pub(crate) fn print(&mut self, c: char) {
-        *self.current_cell() = Cell(Some(c));
+    pub(crate) fn print(&mut self) {
+        self.current_cell().is_covered = true;
     }
 
     pub(crate) fn clear(&mut self) {
-        self.text = vec![Cell(None); self.width * self.height];
+        for cell in &mut self.cells {
+            cell.is_covered = false;
+        }
     }
 
     pub(crate) fn portion_covered(&self) -> f32 {
-        let num_covered = self.text.iter().filter(|c| c.is_covered()).count();
-        let total = self.text.len();
+        let num_covered = self.cells.iter().filter(|c| c.is_covered).count();
+        let total = self.cells.len();
 
         num_covered as f32 / total as f32
     }
 
     fn current_cell(&mut self) -> &mut Cell {
-        &mut self.text[self.cursor.1 * self.width + self.cursor.0]
+        &mut self.cells[self.cursor.1 * self.width + self.cursor.0]
     }
 }
 
 #[derive(Clone, Copy)]
-struct Cell(Option<char>);
-
-impl Cell {
-    fn is_covered(self) -> bool {
-        self.0.is_some()
-    }
+struct Cell {
+    is_covered: bool,
 }
