@@ -138,10 +138,9 @@ impl<B: Backend> App<B> {
     }
 
     fn under_threshold(&self) -> bool {
-        if let Some(reset_threshold) = self.config.reset_threshold() {
-            self.terminal.portion_covered() < reset_threshold
-        } else {
-            true
+        match self.config.reset_threshold() {
+            Some(reset_threshold) => self.terminal.portion_covered() < reset_threshold,
+            None => true,
         }
     }
 

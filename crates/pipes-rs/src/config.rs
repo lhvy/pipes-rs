@@ -57,11 +57,11 @@ impl Config {
     fn read_from_disk_with_default() -> anyhow::Result<Self> {
         let path = Self::path()?;
 
-        if path.exists() {
-            Self::read_from_disk(path)
-        } else {
-            Ok(Config::default())
+        if !path.exists() {
+            return Ok(Config::default());
         }
+
+        Self::read_from_disk(path)
     }
 
     fn path() -> anyhow::Result<PathBuf> {
@@ -106,10 +106,10 @@ impl Config {
     }
 
     pub fn reset_threshold(&self) -> Option<f32> {
-        if self.reset_threshold == Some(0.0) {
-            None
-        } else {
-            Some(self.reset_threshold.unwrap_or(0.5))
+        match self.reset_threshold {
+            Some(n) if n == 0.0 => None,
+            Some(n) => Some(n),
+            None => Some(0.5),
         }
     }
 

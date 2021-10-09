@@ -46,14 +46,16 @@ impl<B: Backend> Terminal<B> {
                         .send(EventWithData::Resized { width, height })
                         .unwrap(),
 
-                    CrosstermEvent::Key(KeyEvent {
-                        code: KeyCode::Char('c'),
-                        modifiers: KeyModifiers::CONTROL,
-                    })
-                    | CrosstermEvent::Key(KeyEvent {
-                        code: KeyCode::Char('q'),
-                        ..
-                    }) => events_tx.send(EventWithData::Exit).unwrap(),
+                    CrosstermEvent::Key(
+                        KeyEvent {
+                            code: KeyCode::Char('c'),
+                            modifiers: KeyModifiers::CONTROL,
+                        }
+                        | KeyEvent {
+                            code: KeyCode::Char('q'),
+                            ..
+                        },
+                    ) => events_tx.send(EventWithData::Exit).unwrap(),
 
                     CrosstermEvent::Key(KeyEvent {
                         code: KeyCode::Char('r'),
@@ -62,7 +64,7 @@ impl<B: Backend> Terminal<B> {
 
                     _ => {} // ignore all other events
                 }
-            })
+            });
         });
 
         Ok(Self {
@@ -80,10 +82,9 @@ impl<B: Backend> Terminal<B> {
     ) -> u16 {
         let max_char_width = chars.map(|c| c.width().unwrap() as u16).max().unwrap();
 
-        if let Some(custom_width) = custom_width {
-            max_char_width.max(custom_width.get() as u16)
-        } else {
-            max_char_width
+        match custom_width {
+            Some(custom_width) => max_char_width.max(custom_width.get() as u16),
+            None => max_char_width,
         }
     }
 
