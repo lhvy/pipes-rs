@@ -33,7 +33,7 @@ Download compiled binaries from [releases](https://github.com/lhvy/pipes-rs/rele
 
 ## Windows Font Issues
 
-Some characters may be missing on Windows and will fall back to [tofu](https://en.wikipedia.org/wiki/Noto_fonts#Etymology), use a font such as [Noto Mono](https://www.google.com/get/noto/) to fix this issue.
+There have been reports that some characters pipes-rs uses are missing on Windows, which causes them to appear as [tofu](https://en.wikipedia.org/wiki/Noto_fonts#Etymology). If you experience this issue, try using a font with a large character set, such as [Noto Mono](https://www.google.com/get/noto/).
 
 ## Keybindings
 
