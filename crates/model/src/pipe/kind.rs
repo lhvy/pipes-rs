@@ -59,10 +59,9 @@ impl Kind {
     }
 
     fn width(self) -> KindWidth {
-        if self == Self::Dots {
-            KindWidth::Custom(NonZeroUsize::new(2).unwrap())
-        } else {
-            KindWidth::Auto
+        match self {
+            Self::Dots => KindWidth::Custom(NonZeroUsize::new(2).unwrap()),
+            _ => KindWidth::Auto,
         }
     }
 
