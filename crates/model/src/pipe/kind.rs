@@ -11,6 +11,7 @@ pub enum Kind {
     Emoji,
     Outline,
     Dots,
+    Blocks,
 }
 
 impl Kind {
@@ -55,6 +56,7 @@ impl Kind {
             Self::Emoji => Self::EMOJI,
             Self::Outline => Self::OUTLINE,
             Self::Dots => Self::DOTS,
+            Self::Blocks => Self::BLOCKS,
         }
     }
 
@@ -73,6 +75,7 @@ impl Kind {
     const EMOJI: [char; 8] = ['👆', '👇', '👈', '👉', '👌', '👌', '👌', '👌'];
     const OUTLINE: [char; 8] = ['║', '║', '═', '═', '╔', '╗', '╚', '╝'];
     const DOTS: [char; 8] = ['•', '•', '•', '•', '•', '•', '•', '•'];
+    const BLOCKS: [char; 8] = ['█', '█', '▀', '▀', '█', '█', '▀', '▀'];
 }
 
 #[derive(Clone, Copy)]
@@ -93,8 +96,9 @@ impl FromStr for Kind {
             "emoji" => Self::Emoji,
             "outline" => Self::Outline,
             "dots" => Self::Dots,
+            "blocks" => Self::Blocks,
             _ => anyhow::bail!(
-                r#"unknown pipe kind (expected “heavy”, “light”, “curved”, “knobby”, “emoji”, “outline” or “dots”)"#,
+                r#"unknown pipe kind (expected “heavy”, “light”, “curved”, “knobby”, “emoji”, “outline”, “dots” or “blocks”)"#,
             ),
         })
     }
