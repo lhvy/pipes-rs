@@ -41,8 +41,10 @@ impl<B: Backend> App<B> {
             self.terminal.enable_bold()?;
         }
 
+        let mut pipes = self.create_pipes();
+
         loop {
-            if let ControlFlow::Break = self.reset_loop()? {
+            if let ControlFlow::Break = self.reset_loop(&mut pipes)? {
                 break;
             }
         }
@@ -54,12 +56,15 @@ impl<B: Backend> App<B> {
         Ok(())
     }
 
-    pub fn reset_loop(&mut self) -> anyhow::Result<ControlFlow> {
+    pub fn reset_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
         self.terminal.clear()?;
-        let mut pipes = self.create_pipes();
+
+        for pipe in &mut *pipes {
+            *pipe = self.create_pipe();
+        }
 
         while self.under_threshold() {
-            let control_flow = self.tick_loop(&mut pipes)?;
+            let control_flow = self.tick_loop(pipes)?;
             match control_flow {
                 ControlFlow::Break | ControlFlow::Reset => return Ok(control_flow),
                 ControlFlow::Continue => {}
