@@ -1,3 +1,4 @@
+use rng::Rng;
 use std::num::NonZeroUsize;
 use std::str::FromStr;
 
@@ -129,8 +130,9 @@ impl KindSet {
         Self(vec![kind])
     }
 
-    pub fn iter(&self) -> impl ExactSizeIterator<Item = Kind> + '_ {
-        self.0.iter().copied()
+    pub fn choose_random(&self, rng: &mut Rng) -> Kind {
+        let idx = rng.gen_range(0..self.0.len() as u32);
+        self.0[idx as usize]
     }
 
     pub fn chars(&self) -> impl Iterator<Item = char> + '_ {

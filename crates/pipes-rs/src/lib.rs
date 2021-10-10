@@ -2,7 +2,7 @@ mod config;
 pub use config::Config;
 
 use model::{
-    pipe::{Kind, KindSet, Pipe},
+    pipe::{KindSet, Pipe},
     position::InScreenBounds,
 };
 use rng::Rng;
@@ -131,7 +131,7 @@ impl<B: Backend> App<B> {
     }
 
     fn create_pipe(&mut self) -> Pipe {
-        let kind = self.random_kind();
+        let kind = self.kinds.choose_random(&mut self.rng);
 
         Pipe::new(
             self.terminal.size(),
@@ -148,15 +148,6 @@ impl<B: Backend> App<B> {
             None => true,
         }
     }
-
-    fn random_kind(&mut self) -> Kind {
-        choose_random(self.kinds.iter(), &mut self.rng)
-    }
-}
-
-fn choose_random<T>(mut iter: impl ExactSizeIterator<Item = T>, rng: &mut Rng) -> T {
-    let index = rng.gen_range_size(0..iter.len());
-    iter.nth(index).unwrap()
 }
 
 #[must_use]
