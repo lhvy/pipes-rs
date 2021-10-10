@@ -7,12 +7,12 @@ version = "1.4.5"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.37"
+anyhow = "1.0"
 etcetera = "0.3.2"
 mimalloc = {version = "0.1.25", default-features = false}
 model = {path = "../model"}
 rng = {path = "../rng"}
-serde = "1.0.118"
+serde = "1.0"
 structopt = "0.3.21"
 terminal = {path = "../terminal"}
 toml = "0.5.8"
