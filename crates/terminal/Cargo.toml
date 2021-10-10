@@ -4,8 +4,6 @@ license = "MIT OR Apache-2.0"
 name = "terminal"
 version = "0.1.0"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 anyhow = "1.0"
 crossterm = "0.19.0"
