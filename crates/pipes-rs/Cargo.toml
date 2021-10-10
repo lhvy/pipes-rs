@@ -4,8 +4,6 @@ license = "MIT OR Apache-2.0"
 name = "pipes-rs"
 version = "1.4.5"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 anyhow = "1.0.37"
 etcetera = "0.3.2"
