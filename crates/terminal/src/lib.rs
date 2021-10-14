@@ -142,7 +142,6 @@ impl<B: Backend> Terminal<B> {
         Ok(())
     }
 
-    #[inline(always)]
     pub fn move_cursor_to(&mut self, x: u16, y: u16) -> anyhow::Result<()> {
         let max_char_width = self.max_char_width;
         queue!(self.backend, cursor::MoveTo(x * max_char_width, y))?;
