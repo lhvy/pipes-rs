@@ -5,13 +5,12 @@ mod void_backend;
 pub use stdout_backend::StdoutBackend;
 pub use void_backend::VoidBackend;
 
-use crossterm::{
-    cursor,
-    event::{Event as CrosstermEvent, KeyCode, KeyEvent, KeyModifiers},
-    queue, style, terminal,
-};
+use crossterm::event::{Event as CrosstermEvent, KeyCode, KeyEvent, KeyModifiers};
+use crossterm::{cursor, queue, style, terminal};
 use screen::Screen;
-use std::{io::Write, num::NonZeroUsize, thread};
+use std::io::Write;
+use std::num::NonZeroUsize;
+use std::thread;
 use unicode_width::UnicodeWidthChar;
 
 pub struct Terminal<B: Backend> {

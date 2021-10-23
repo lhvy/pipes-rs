@@ -2,7 +2,9 @@ use anyhow::Context;
 use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use model::pipe::{ColorMode, Kind, KindSet, Palette};
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf, time::Duration};
+use std::fs;
+use std::path::PathBuf;
+use std::time::Duration;
 use structopt::clap::AppSettings;
 use structopt::StructOpt;
 
