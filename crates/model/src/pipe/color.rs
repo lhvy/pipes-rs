@@ -1,5 +1,6 @@
 use rng::Rng;
-use std::{ops::Range, str::FromStr};
+use std::ops::Range;
+use std::str::FromStr;
 use tincture::ColorSpace;
 
 pub(super) fn gen_random_color(

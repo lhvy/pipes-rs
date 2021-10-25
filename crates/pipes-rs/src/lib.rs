@@ -1,10 +1,8 @@
 mod config;
 pub use config::Config;
 
-use model::{
-    pipe::{KindSet, Pipe},
-    position::InScreenBounds,
-};
+use model::pipe::{KindSet, Pipe};
+use model::position::InScreenBounds;
 use rng::Rng;
 use std::thread;
 use terminal::{Backend, Event, Terminal};

@@ -7,8 +7,7 @@ use history_keeper::HistoryKeeper;
 pub use kind::{Kind, KindSet};
 
 use crate::direction::Direction;
-use crate::position::InScreenBounds;
-use crate::position::Position;
+use crate::position::{InScreenBounds, Position};
 use rng::Rng;
 
 pub struct Pipe {
