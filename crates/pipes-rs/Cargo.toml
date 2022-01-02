@@ -6,12 +6,12 @@ version = "1.4.6"
 
 [dependencies]
 anyhow = "1.0"
+clap = {version = "3.0", features = ["derive", "wrap_help"]}
 etcetera = "0.3.2"
 mimalloc = {version = "0.1.25", default-features = false}
 model = {path = "../model"}
 rng = {path = "../rng"}
 serde = "1.0"
-structopt = "0.3.21"
 terminal = {path = "../terminal"}
 toml = "0.5.8"
 

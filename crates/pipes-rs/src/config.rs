@@ -1,56 +1,55 @@
 use anyhow::Context;
+use clap::Parser;
 use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use model::pipe::{ColorMode, Kind, KindSet, Palette};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use std::time::Duration;
-use structopt::clap::AppSettings;
-use structopt::StructOpt;
 
-#[derive(Serialize, Deserialize, Default, StructOpt)]
-#[structopt(name = "pipes-rs", setting = AppSettings::ColoredHelp)]
+#[derive(Serialize, Deserialize, Default, Parser)]
+#[clap(name = "pipes-rs", version)]
 pub struct Config {
     /// what kind of terminal coloring to use
-    #[structopt(short, long, possible_values = &["ansi", "rgb", "none"])]
+    #[clap(short, long, possible_values = &["ansi", "rgb", "none"])]
     pub color_mode: Option<ColorMode>,
 
     /// the color palette used assign colors to pipes
-    #[structopt(long, possible_values = &["default", "darker", "pastel", "matrix"])]
+    #[clap(long, possible_values = &["default", "darker", "pastel", "matrix"])]
     pub palette: Option<Palette>,
 
     /// delay between frames in milliseconds
-    #[structopt(short, long = "delay")]
+    #[clap(short, long = "delay")]
     pub delay_ms: Option<u64>,
 
     /// portion of screen covered before resetting (0.0–1.0)
-    #[structopt(short, long)]
+    #[clap(short, long)]
     pub reset_threshold: Option<f32>,
 
     /// kinds of pipes separated by commas, e.g. heavy,curved
-    #[structopt(short, long)]
+    #[clap(short, long)]
     pub kinds: Option<KindSet>,
 
     /// whether to use bold
-    #[structopt(short, long, possible_values = &["true", "false"], value_name = "boolean")]
+    #[clap(short, long, possible_values = &["true", "false"], value_name = "boolean")]
     pub bold: Option<bool>,
 
     /// whether pipes should retain style after hitting the edge
-    #[structopt(short, long, possible_values = &["true", "false"], value_name = "boolean")]
+    #[clap(short, long, possible_values = &["true", "false"], value_name = "boolean")]
     pub inherit_style: Option<bool>,
 
     /// number of pipes
-    #[structopt(name = "pipe-num", short, long)]
+    #[clap(name = "pipe-num", short, long)]
     pub num_pipes: Option<u32>,
 
     /// chance of a pipe turning (0.0–1.0)
-    #[structopt(short, long)]
+    #[clap(short, long)]
     pub turn_chance: Option<f32>,
 }
 
 impl Config {
     pub fn read() -> anyhow::Result<Self> {
-        let config = Self::read_from_disk_with_default()?.combine(Self::from_args());
+        let config = Self::read_from_disk_with_default()?.combine(Self::parse());
         config.validate()?;
 
         Ok(config)
