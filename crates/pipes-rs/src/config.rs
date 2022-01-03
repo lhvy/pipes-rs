@@ -31,15 +31,15 @@ pub struct Config {
     pub kinds: Option<KindSet>,
 
     /// whether to use bold
-    #[clap(short, long, possible_values = &["true", "false"], value_name = "boolean")]
+    #[clap(short, long, possible_values = &["true", "false"], value_name = "BOOL")]
     pub bold: Option<bool>,
 
     /// whether pipes should retain style after hitting the edge
-    #[clap(short, long, possible_values = &["true", "false"], value_name = "boolean")]
+    #[clap(short, long, possible_values = &["true", "false"], value_name = "BOOL")]
     pub inherit_style: Option<bool>,
 
     /// number of pipes
-    #[clap(name = "pipe-num", short, long)]
+    #[clap(name = "pipe-num", short, long, value_name = "NUM")]
     pub num_pipes: Option<u32>,
 
     /// chance of a pipe turning (0.0–1.0)
