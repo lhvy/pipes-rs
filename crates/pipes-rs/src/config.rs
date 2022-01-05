@@ -11,11 +11,11 @@ use std::time::Duration;
 #[clap(name = "pipes-rs", version)]
 pub struct Config {
     /// what kind of terminal coloring to use
-    #[clap(short, long, possible_values = &["ansi", "rgb", "none"])]
+    #[clap(short, long, possible_values = ["ansi", "rgb", "none"])]
     pub color_mode: Option<ColorMode>,
 
     /// the color palette used assign colors to pipes
-    #[clap(long, possible_values = &["default", "darker", "pastel", "matrix"])]
+    #[clap(long, possible_values = ["default", "darker", "pastel", "matrix"])]
     pub palette: Option<Palette>,
 
     /// delay between frames in milliseconds
@@ -31,11 +31,11 @@ pub struct Config {
     pub kinds: Option<KindSet>,
 
     /// whether to use bold
-    #[clap(short, long, possible_values = &["true", "false"], value_name = "BOOL")]
+    #[clap(short, long, possible_values = ["true", "false"], value_name = "BOOL")]
     pub bold: Option<bool>,
 
     /// whether pipes should retain style after hitting the edge
-    #[clap(short, long, possible_values = &["true", "false"], value_name = "BOOL")]
+    #[clap(short, long, possible_values = ["true", "false"], value_name = "BOOL")]
     pub inherit_style: Option<bool>,
 
     /// number of pipes
