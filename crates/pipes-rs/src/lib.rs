@@ -3,13 +3,11 @@ pub use config::Config;
 
 use model::pipe::{KindSet, Pipe};
 use model::position::InScreenBounds;
-use rng::Rng;
 use std::thread;
 use terminal::{Backend, Event, Terminal};
 
 pub struct App<B: Backend> {
     terminal: Terminal<B>,
-    rng: Rng,
     config: Config,
     kinds: KindSet,
 }
@@ -21,11 +19,8 @@ impl<B: Backend> App<B> {
         let largest_custom_width = kinds.custom_widths().max();
         let terminal = Terminal::new(backend, kinds.chars(), largest_custom_width)?;
 
-        let rng = Rng::new()?;
-
         Ok(Self {
             terminal,
-            rng,
             config,
             kinds,
         })
@@ -91,15 +86,12 @@ impl<B: Backend> App<B> {
     }
 
     fn tick_pipe(&mut self, pipe: &mut Pipe) {
-        let InScreenBounds(stayed_onscreen) = pipe.tick(
-            self.terminal.size(),
-            &mut self.rng,
-            self.config.turn_chance(),
-        );
+        let InScreenBounds(stayed_onscreen) =
+            pipe.tick(self.terminal.size(), self.config.turn_chance());
 
         if !stayed_onscreen {
             *pipe = if self.config.inherit_style() {
-                pipe.dup(self.terminal.size(), &mut self.rng)
+                pipe.dup(self.terminal.size())
             } else {
                 self.create_pipe()
             };
@@ -113,7 +105,7 @@ impl<B: Backend> App<B> {
             self.terminal.set_text_color(color)?;
         }
 
-        self.terminal.print(if self.rng.gen_bool(0.99999) {
+        self.terminal.print(if rng::gen_bool(0.99999) {
             pipe.to_char()
         } else {
             '🦀'
@@ -129,11 +121,10 @@ impl<B: Backend> App<B> {
     }
 
     fn create_pipe(&mut self) -> Pipe {
-        let kind = self.kinds.choose_random(&mut self.rng);
+        let kind = self.kinds.choose_random();
 
         Pipe::new(
             self.terminal.size(),
-            &mut self.rng,
             self.config.color_mode(),
             self.config.palette(),
             kind,

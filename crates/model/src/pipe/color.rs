@@ -1,22 +1,17 @@
-use rng::Rng;
 use std::ops::Range;
 use std::str::FromStr;
 use tincture::ColorSpace;
 
-pub(super) fn gen_random_color(
-    rng: &mut Rng,
-    color_mode: ColorMode,
-    palette: Palette,
-) -> Option<terminal::Color> {
+pub(super) fn gen_random_color(color_mode: ColorMode, palette: Palette) -> Option<terminal::Color> {
     match color_mode {
-        ColorMode::Ansi => Some(gen_random_ansi_color(rng)),
-        ColorMode::Rgb => Some(gen_random_rgb_color(rng, palette)),
+        ColorMode::Ansi => Some(gen_random_ansi_color()),
+        ColorMode::Rgb => Some(gen_random_rgb_color(palette)),
         ColorMode::None => None,
     }
 }
 
-fn gen_random_ansi_color(rng: &mut Rng) -> terminal::Color {
-    let num = rng.gen_range(0..12);
+fn gen_random_ansi_color() -> terminal::Color {
+    let num = rng::gen_range(0..12);
 
     match num {
         0 => terminal::Color::Red,
@@ -35,9 +30,9 @@ fn gen_random_ansi_color(rng: &mut Rng) -> terminal::Color {
     }
 }
 
-fn gen_random_rgb_color(rng: &mut Rng, palette: Palette) -> terminal::Color {
-    let hue = rng.gen_range_float(palette.get_hue_range());
-    let lightness = rng.gen_range_float(palette.get_lightness_range());
+fn gen_random_rgb_color(palette: Palette) -> terminal::Color {
+    let hue = rng::gen_range_float(palette.get_hue_range());
+    let lightness = rng::gen_range_float(palette.get_lightness_range());
 
     let oklch = tincture::Oklch {
         l: lightness,
