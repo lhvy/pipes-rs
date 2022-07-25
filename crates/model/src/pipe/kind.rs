@@ -1,4 +1,3 @@
-use rng::Rng;
 use std::num::NonZeroUsize;
 use std::str::FromStr;
 
@@ -130,8 +129,8 @@ impl KindSet {
         Self(vec![kind])
     }
 
-    pub fn choose_random(&self, rng: &mut Rng) -> Kind {
-        let idx = rng.gen_range(0..self.0.len() as u32);
+    pub fn choose_random(&self) -> Kind {
+        let idx = rng::gen_range(0..self.0.len() as u32);
         self.0[idx as usize]
     }
 
