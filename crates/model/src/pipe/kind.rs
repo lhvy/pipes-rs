@@ -12,6 +12,7 @@ pub enum Kind {
     Outline,
     Dots,
     Blocks,
+    Sus,
 }
 
 impl Kind {
@@ -57,12 +58,13 @@ impl Kind {
             Self::Outline => Self::OUTLINE,
             Self::Dots => Self::DOTS,
             Self::Blocks => Self::BLOCKS,
+            Self::Sus => Self::SUS,
         }
     }
 
     fn width(self) -> KindWidth {
         match self {
-            Self::Dots => KindWidth::Custom(NonZeroUsize::new(2).unwrap()),
+            Self::Dots | Self::Sus => KindWidth::Custom(NonZeroUsize::new(2).unwrap()),
             _ => KindWidth::Auto,
         }
     }
@@ -75,6 +77,7 @@ impl Kind {
     const OUTLINE: [char; 8] = ['║', '║', '═', '═', '╔', '╗', '╚', '╝'];
     const DOTS: [char; 8] = ['•', '•', '•', '•', '•', '•', '•', '•'];
     const BLOCKS: [char; 8] = ['█', '█', '▀', '▀', '█', '█', '▀', '▀'];
+    const SUS: [char; 8] = ['ඞ', 'ඞ', 'ඞ', 'ඞ', 'ඞ', 'ඞ', 'ඞ', 'ඞ'];
 }
 
 #[derive(Clone, Copy)]
@@ -96,8 +99,9 @@ impl FromStr for Kind {
             "outline" => Self::Outline,
             "dots" => Self::Dots,
             "blocks" => Self::Blocks,
+            "sus" => Self::Sus,
             _ => anyhow::bail!(
-                r#"unknown pipe kind (expected “heavy”, “light”, “curved”, “knobby”, “emoji”, “outline”, “dots” or “blocks”)"#,
+                r#"unknown pipe kind (expected “heavy”, “light”, “curved”, “knobby”, “emoji”, “outline”, “dots”, “blocks”, or “sus”)"#,
             ),
         })
     }
