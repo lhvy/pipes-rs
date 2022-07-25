@@ -1,6 +1,5 @@
 use std::ops::Range;
 use std::str::FromStr;
-use tincture::ColorSpace;
 
 pub(super) fn gen_random_color(color_mode: ColorMode, palette: Palette) -> Option<terminal::Color> {
     match color_mode {
@@ -37,12 +36,16 @@ fn gen_random_rgb_color(palette: Palette) -> terminal::Color {
     let oklch = tincture::Oklch {
         l: lightness,
         c: palette.get_chroma(),
-        h: tincture::Hue::from_degrees(hue).unwrap(),
+        h: hue.to_radians(),
     };
-    let oklab = tincture::Oklab::from(oklch);
-    let lrgb: tincture::LinearRgb = tincture::convert(oklab);
-    let srgb = tincture::Srgb::from(lrgb);
-    debug_assert!(srgb.in_bounds());
+    let oklab = tincture::oklch_to_oklab(oklch);
+    let lrgb = tincture::oklab_to_linear_srgb(oklab);
+    let srgb = tincture::linear_srgb_to_srgb(lrgb);
+    debug_assert!(
+        (0.0..=1.0).contains(&srgb.r)
+            && (0.0..=1.0).contains(&srgb.g)
+            && (0.0..=1.0).contains(&srgb.b)
+    );
 
     terminal::Color::Rgb {
         r: (srgb.r * 255.0) as u8,

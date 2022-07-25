@@ -871,9 +871,9 @@ dependencies = [
 
 [[package]]
 name = "tincture"
-version = "0.5.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05f713c3bf4e2ef169710223e7185c8eaa27a5e3709f64a042d7f7650c32f692"
+checksum = "29d41631100909c3fba47be2e71076de7518ebc380df9210c1422a843aecb8da"
 
 [[package]]
 name = "tinytemplate"
