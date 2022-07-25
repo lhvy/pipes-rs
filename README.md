@@ -51,7 +51,7 @@ color_mode = "ansi" # ansi, rgb or none
 palette = "default" # default, darker, pastel or matrix
 delay_ms = 20
 inherit_style = false
-kinds = ["heavy"] # heavy, light, curved, knobby, emoji, outline, dots, blocks
+kinds = ["heavy"] # heavy, light, curved, knobby, emoji, outline, dots, blocks, sus
 num_pipes = 1
 reset_threshold = 0.5 # 0.0–1.0
 turn_chance = 0.15 # 0.0–1.0
@@ -86,6 +86,7 @@ turn_chance = 0.15 # 0.0–1.0
 | `outline` | `║ ║ ═ ═ ╔ ╗ ╚ ╝`         |
 | `dots`    | `• • • • • • • •`         |
 | `blocks`  | `█ █ ▀ ▀ █ █ ▀ ▀`         |
+| `sus`     | `ඞ ඞ ඞ ඞ ඞ ඞ ඞ ඞ`         |
 
 _Due to emojis having a different character width, using the emoji pipe kind along side another pipe kind can cause spacing issues._
 
@@ -100,7 +101,7 @@ There are also command line options that can be used to override parts of the co
 | `-d`        | sets the delay in ms                                            | `-d 15`            |
 | `-i`        | toggles if pipes inherit style when hitting the edge            | `-i false`         |
 | `-k`        | sets the kinds of pipes, each kind separated by commas          | `-k heavy,curved`  |
-| `-p`        | sets the number of pipes onscreen                               | `-p 5`             |
+| `-p`        | sets the number of pipes on screen                              | `-p 5`             |
 | `-r`        | sets the percentage of the screen to be filled before resetting | `-r 0.75`          |
 | `-t`        | chance of a pipe turning each frame                             | `-t 0.15`          |
 | `--palette` | sets the color palette, RGB mode only                           | `--palette pastel` |
@@ -109,7 +110,7 @@ There are also command line options that can be used to override parts of the co
 
 ### Contributors
 
-pipes-rs is maintained by [lhvy](https://github.com/lhvy) and [arzg](https://github.com/arzg); any other contributions via PRs are welcome! Forks and modifications are implicitly dual-licensed under Apache 2.0 OR MIT. Please credit the above contributers and pipes.sh when making modifications.
+pipes-rs is maintained by [lhvy](https://github.com/lhvy) and [arzg](https://github.com/arzg); any other contributions via PRs are welcome! Forks and modifications are implicitly dual-licensed under Apache 2.0 OR MIT. Please credit the above contributors and pipes.sh when making modifications.
 
 ### Inspiration
 
