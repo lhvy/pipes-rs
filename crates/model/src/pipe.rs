@@ -6,13 +6,14 @@ pub use color::{ColorMode, Palette};
 use history_keeper::HistoryKeeper;
 pub use kind::{Kind, KindSet};
 
+use self::color::Color;
 use crate::direction::Direction;
 use crate::position::{InScreenBounds, Position};
 
 pub struct Pipe {
     dir: HistoryKeeper<Direction>,
     pub pos: Position,
-    pub color: Option<terminal::Color>,
+    pub color: Option<Color>,
     kind: Kind,
 }
 
@@ -40,8 +41,12 @@ impl Pipe {
         }
     }
 
-    pub fn tick(&mut self, size: (u16, u16), turn_chance: f32) -> InScreenBounds {
+    pub fn tick(&mut self, size: (u16, u16), turn_chance: f32, hue_shift: u8) -> InScreenBounds {
         let InScreenBounds(in_screen_bounds) = self.pos.move_in(self.dir.current(), size);
+
+        if let Some(color) = &mut self.color {
+            color.update(hue_shift.into());
+        }
 
         if !in_screen_bounds {
             return InScreenBounds(false);

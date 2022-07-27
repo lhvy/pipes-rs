@@ -9,4 +9,4 @@ anyhow = "1.0"
 rng = {path = "../rng"}
 serde = {version = "1.0", features = ["derive"]}
 terminal = {path = "../terminal"}
-tincture = "0.5.0"
+tincture = "1.0.0"
