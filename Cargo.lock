@@ -520,7 +520,7 @@ dependencies = [
 
 [[package]]
 name = "pipes-rs"
-version = "1.5.0"
+version = "1.6.0"
 dependencies = [
  "anyhow",
  "clap 3.2.14",
