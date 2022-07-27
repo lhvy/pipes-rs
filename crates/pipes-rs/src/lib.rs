@@ -86,8 +86,11 @@ impl<B: Backend> App<B> {
     }
 
     fn tick_pipe(&mut self, pipe: &mut Pipe) {
-        let InScreenBounds(stayed_onscreen) =
-            pipe.tick(self.terminal.size(), self.config.turn_chance());
+        let InScreenBounds(stayed_onscreen) = pipe.tick(
+            self.terminal.size(),
+            self.config.turn_chance(),
+            self.config.rainbow(),
+        );
 
         if !stayed_onscreen {
             *pipe = if self.config.inherit_style() {
@@ -102,7 +105,7 @@ impl<B: Backend> App<B> {
         self.terminal.move_cursor_to(pipe.pos.x, pipe.pos.y)?;
 
         if let Some(color) = pipe.color {
-            self.terminal.set_text_color(color)?;
+            self.terminal.set_text_color(color.terminal)?;
         }
 
         self.terminal.print(if rng::gen_bool(0.99999) {

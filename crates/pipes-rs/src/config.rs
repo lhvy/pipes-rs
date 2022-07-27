@@ -18,6 +18,10 @@ pub struct Config {
     #[clap(long, possible_values = ["default", "darker", "pastel", "matrix"])]
     pub palette: Option<Palette>,
 
+    /// cycle hue of pipes
+    #[clap(long, value_name = "DEGREES")]
+    pub rainbow: Option<u8>,
+
     /// delay between frames in milliseconds
     #[clap(short, long = "delay")]
     pub delay_ms: Option<u64>,
@@ -102,6 +106,10 @@ impl Config {
         self.palette.unwrap_or(Palette::Default)
     }
 
+    pub fn rainbow(&self) -> u8 {
+        self.rainbow.unwrap_or(0)
+    }
+
     pub fn delay(&self) -> Duration {
         Duration::from_millis(self.delay_ms.unwrap_or(20))
     }
@@ -140,6 +148,7 @@ impl Config {
         Self {
             color_mode: other.color_mode.or(self.color_mode),
             palette: other.palette.or(self.palette),
+            rainbow: other.rainbow.or(self.rainbow),
             delay_ms: other.delay_ms.or(self.delay_ms),
             reset_threshold: other.reset_threshold.or(self.reset_threshold),
             kinds: other.kinds.or(self.kinds),

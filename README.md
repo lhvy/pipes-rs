@@ -49,6 +49,7 @@ The following is an example file with the default settings:
 bold = true
 color_mode = "ansi" # ansi, rgb or none
 palette = "default" # default, darker, pastel or matrix
+rainbow = 0 # 0-255
 delay_ms = 20
 inherit_style = false
 kinds = ["heavy"] # heavy, light, curved, knobby, emoji, outline, dots, blocks, sus
@@ -94,17 +95,18 @@ _Due to emojis having a different character width, using the emoji pipe kind alo
 
 There are also command line options that can be used to override parts of the configuration file:
 
-| Option      | Usage                                                           | Example            |
-| :---------- | :-------------------------------------------------------------- | :----------------- |
-| `-b`        | toggles bold text                                               | `-b true`          |
-| `-c`        | sets the color mode                                             | `-c rgb`           |
-| `-d`        | sets the delay in ms                                            | `-d 15`            |
-| `-i`        | toggles if pipes inherit style when hitting the edge            | `-i false`         |
-| `-k`        | sets the kinds of pipes, each kind separated by commas          | `-k heavy,curved`  |
-| `-p`        | sets the number of pipes on screen                              | `-p 5`             |
-| `-r`        | sets the percentage of the screen to be filled before resetting | `-r 0.75`          |
-| `-t`        | chance of a pipe turning each frame                             | `-t 0.15`          |
-| `--palette` | sets the color palette, RGB mode only                           | `--palette pastel` |
+| Option      | Usage                                                                             | Example            |
+| :---------- | :-------------------------------------------------------------------------------- | :----------------- |
+| `-b`        | toggles bold text                                                                 | `-b true`          |
+| `-c`        | sets the color mode                                                               | `-c rgb`           |
+| `-d`        | sets the delay in ms                                                              | `-d 15`            |
+| `-i`        | toggles if pipes inherit style when hitting the edge                              | `-i false`         |
+| `-k`        | sets the kinds of pipes, each kind separated by commas                            | `-k heavy,curved`  |
+| `-p`        | sets the number of pipes on screen                                                | `-p 5`             |
+| `-r`        | sets the percentage of the screen to be filled before resetting                   | `-r 0.75`          |
+| `-t`        | chance of a pipe turning each frame                                               | `-t 0.15`          |
+| `--palette` | sets the color palette, RGB mode only                                             | `--palette pastel` |
+| `--rainbow` | sets the number of degrees per frame to shift the hue of each pipe, RGB mode only | `--rainbow 5`      |
 
 ## Credits
 
