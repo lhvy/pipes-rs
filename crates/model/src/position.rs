@@ -32,5 +32,5 @@ impl Position {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub struct InScreenBounds(pub bool);
