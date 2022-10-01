@@ -8,46 +8,46 @@ use std::path::PathBuf;
 use std::time::Duration;
 
 #[derive(Serialize, Deserialize, Default, Parser)]
-#[clap(name = "pipes-rs", version)]
+#[command(name = "pipes-rs", version)]
 pub struct Config {
     /// what kind of terminal coloring to use
-    #[clap(short, long, possible_values = ["ansi", "rgb", "none"])]
+    #[arg(short, long, value_parser = ["ansi", "rgb", "none"])]
     pub color_mode: Option<ColorMode>,
 
     /// the color palette used assign colors to pipes
-    #[clap(long, possible_values = ["default", "darker", "pastel", "matrix"])]
+    #[arg(long, value_parser = ["default", "darker", "pastel", "matrix"])]
     pub palette: Option<Palette>,
 
     /// cycle hue of pipes
-    #[clap(long, value_name = "DEGREES")]
+    #[arg(long, value_name = "DEGREES")]
     pub rainbow: Option<u8>,
 
     /// delay between frames in milliseconds
-    #[clap(short, long = "delay")]
+    #[arg(short, long = "delay")]
     pub delay_ms: Option<u64>,
 
     /// portion of screen covered before resetting (0.0–1.0)
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub reset_threshold: Option<f32>,
 
     /// kinds of pipes separated by commas, e.g. heavy,curved
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub kinds: Option<KindSet>,
 
     /// whether to use bold
-    #[clap(short, long, possible_values = ["true", "false"], value_name = "BOOL")]
+    #[arg(short, long, value_parser = ["true", "false"], value_name = "BOOL")]
     pub bold: Option<bool>,
 
     /// whether pipes should retain style after hitting the edge
-    #[clap(short, long, possible_values = ["true", "false"], value_name = "BOOL")]
+    #[arg(short, long, value_parser = ["true", "false"], value_name = "BOOL")]
     pub inherit_style: Option<bool>,
 
     /// number of pipes
-    #[clap(name = "pipe-num", short, long, value_name = "NUM")]
+    #[arg(name = "pipe-num", short, long, value_name = "NUM")]
     pub num_pipes: Option<u32>,
 
     /// chance of a pipe turning (0.0–1.0)
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub turn_chance: Option<f32>,
 }
 
