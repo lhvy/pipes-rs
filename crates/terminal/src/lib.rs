@@ -49,6 +49,7 @@ impl<B: Backend> Terminal<B> {
                         KeyEvent {
                             code: KeyCode::Char('c'),
                             modifiers: KeyModifiers::CONTROL,
+                            ..
                         }
                         | KeyEvent {
                             code: KeyCode::Char('q'),

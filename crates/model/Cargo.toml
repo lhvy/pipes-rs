@@ -5,8 +5,8 @@ name = "model"
 version = "0.0.0"
 
 [dependencies]
-anyhow = "1.0"
+anyhow = "1.0.70"
 rng = {path = "../rng"}
-serde = {version = "1.0", features = ["derive"]}
+serde = {version = "1.0.159", features = ["derive"]}
 terminal = {path = "../terminal"}
 tincture = "1.0.0"

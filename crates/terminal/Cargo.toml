@@ -5,10 +5,10 @@ name = "terminal"
 version = "0.0.0"
 
 [dependencies]
-anyhow = "1.0"
-crossterm = "0.24.0"
-unicode-width = "0.1.8"
+anyhow = "1.0.70"
+crossterm = "0.26.1"
+unicode-width = "0.1.10"
 
 [dependencies.flume]
 default_features = false
-version = "0.10.2"
+version = "0.10.14"

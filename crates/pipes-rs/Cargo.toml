@@ -5,15 +5,15 @@ name = "pipes-rs"
 version = "1.6.1"
 
 [dependencies]
-anyhow = "1.0"
-clap = { version = "4.0.7", features = ["derive", "wrap_help"] }
+anyhow = "1.0.70"
+clap = { version = "4.2.1", features = ["derive", "wrap_help"] }
 etcetera = "0.4.0"
-mimalloc = { version = "0.1.25", default-features = false }
+mimalloc = { version = "0.1.36", default-features = false }
 model = { path = "../model" }
 rng = { path = "../rng" }
-serde = "1.0"
+serde = "1.0.159"
 terminal = { path = "../terminal" }
-toml = "0.5.8"
+toml = "0.7.3"
 
 [dev-dependencies]
 criterion = "0.4.0"

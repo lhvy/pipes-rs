@@ -11,11 +11,11 @@ use std::time::Duration;
 #[command(name = "pipes-rs", version)]
 pub struct Config {
     /// what kind of terminal coloring to use
-    #[arg(short, long, value_parser = ["ansi", "rgb", "none"])]
+    #[arg(short, long)]
     pub color_mode: Option<ColorMode>,
 
     /// the color palette used assign colors to pipes
-    #[arg(long, value_parser = ["default", "darker", "pastel", "matrix"])]
+    #[arg(long)]
     pub palette: Option<Palette>,
 
     /// cycle hue of pipes
@@ -35,11 +35,11 @@ pub struct Config {
     pub kinds: Option<KindSet>,
 
     /// whether to use bold
-    #[arg(short, long, value_parser = ["true", "false"], value_name = "BOOL")]
+    #[arg(short, long, value_name = "BOOL")]
     pub bold: Option<bool>,
 
     /// whether pipes should retain style after hitting the edge
-    #[arg(short, long, value_parser = ["true", "false"], value_name = "BOOL")]
+    #[arg(short, long, value_name = "BOOL")]
     pub inherit_style: Option<bool>,
 
     /// number of pipes
