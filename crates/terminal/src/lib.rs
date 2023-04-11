@@ -5,7 +5,7 @@ mod void_backend;
 pub use stdout_backend::StdoutBackend;
 pub use void_backend::VoidBackend;
 
-use crossterm::event::{Event as CrosstermEvent, KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{Event as CrosstermEvent, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use crossterm::{cursor, queue, style, terminal};
 use screen::Screen;
 use std::io::Write;
@@ -49,9 +49,12 @@ impl<B: Backend> Terminal<B> {
                         KeyEvent {
                             code: KeyCode::Char('c'),
                             modifiers: KeyModifiers::CONTROL,
+                            kind: KeyEventKind::Press,
+                            ..
                         }
                         | KeyEvent {
                             code: KeyCode::Char('q'),
+                            kind: KeyEventKind::Press,
                             ..
                         },
                     ) => events_tx.send(EventWithData::Exit).unwrap(),

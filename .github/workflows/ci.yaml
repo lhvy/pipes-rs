@@ -34,6 +34,9 @@ jobs:
           profile: minimal
           components: clippy
 
+      - name: Load Rust/Cargo cache
+        uses: Swatinem/rust-cache@v2
+
       - name: Build
         uses: actions-rs/cargo@v1
         with:
