@@ -188,13 +188,6 @@ impl Terminal {
     }
 }
 
-pub trait Backend: Write {
-    fn size(&self) -> anyhow::Result<(u16, u16)>;
-    fn for_each_event(f: impl FnMut(CrosstermEvent));
-    fn enable_raw_mode(&self) -> anyhow::Result<()>;
-    fn disable_raw_mode(&self) -> anyhow::Result<()>;
-}
-
 #[derive(Clone, Copy)]
 pub enum Color {
     Red,
