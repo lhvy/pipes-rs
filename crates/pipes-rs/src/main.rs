@@ -1,15 +1,12 @@
 use mimalloc::MiMalloc;
 use pipes_rs::{App, Config};
-use std::io;
-use terminal::StdoutBackend;
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
 fn main() -> anyhow::Result<()> {
-    let stdout = io::stdout();
-    let backend = StdoutBackend::new(stdout.lock());
-    let app = App::new(backend, Config::read()?)?;
+    let config = Config::read()?;
+    let app = App::new(config)?;
     app.run()?;
 
     Ok(())

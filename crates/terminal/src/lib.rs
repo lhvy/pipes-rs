@@ -1,36 +1,33 @@
 mod screen;
-mod stdout_backend;
-mod void_backend;
 
-pub use stdout_backend::StdoutBackend;
-pub use void_backend::VoidBackend;
-
-use crossterm::event::{Event as CrosstermEvent, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use crossterm::event::{
+    self, Event as CrosstermEvent, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+};
 use crossterm::{cursor, queue, style, terminal};
 use screen::Screen;
-use std::io::Write;
+use std::io::{self, Write};
 use std::num::NonZeroUsize;
 use std::thread;
 use unicode_width::UnicodeWidthChar;
 
-pub struct Terminal<B: Backend> {
+pub struct Terminal {
     screen: Screen,
-    backend: B,
+    stdout: io::StdoutLock<'static>,
     max_char_width: u16,
     size: (u16, u16),
     events_rx: flume::Receiver<EventWithData>,
 }
 
-impl<B: Backend> Terminal<B> {
+impl Terminal {
     pub fn new(
-        backend: B,
+        stdout: io::StdoutLock<'static>,
         chars: impl Iterator<Item = char>,
         custom_width: Option<NonZeroUsize>,
     ) -> anyhow::Result<Self> {
         let max_char_width = Self::determine_max_char_width(chars, custom_width);
 
         let size = {
-            let (width, height) = backend.size()?;
+            let (width, height) = terminal::size()?;
             (width / max_char_width, height)
         };
 
@@ -39,7 +36,8 @@ impl<B: Backend> Terminal<B> {
         let (events_tx, events_rx) = flume::unbounded();
 
         thread::spawn(move || {
-            B::for_each_event(|event| {
+            loop {
+                let Ok(event) = event::read() else { continue; };
                 match event {
                     CrosstermEvent::Resize(width, height) => events_tx
                         .send(EventWithData::Resized { width, height })
@@ -66,12 +64,12 @@ impl<B: Backend> Terminal<B> {
 
                     _ => {} // ignore all other events
                 }
-            });
+            }
         });
 
         Ok(Self {
             screen,
-            backend,
+            stdout,
             max_char_width,
             size,
             events_rx,
@@ -91,27 +89,27 @@ impl<B: Backend> Terminal<B> {
     }
 
     pub fn enable_bold(&mut self) -> anyhow::Result<()> {
-        queue!(self.backend, style::SetAttribute(style::Attribute::Bold))?;
+        queue!(self.stdout, style::SetAttribute(style::Attribute::Bold))?;
         Ok(())
     }
 
     pub fn reset_style(&mut self) -> anyhow::Result<()> {
-        queue!(self.backend, style::SetAttribute(style::Attribute::Reset))?;
+        queue!(self.stdout, style::SetAttribute(style::Attribute::Reset))?;
         Ok(())
     }
 
     pub fn set_cursor_visibility(&mut self, visible: bool) -> anyhow::Result<()> {
         if visible {
-            queue!(self.backend, cursor::Show)?;
+            queue!(self.stdout, cursor::Show)?;
         } else {
-            queue!(self.backend, cursor::Hide)?;
+            queue!(self.stdout, cursor::Hide)?;
         }
 
         Ok(())
     }
 
     pub fn clear(&mut self) -> anyhow::Result<()> {
-        queue!(self.backend, terminal::Clear(terminal::ClearType::All))?;
+        queue!(self.stdout, terminal::Clear(terminal::ClearType::All))?;
         self.screen.clear();
 
         Ok(())
@@ -119,34 +117,34 @@ impl<B: Backend> Terminal<B> {
 
     pub fn set_raw_mode(&self, enabled: bool) -> anyhow::Result<()> {
         if enabled {
-            self.backend.enable_raw_mode()?;
+            terminal::enable_raw_mode()?;
         } else {
-            self.backend.disable_raw_mode()?;
+            terminal::disable_raw_mode()?;
         }
 
         Ok(())
     }
 
     pub fn enter_alternate_screen(&mut self) -> anyhow::Result<()> {
-        queue!(self.backend, terminal::EnterAlternateScreen)?;
+        queue!(self.stdout, terminal::EnterAlternateScreen)?;
         Ok(())
     }
 
     pub fn leave_alternate_screen(&mut self) -> anyhow::Result<()> {
-        queue!(self.backend, terminal::LeaveAlternateScreen)?;
+        queue!(self.stdout, terminal::LeaveAlternateScreen)?;
         Ok(())
     }
 
     pub fn set_text_color(&mut self, color: Color) -> anyhow::Result<()> {
         let color = style::Color::from(color);
-        queue!(self.backend, style::SetForegroundColor(color))?;
+        queue!(self.stdout, style::SetForegroundColor(color))?;
 
         Ok(())
     }
 
     pub fn move_cursor_to(&mut self, x: u16, y: u16) -> anyhow::Result<()> {
         let max_char_width = self.max_char_width;
-        queue!(self.backend, cursor::MoveTo(x * max_char_width, y))?;
+        queue!(self.stdout, cursor::MoveTo(x * max_char_width, y))?;
         self.screen.move_cursor_to(x as usize, y as usize);
 
         Ok(())
@@ -162,13 +160,13 @@ impl<B: Backend> Terminal<B> {
 
     pub fn print(&mut self, c: char) -> anyhow::Result<()> {
         self.screen.print();
-        self.backend.write_all(c.to_string().as_bytes())?;
+        self.stdout.write_all(c.to_string().as_bytes())?;
 
         Ok(())
     }
 
     pub fn flush(&mut self) -> anyhow::Result<()> {
-        self.backend.flush()?;
+        self.stdout.flush()?;
         Ok(())
     }
 
