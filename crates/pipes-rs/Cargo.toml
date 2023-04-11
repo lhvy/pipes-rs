@@ -15,10 +15,3 @@ rng = { path = "../rng" }
 serde = "1.0.159"
 terminal = { path = "../terminal" }
 toml = "0.7.3"
-
-[dev-dependencies]
-criterion = "0.4.0"
-
-[[bench]]
-harness = false
-name = "one_frame"
