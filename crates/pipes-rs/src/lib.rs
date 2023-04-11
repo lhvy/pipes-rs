@@ -103,7 +103,8 @@ impl App {
     }
 
     fn render_pipe(&mut self, pipe: &Pipe) -> anyhow::Result<()> {
-        self.terminal.move_cursor_to(pipe.pos.x, pipe.pos.y)?;
+        self.terminal
+            .move_cursor_to(pipe.position.x, pipe.position.y)?;
 
         if let Some(color) = pipe.color {
             self.terminal.set_text_color(color.terminal)?;
