@@ -1,12 +1,13 @@
 [package]
+description = "An over-engineered rewrite of pipes.sh in Rust"
 edition = "2021"
-license = "MIT OR Apache-2.0"
+license = "BlueOak-1.0.0"
 name = "pipes-rs"
 version = "1.6.1"
 
 [dependencies]
 anyhow = "1.0.70"
-clap = { version = "4.2.1", features = ["derive", "wrap_help"] }
+clap = { version = "4.2.1", features = ["derive", "help", "wrap_help"] }
 etcetera = "0.4.0"
 mimalloc = { version = "0.1.36", default-features = false }
 model = { path = "../model" }

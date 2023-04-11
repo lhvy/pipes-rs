@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-license = "MIT OR Apache-2.0"
+license = "BlueOak-1.0.0"
 name = "model"
 version = "0.0.0"
 

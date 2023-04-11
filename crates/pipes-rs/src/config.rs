@@ -8,7 +8,11 @@ use std::path::PathBuf;
 use std::time::Duration;
 
 #[derive(Serialize, Deserialize, Default, Parser)]
-#[command(name = "pipes-rs", version)]
+#[command(
+    name = "pipes-rs",
+    version,
+    about = "An over-engineered rewrite of pipes.sh in Rust.\nLicensed under the Blue Oak Model License 1.0.0. See https://blueoakcouncil.org/license/1.0.0 for more information."
+)]
 pub struct Config {
     /// what kind of terminal coloring to use
     #[arg(short, long)]

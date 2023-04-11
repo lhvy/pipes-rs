@@ -112,7 +112,7 @@ There are also command line options that can be used to override parts of the co
 
 ### Contributors
 
-pipes-rs is maintained by [lhvy](https://github.com/lhvy) and [lunacookies](https://github.com/lunacookies); any other contributions via PRs are welcome! Forks and modifications are implicitly dual-licensed under Apache 2.0 OR MIT. Please credit the above contributors and pipes.sh when making modifications.
+pipes-rs is maintained by [lhvy](https://github.com/lhvy) and [lunacookies](https://github.com/lunacookies); any other contributions via PRs are welcome! Forks and modifications are implicitly licensed under the Blue Oak Model License 1.0.0. Please credit the above contributors and pipes.sh when making modifications.
 
 ### Inspiration
 
