@@ -3,6 +3,7 @@ pub(crate) struct Screen {
     cursor: (usize, usize),
     width: usize,
     height: usize,
+    num_covered: usize,
 }
 
 impl Screen {
@@ -12,6 +13,7 @@ impl Screen {
             cursor: (0, 0),
             width,
             height,
+            num_covered: 0,
         }
     }
 
@@ -23,20 +25,26 @@ impl Screen {
     }
 
     pub(crate) fn print(&mut self) {
-        self.current_cell().is_covered = true;
+        let current_cell = self.current_cell();
+        if !current_cell.is_covered {
+            current_cell.is_covered = true;
+            self.num_covered += 1;
+        }
     }
 
     pub(crate) fn clear(&mut self) {
         for cell in &mut self.cells {
             cell.is_covered = false;
         }
+        self.num_covered = 0;
     }
 
     pub(crate) fn portion_covered(&self) -> f32 {
-        let num_covered = self.cells.iter().filter(|c| c.is_covered).count();
-        let total = self.cells.len();
-
-        num_covered as f32 / total as f32
+        debug_assert_eq!(
+            self.num_covered,
+            self.cells.iter().filter(|c| c.is_covered).count()
+        );
+        self.num_covered as f32 / self.cells.len() as f32
     }
 
     fn current_cell(&mut self) -> &mut Cell {
