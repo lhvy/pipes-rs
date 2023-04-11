@@ -3,21 +3,22 @@ pub use config::Config;
 
 use model::pipe::{KindSet, Pipe};
 use model::position::InScreenBounds;
-use std::thread;
-use terminal::{Backend, Event, Terminal};
+use std::{io, thread};
+use terminal::{Event, Terminal};
 
-pub struct App<B: Backend> {
-    terminal: Terminal<B>,
+pub struct App {
+    terminal: Terminal,
     config: Config,
     kinds: KindSet,
 }
 
-impl<B: Backend> App<B> {
-    pub fn new(backend: B, config: Config) -> anyhow::Result<Self> {
+impl App {
+    pub fn new(config: Config) -> anyhow::Result<Self> {
         let kinds = config.kinds();
 
+        let stdout = io::stdout().lock();
         let largest_custom_width = kinds.custom_widths().max();
-        let terminal = Terminal::new(backend, kinds.chars(), largest_custom_width)?;
+        let terminal = Terminal::new(stdout, kinds.chars(), largest_custom_width)?;
 
         Ok(Self {
             terminal,
