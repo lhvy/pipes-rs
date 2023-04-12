@@ -169,7 +169,7 @@ impl Terminal {
 
     fn resize(&mut self, width: u16, height: u16) {
         self.size = (width, height);
-        self.screen = Screen::new(width as usize, height as usize);
+        self.screen.resize(width as usize, height as usize);
     }
 }
 

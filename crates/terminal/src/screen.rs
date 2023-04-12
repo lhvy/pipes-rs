@@ -17,6 +17,15 @@ impl Screen {
         }
     }
 
+    pub(crate) fn resize(&mut self, width: usize, height: usize) {
+        self.cells
+            .resize(width * height, Cell { is_covered: false });
+        self.cursor = (0, 0);
+        self.width = width;
+        self.height = height;
+        self.clear();
+    }
+
     pub(crate) fn move_cursor_to(&mut self, x: usize, y: usize) {
         assert!(x < self.width);
         assert!(y < self.height);
