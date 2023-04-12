@@ -3,7 +3,7 @@ pub use config::Config;
 
 use model::pipe::{KindSet, Pipe};
 use model::position::InScreenBounds;
-use std::{io, thread};
+use std::{io, thread, time};
 use terminal::{Event, Terminal};
 
 pub struct App {
@@ -69,6 +69,8 @@ impl App {
     }
 
     pub fn tick_loop(&mut self, pipes: &mut Vec<Pipe>) -> anyhow::Result<ControlFlow> {
+        let start_time = time::Instant::now();
+
         match self.terminal.get_event()? {
             Some(Event::Exit) => return Ok(ControlFlow::Break),
             Some(Event::Reset) => return Ok(ControlFlow::Reset),
@@ -81,7 +83,15 @@ impl App {
         }
 
         self.terminal.flush()?;
-        thread::sleep(self.config.delay());
+
+        let tick_length_so_far = start_time.elapsed();
+
+        // If we’ve taken more time than we have a budget for,
+        // then just don’t sleep.
+        let took_too_long = tick_length_so_far >= self.config.tick_length();
+        if !took_too_long {
+            thread::sleep(self.config.tick_length() - tick_length_so_far);
+        }
 
         Ok(ControlFlow::Continue)
     }
