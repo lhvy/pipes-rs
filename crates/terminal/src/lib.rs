@@ -7,7 +7,7 @@ use crossterm::{cursor, queue, style, terminal};
 use screen::Screen;
 use std::io::{self, Write};
 use std::num::NonZeroUsize;
-use std::thread;
+use std::time::Duration;
 use unicode_width::UnicodeWidthChar;
 
 pub struct Terminal {
@@ -15,7 +15,6 @@ pub struct Terminal {
     stdout: io::StdoutLock<'static>,
     max_char_width: u16,
     size: (u16, u16),
-    events_rx: flume::Receiver<EventWithData>,
 }
 
 impl Terminal {
@@ -33,46 +32,11 @@ impl Terminal {
 
         let screen = Screen::new(size.0 as usize, size.1 as usize);
 
-        let (events_tx, events_rx) = flume::unbounded();
-
-        thread::spawn(move || {
-            loop {
-                let Ok(event) = event::read() else { continue; };
-                match event {
-                    CrosstermEvent::Resize(width, height) => events_tx
-                        .send(EventWithData::Resized { width, height })
-                        .unwrap(),
-
-                    CrosstermEvent::Key(
-                        KeyEvent {
-                            code: KeyCode::Char('c'),
-                            modifiers: KeyModifiers::CONTROL,
-                            kind: KeyEventKind::Press,
-                            ..
-                        }
-                        | KeyEvent {
-                            code: KeyCode::Char('q'),
-                            kind: KeyEventKind::Press,
-                            ..
-                        },
-                    ) => events_tx.send(EventWithData::Exit).unwrap(),
-
-                    CrosstermEvent::Key(KeyEvent {
-                        code: KeyCode::Char('r'),
-                        ..
-                    }) => events_tx.send(EventWithData::Reset).unwrap(),
-
-                    _ => {} // ignore all other events
-                }
-            }
-        });
-
         Ok(Self {
             screen,
             stdout,
             max_char_width,
             size,
-            events_rx,
         })
     }
 
@@ -169,15 +133,37 @@ impl Terminal {
         Ok(())
     }
 
-    pub fn get_event(&mut self) -> Option<Event> {
-        match self.events_rx.try_recv().ok() {
-            Some(EventWithData::Exit) => Some(Event::Exit),
-            Some(EventWithData::Reset) => Some(Event::Reset),
-            Some(EventWithData::Resized { width, height }) => {
+    pub fn get_event(&mut self) -> anyhow::Result<Option<Event>> {
+        if !event::poll(Duration::ZERO)? {
+            return Ok(None);
+        }
+
+        match event::read()? {
+            CrosstermEvent::Resize(width, height) => {
                 self.resize(width, height);
-                Some(Event::Reset)
+                Ok(Some(Event::Reset))
             }
-            None => None,
+
+            CrosstermEvent::Key(
+                KeyEvent {
+                    code: KeyCode::Char('c'),
+                    modifiers: KeyModifiers::CONTROL,
+                    kind: KeyEventKind::Press,
+                    ..
+                }
+                | KeyEvent {
+                    code: KeyCode::Char('q'),
+                    kind: KeyEventKind::Press,
+                    ..
+                },
+            ) => Ok(Some(Event::Exit)),
+
+            CrosstermEvent::Key(KeyEvent {
+                code: KeyCode::Char('r'),
+                ..
+            }) => Ok(Some(Event::Reset)),
+
+            _ => Ok(None),
         }
     }
 
@@ -227,10 +213,4 @@ impl From<Color> for style::Color {
 pub enum Event {
     Exit,
     Reset,
-}
-
-enum EventWithData {
-    Exit,
-    Reset,
-    Resized { width: u16, height: u16 },
 }
