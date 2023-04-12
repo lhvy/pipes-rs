@@ -143,8 +143,7 @@ impl Terminal {
     }
 
     pub fn move_cursor_to(&mut self, x: u16, y: u16) -> anyhow::Result<()> {
-        let max_char_width = self.max_char_width;
-        queue!(self.stdout, cursor::MoveTo(x * max_char_width, y))?;
+        queue!(self.stdout, cursor::MoveTo(x * self.max_char_width, y))?;
         self.screen.move_cursor_to(x as usize, y as usize);
 
         Ok(())
