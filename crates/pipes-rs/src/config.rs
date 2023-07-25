@@ -11,7 +11,7 @@ use std::time::Duration;
 #[command(
     name = "pipes-rs",
     version,
-    about = "An over-engineered rewrite of pipes.sh in Rust.\nLicensed under the Blue Oak Model License 1.0.0. See https://blueoakcouncil.org/license/1.0.0 for more information."
+    about = "An over-engineered rewrite of pipes.sh in Rust."
 )]
 pub struct Config {
     /// what kind of terminal coloring to use
@@ -57,6 +57,10 @@ pub struct Config {
     /// chance of a pipe turning (0.0–1.0)
     #[arg(short, long)]
     pub turn_chance: Option<f32>,
+
+    /// Print license
+    #[arg(long)]
+    pub license: bool,
 }
 
 impl Config {
@@ -181,6 +185,7 @@ impl Config {
             inherit_style: other.inherit_style.or(self.inherit_style),
             num_pipes: other.num_pipes.or(self.num_pipes),
             turn_chance: other.turn_chance.or(self.turn_chance),
+            license: self.license || other.license,
         }
     }
 }
