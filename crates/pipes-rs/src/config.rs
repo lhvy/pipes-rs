@@ -60,6 +60,7 @@ pub struct Config {
 
     /// Print license
     #[arg(long)]
+    #[serde(default)]
     pub license: bool,
 }
 
