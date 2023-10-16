@@ -1,5 +1,4 @@
 use std::ops::Range;
-use std::str::FromStr;
 
 #[derive(Clone, Copy)]
 pub struct Color {
@@ -90,19 +89,6 @@ pub enum ColorMode {
     None,
 }
 
-impl FromStr for ColorMode {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(match s {
-            "ansi" => Self::Ansi,
-            "rgb" => Self::Rgb,
-            "none" => Self::None,
-            _ => anyhow::bail!(r#"unknown color mode (expected “ansi”, “rgb”, or “none”)"#),
-        })
-    }
-}
-
 #[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Palette {
@@ -110,22 +96,6 @@ pub enum Palette {
     Darker,
     Pastel,
     Matrix,
-}
-
-impl FromStr for Palette {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(match s {
-            "default" => Self::Default,
-            "darker" => Self::Darker,
-            "pastel" => Self::Pastel,
-            "matrix" => Self::Matrix,
-            _ => anyhow::bail!(
-                r#"unknown palette (expected “default”, “darker”, “pastel”, or “matrix”)"#
-            ),
-        })
-    }
 }
 
 impl Palette {

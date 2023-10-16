@@ -86,27 +86,6 @@ enum KindWidth {
     Custom(NonZeroUsize),
 }
 
-impl FromStr for Kind {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(match s {
-            "heavy" => Self::Heavy,
-            "light" => Self::Light,
-            "curved" => Self::Curved,
-            "knobby" => Self::Knobby,
-            "emoji" => Self::Emoji,
-            "outline" => Self::Outline,
-            "dots" => Self::Dots,
-            "blocks" => Self::Blocks,
-            "sus" => Self::Sus,
-            _ => anyhow::bail!(
-                r#"unknown pipe kind (expected “heavy”, “light”, “curved”, “knobby”, “emoji”, “outline”, “dots”, “blocks”, or “sus”)"#,
-            ),
-        })
-    }
-}
-
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct KindSet(Vec<Kind>);
 
@@ -117,7 +96,20 @@ impl FromStr for KindSet {
         let mut set = Vec::new();
 
         for kind in s.split(',') {
-            let kind = Kind::from_str(kind)?;
+            let kind = match kind {
+                "heavy" => Kind::Heavy,
+                "light" => Kind::Light,
+                "curved" => Kind::Curved,
+                "knobby" => Kind::Knobby,
+                "emoji" => Kind::Emoji,
+                "outline" => Kind::Outline,
+                "dots" => Kind::Dots,
+                "blocks" => Kind::Blocks,
+                "sus" => Kind::Sus,
+                _ => anyhow::bail!(
+                    r#"unknown pipe kind (expected “heavy”, “light”, “curved”, “knobby”, “emoji”, “outline”, “dots”, “blocks”, or “sus”)"#,
+                ),
+            };
 
             if !set.contains(&kind) {
                 set.push(kind);
