@@ -53,6 +53,12 @@ fn parse_args(config: &mut Config) {
             _ => {}
         }
 
+        if !arg.starts_with('-') {
+            eprintln!("error: unexpected argument “{arg}” found");
+            eprintln!("see --help");
+            process::exit(1);
+        }
+
         let (option, value) = arg.split_once('=').unwrap_or_else(|| match args_i.next() {
             Some(value) => (arg, value),
             None => required_value(arg),
