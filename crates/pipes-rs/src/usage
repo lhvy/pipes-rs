@@ -1,0 +1,19 @@
+An over-engineered rewrite of pipes.sh in Rust.
+
+Usage: pipes-rs [OPTIONS]
+
+Options:
+  -c, --color-mode <COLOR_MODE>            what kind of terminal coloring to use
+      --palette <PALETTE>                  the color palette used assign colors to pipes
+      --rainbow <DEGREES>                  cycle hue of pipes
+  -d, --delay <DELAY_MS>                   delay between frames in milliseconds
+  -f, --fps <FPS>                          number of frames of animation that are displayed in a second; use 0 for unlimited
+  -r, --reset-threshold <RESET_THRESHOLD>  portion of screen covered before resetting (0.0–1.0)
+  -k, --kinds <KINDS>                      kinds of pipes separated by commas, e.g. heavy,curved
+  -b, --bold <BOOL>                        whether to use bold [possible values: true, false]
+  -i, --inherit-style <BOOL>               whether pipes should retain style after hitting the edge [possible values: true, false]
+  -p, --pipe-num <NUM>                     number of pipes
+  -t, --turn-chance <TURN_CHANCE>          chance of a pipe turning (0.0–1.0)
+      --license                            Print license
+  -h, --help                               Print help
+  -V, --version                            Print version
