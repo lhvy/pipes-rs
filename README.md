@@ -8,26 +8,26 @@
 
 ## Installation
 
-Install on any platform using Cargo:
+Install the latest version release via git on any platform using Cargo:
 
-```
+```sh
 cargo install --git https://github.com/lhvy/pipes-rs
 ```
 
 Alternatively for macOS, install via Homebrew:
 
-```
+```sh
 brew install lhvy/tap/pipes-rs
 ```
 
 Alternatively for Windows, install via Scoop:
 
-```
+```sh
 scoop bucket add extras
 scoop install pipes-rs
 ```
 
-#### Manual Download
+### Manual Download
 
 Download compiled binaries from [releases](https://github.com/lhvy/pipes-rs/releases/latest).
 
