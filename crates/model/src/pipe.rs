@@ -83,7 +83,14 @@ impl Pipe {
 }
 
 fn gen_random_direction_and_position((columns, rows): (u16, u16)) -> (Direction, Position) {
-    let direction = Direction::gen();
+    let direction = match rng::gen_range(0..4) {
+        0 => Direction::Up,
+        1 => Direction::Down,
+        2 => Direction::Left,
+        3 => Direction::Right,
+        _ => unreachable!(),
+    };
+
     let position = match direction {
         Direction::Up => Position {
             x: rng::gen_range_16(0..columns),

@@ -31,15 +31,3 @@ impl Direction {
         }
     }
 }
-
-impl Direction {
-    pub(crate) fn gen() -> Self {
-        match rng::gen_range(0..4) {
-            0 => Direction::Up,
-            1 => Direction::Down,
-            2 => Direction::Left,
-            3 => Direction::Right,
-            _ => unreachable!(),
-        }
-    }
-}
