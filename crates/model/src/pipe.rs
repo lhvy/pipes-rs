@@ -54,7 +54,7 @@ impl Pipe {
         }
 
         self.previous_direction = self.current_direction;
-        self.current_direction.maybe_turn(turn_chance);
+        self.current_direction = self.current_direction.maybe_turn(turn_chance);
 
         InScreenBounds(true)
     }
