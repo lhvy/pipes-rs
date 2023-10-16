@@ -35,6 +35,16 @@ fn parse_args(config: &mut Config) {
                 process::exit(0);
             }
 
+            "--version" | "-V" => {
+                if args.len() != 1 {
+                    eprintln!("error: provided arguments other than --version");
+                    process::exit(1);
+                }
+
+                println!("pipes-rs {}", env!("CARGO_PKG_VERSION"));
+                process::exit(0);
+            }
+
             "--help" => {
                 println!("{}", include_str!("usage"));
                 process::exit(0);
