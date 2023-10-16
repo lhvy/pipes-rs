@@ -158,7 +158,7 @@ fn required_value(option: &str) -> ! {
 
 fn invalid_value(option: &str, actual: &str, expected: &str) -> ! {
     eprintln!("error: invalid value “{actual}” for {option}");
-    eprint!("       expected {expected}");
-    eprintln!("\nsee --help");
+    eprintln!("       expected {expected}");
+    eprintln!("see --help");
     process::exit(1);
 }
