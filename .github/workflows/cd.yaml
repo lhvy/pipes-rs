@@ -19,10 +19,6 @@ jobs:
         id: step
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          name: ${{ github.ref }}
-          draft: false
 
   build_release:
     name: Build release
@@ -50,6 +46,7 @@ jobs:
           targets: ${{ join(matrix.targets, ',') }}
 
       - name: Build
+        shell: bash
         run: |
           for target in ${{ join(matrix.targets, ' ') }}; do
             cargo build --release --target $target
@@ -64,7 +61,7 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Create macOS archive
-        run:
+        run: |
           lipo -create -output ./${{ env.RELEASE_BIN }}-mac-universal ./target/x86_64-apple-darwin/release/${{ env.RELEASE_BIN }} ./target/aarch64-apple-darwin/release/${{ env.RELEASE_BIN }}
           tar -czvf ./${{ env.RELEASE_BIN }}-mac-universal.tar.gz ./${{ env.RELEASE_BIN }}-mac-universal
         if: matrix.os == 'macos-latest'
