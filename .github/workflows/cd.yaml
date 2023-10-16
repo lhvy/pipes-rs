@@ -15,81 +15,68 @@ jobs:
       upload_url: ${{ steps.step.outputs.upload_url }}
 
     steps:
-      - uses: actions/create-release@v1
+      - uses: softprops/action-gh-release@v1
         id: step
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          name: ${{ github.ref }}
           draft: false
 
   build_release:
     name: Build release
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            targets: [x86_64-unknown-linux-gnu]
+            suffix: linux-x86_64.tar.gz
+          - os: macos-latest
+            targets: [x86_64-apple-darwin, aarch64-apple-darwin]
+            suffix: mac-universal.tar.gz
+          - os: windows-latest
+            targets: [x86_64-pc-windows-msvc]
+            suffix: windows-x86_64.zip
     runs-on: ${{ matrix.os }}
     needs: create_release
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
+          targets: ${{ join(matrix.targets, ',') }}
 
       - name: Build
-        run: cargo build --release
-
-      - name: Create artifact directory
-        run: mkdir artifacts
+        run: |
+          for target in ${{ join(matrix.targets, ' ') }}; do
+            cargo build --release --target $target
+          done
 
       - name: Create Linux archive
-        run: tar -czvf ./artifacts/${{ env.RELEASE_BIN }}-linux-x86_64.tar.gz ./target/release/${{ env.RELEASE_BIN }}
-        if: matrix.os == 'ubuntu-latest'
-
-      - name: Upload Linux archive
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/${{ env.RELEASE_BIN }}-linux-x86_64.tar.gz
-          asset_name: ${{ env.RELEASE_BIN }}-linux-x86_64.tar.gz
-          asset_content_type: application/gzip
+        run: tar -czvf ./${{ env.RELEASE_BIN }}-linux-x86_64.tar.gz ./target/x86_64-unknown-linux-gnu/release/${{ env.RELEASE_BIN }}
         if: matrix.os == 'ubuntu-latest'
 
       - name: Create Windows archive
-        run: 7z a -tzip ./artifacts/${{ env.RELEASE_BIN }}-windows-x86_64.zip ./target/release/${{ env.RELEASE_BIN }}.exe
-        if: matrix.os == 'windows-latest'
-
-      - name: Upload Windows archive
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/${{ env.RELEASE_BIN }}-windows-x86_64.zip
-          asset_name: ${{ env.RELEASE_BIN }}-windows-x86_64.zip
-          asset_content_type: application/zip
+        run: 7z a -tzip ./${{ env.RELEASE_BIN }}-windows-x86_64.zip ./target/x86_64-pc-windows-msvc/release/${{ env.RELEASE_BIN }}.exe
         if: matrix.os == 'windows-latest'
 
       - name: Create macOS archive
-        run: tar -czvf ./artifacts/${{ env.RELEASE_BIN }}-mac-x86_64.tar.gz ./target/release/${{ env.RELEASE_BIN }}
+        run:
+          lipo -create -output ./${{ env.RELEASE_BIN }}-mac-universal ./target/x86_64-apple-darwin/release/${{ env.RELEASE_BIN }} ./target/aarch64-apple-darwin/release/${{ env.RELEASE_BIN }}
+          tar -czvf ./${{ env.RELEASE_BIN }}-mac-universal.tar.gz ./${{ env.RELEASE_BIN }}-mac-universal
         if: matrix.os == 'macos-latest'
 
-      - name: Upload macOS archive
-        uses: actions/upload-release-asset@v1
+      - name: Upload archive
+        uses: shogo82148/actions-upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/${{ env.RELEASE_BIN }}-mac-x86_64.tar.gz
-          asset_name: ${{ env.RELEASE_BIN }}-mac-x86_64.tar.gz
-          asset_content_type: application/gzip
-        if: matrix.os == 'macos-latest'
+          asset_path: ./${{ env.RELEASE_BIN }}-${{ matrix.suffix }}
+          asset_name: ${{ env.RELEASE_BIN }}-${{ matrix.suffix }}
 
       - name: Get version
         id: get-version
@@ -97,11 +84,11 @@ jobs:
         if: matrix.os == 'macos-latest'
 
       - name: Bump Homebrew formula
-        uses: mislav/bump-homebrew-formula-action@v1.12
+        uses: mislav/bump-homebrew-formula-action@v3
         with:
           formula-name: pipes-rs
           homebrew-tap: lhvy/homebrew-tap
-          download-url: https://github.com/lhvy/pipes-rs/releases/download/${{ steps.get-version.outputs.version }}/pipes-rs-mac-x86_64.tar.gz
+          download-url: https://github.com/lhvy/pipes-rs/releases/download/${{ steps.get-version.outputs.version }}/pipes-rs-mac-universal.tar.gz
         env:
           COMMITTER_TOKEN: ${{ secrets.BREW_TOKEN }}
         if: matrix.os == 'macos-latest'
