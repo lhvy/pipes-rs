@@ -2,6 +2,12 @@
 members = ["crates/*"]
 resolver = "2"
 
+[profile.dev]
+panic = "abort"
+
 [profile.release]
+panic = "abort"
 codegen-units = 1
 lto = "fat"
+strip = true
+opt-level = "z"
