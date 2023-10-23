@@ -1,10 +1,9 @@
 use anyhow::Context;
-use etcetera::app_strategy::{AppStrategy, AppStrategyArgs, Xdg};
 use model::pipe::{ColorMode, Kind, KindSet, Palette};
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::path::PathBuf;
 use std::time::Duration;
+use std::{env, fs};
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct Config {
@@ -40,14 +39,21 @@ impl Config {
     }
 
     fn path() -> anyhow::Result<PathBuf> {
-        let path = Xdg::new(AppStrategyArgs {
-            top_level_domain: "io.github".to_string(),
-            author: "lhvy".to_string(),
-            app_name: "pipes-rs".to_string(),
-        })?
-        .in_config_dir("config.toml");
+        let config_dir = 'config_dir: {
+            if let Ok(d) = env::var("XDG_CONFIG_HOME") {
+                let d = PathBuf::from(d);
+                if d.is_absolute() {
+                    break 'config_dir d;
+                }
+            }
 
-        Ok(path)
+            match home::home_dir() {
+                Some(d) => d.join(".config/"),
+                None => anyhow::bail!("could not determine home directory"),
+            }
+        };
+
+        Ok(config_dir.join("pipes-rs/config.toml"))
     }
 
     fn read_from_disk(path: PathBuf) -> anyhow::Result<Self> {
