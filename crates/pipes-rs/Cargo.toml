@@ -7,7 +7,7 @@ version = "1.6.2"
 
 [dependencies]
 anyhow = "1.0.70"
-etcetera = "0.8.0"
+home = "0.5.5"
 mimalloc = { version = "0.1.36", default-features = false }
 model = { path = "../model" }
 rng = { path = "../rng" }
