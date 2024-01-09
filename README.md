@@ -1,6 +1,6 @@
 # pipes-rs
 
-[![Bors enabled](https://bors.tech/images/badge_small.svg)](https://app.bors.tech/repositories/32076) ![GitHub Actions CI status](https://github.com/lhvy/pipes-rs/actions/workflows/ci.yaml/badge.svg)
+![GitHub Actions CI status](https://github.com/lhvy/pipes-rs/actions/workflows/ci.yaml/badge.svg)
 
 > An over-engineered rewrite of pipes.sh in Rust
 
