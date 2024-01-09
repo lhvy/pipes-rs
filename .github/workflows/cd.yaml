@@ -63,6 +63,7 @@ jobs:
       - name: Create macOS archive
         run: |
           lipo -create -output ./${{ env.RELEASE_BIN }}-mac-universal ./target/x86_64-apple-darwin/release/${{ env.RELEASE_BIN }} ./target/aarch64-apple-darwin/release/${{ env.RELEASE_BIN }}
+          codesign --sign - --options runtime ./${{ env.RELEASE_BIN }}-mac-universal
           tar -czvf ./${{ env.RELEASE_BIN }}-mac-universal.tar.gz ./${{ env.RELEASE_BIN }}-mac-universal
         if: matrix.os == 'macos-latest'
 
