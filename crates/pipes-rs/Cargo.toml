@@ -7,6 +7,8 @@ version = "1.6.3"
 
 [dependencies]
 anyhow = "1.0.70"
+clap = { version = "4.5.20", features = ["derive"] }
+clap_derive = { version = "4.0.0-rc.1" }
 home = "0.5.5"
 mimalloc = { version = "0.1.36", default-features = false }
 model = { path = "../model" }

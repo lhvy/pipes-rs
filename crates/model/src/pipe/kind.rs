@@ -1,9 +1,12 @@
 use std::num::NonZeroUsize;
 use std::str::FromStr;
 
-#[derive(serde::Serialize, serde::Deserialize, Eq, PartialEq, Hash, Clone, Copy)]
+#[derive(
+    serde::Serialize, serde::Deserialize, Eq, PartialEq, Hash, Clone, Copy, clap::ValueEnum, Default,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum Kind {
+    #[default]
     Heavy,
     Light,
     Curved,
@@ -123,6 +126,10 @@ impl FromStr for KindSet {
 impl KindSet {
     pub fn from_one(kind: Kind) -> Self {
         Self(vec![kind])
+    }
+
+    pub fn new(kinds: Vec<Kind>) -> Self {
+        Self(kinds)
     }
 
     pub fn choose_random(&self) -> Kind {

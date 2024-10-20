@@ -81,17 +81,19 @@ fn gen_random_rgb_color(palette: Palette) -> Color {
     }
 }
 
-#[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Copy, serde::Serialize, serde::Deserialize, clap::ValueEnum, Default)]
 #[serde(rename_all = "snake_case")]
 pub enum ColorMode {
+    #[default]
     Ansi,
     Rgb,
     None,
 }
 
-#[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Copy, serde::Serialize, serde::Deserialize, clap::ValueEnum, Default)]
 #[serde(rename_all = "snake_case")]
 pub enum Palette {
+    #[default]
     Default,
     Darker,
     Pastel,
