@@ -8,7 +8,7 @@
 
 ## Installation
 
-Install the latest version release via git on any platform using Cargo:
+Install the latest version release via git on any platform using Cargo (MSRV: 1.74.1+):
 
 ```sh
 cargo install --git https://github.com/lhvy/pipes-rs
