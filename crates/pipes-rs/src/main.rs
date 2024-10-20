@@ -45,7 +45,7 @@ fn parse_args(config: &mut Config) {
                 process::exit(0);
             }
 
-            "--help" => {
+            "--help" | "-h" => {
                 println!("{}", include_str!("usage"));
                 process::exit(0);
             }
