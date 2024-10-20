@@ -3,7 +3,8 @@ description = "An over-engineered rewrite of pipes.sh in Rust"
 edition = "2021"
 license = "BlueOak-1.0.0"
 name = "pipes-rs"
-version = "1.6.3"
+version = "1.7.0"
+rust-version = "1.74.1"
 
 [dependencies]
 anyhow = "1.0.70"
