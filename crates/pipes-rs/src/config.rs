@@ -108,7 +108,7 @@ impl Config {
 
     pub fn reset_threshold(&self) -> Option<f32> {
         match self.reset_threshold {
-            Some(n) if n == 0.0 => None,
+            Some(0.0) => None,
             Some(n) => Some(n),
             None => Some(0.5),
         }
